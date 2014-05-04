@@ -1,6 +1,6 @@
 /**
- *    ||          ____  _ __                           
- * +------+      / __ )(_) /_______________ _____  ___ 
+ *    ||          ____  _ __
+ * +------+      / __ )(_) /_______________ _____  ___
  * | 0xBC |     / __  / / __/ ___/ ___/ __ `/_  / / _ \
  * +------+    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
  *  ||  ||    /_____/_/\__/\___/_/   \__,_/ /___/\___/
@@ -109,6 +109,7 @@ typedef struct {
 #define ACK_ENABLE        0x10
 #define SET_CONT_CARRIER  0x20
 #define CHANNEL_SCANN     0x21
+#define SET_RADIO_MODE    0x22
 #define LAUNCH_BOOTLOADER 0xFF
 
 //SET_DATA_RATE parameter
@@ -122,5 +123,13 @@ typedef struct {
 #define RADIO_POWER_M6dBm  2
 #define RADIO_POWER_0dBm   3
 
-#endif /* __USB_H__ */
+//SET_RADIO_MODE
+enum radioMode_e
+{
+  // standard PTX mode, default
+  RADIO_MODE_PTX = 0,
+  // PTX mode, but waits for a synchronous (non-empty) response
+  RADIO_MODE_PTX_SYNCRONOUS = 1,
+};
 
+#endif /* __USB_H__ */

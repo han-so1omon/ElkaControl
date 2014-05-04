@@ -1,6 +1,6 @@
 /**
- *    ||          ____  _ __                           
- * +------+      / __ )(_) /_______________ _____  ___ 
+ *    ||          ____  _ __
+ * +------+      / __ )(_) /_______________ _____  ___
  * | 0xBC |     / __  / / __/ ___/ ___/ __ `/_  / / _ \
  * +------+    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
  *  ||  ||    /_____/_/\__/\___/_/   \__,_/ /___/\___/
@@ -61,14 +61,16 @@ static char scannLength;
 static bool contCarrier=false;
 static bool needAck = true;
 
-void main() 
+static enum radioMode_e radioMode = RADIO_MODE_PTX;
+
+void main()
 {
   char status;
   char leds=0;
   char tlen;  //Transmit length
   char rlen;  //Received packet length
   uint8_t ack;
-  
+
   //Init the chip ID
   initId();
   //Init the led and set the leds until the usb is not ready
@@ -82,7 +84,7 @@ void main()
 #endif //PPM_JOYSTICK
   // Initialise and connect the USB
   usbInit();
-  
+
   //Globally activate the interruptions
   IEN0 |= 0x80;
 
@@ -94,68 +96,140 @@ void main()
 
   //Wait for the USB to be ready
   while (usbGetState() != CONFIGURED);
-  
+
   //Activate OUT1
   OUT1BC=0xFF;
-  
+
   while(1)
   {
-    //Send a packet if something is received on the USB
-    if (!(OUT1CS&EPBSY) && !contCarrier)
+    switch (radioMode)
     {
-      
-      //Deactivate the USB IN
-      IN1CS = 0x02;
-      
-      //Fetch the USB data size. Limit it to 32
-      tlen = OUT1BC;
-      if (tlen>32) tlen=32;
-    
-      //Send the packet
-      memcpy(tbuffer, OUT1BUF, tlen);
-      if (needAck)
+    case RADIO_MODE_PTX:
       {
-        status = radioSendPacket(tbuffer, tlen, rbuffer, &rlen);
-
-        //Set the Green LED on success and the Red one on failure
-        //The SOF interrupt decrement ledTimeout and will reset the LEDs when it
-        //reaches 0
-        ledTimeout = 2;
-        ledSet(LED_GREEN | LED_RED, false);
-        if(status)
-          ledSet(LED_GREEN, true);
-        else
-          ledSet(LED_RED, true);
-        //reactivate OUT1
-        OUT1BC=BCDUMMY;
-
-
-        //Prepare the USB answer, state and ack data
-        ack=status?1:0;
-        if (ack)
+        //Send a packet if something is received on the USB
+        if (!(OUT1CS&EPBSY) && !contCarrier)
         {
-        if (radioGetRpd()) ack |= 0x02;
-        ack |= radioGetTxRetry()<<4;
+
+          //Deactivate the USB IN
+          IN1CS = 0x02;
+
+          //Fetch the USB data size. Limit it to 32
+          tlen = OUT1BC;
+          if (tlen>32) tlen=32;
+
+          //Send the packet
+          memcpy(tbuffer, OUT1BUF, tlen);
+          if (needAck)
+          {
+            status = radioSendPacket(tbuffer, tlen, rbuffer, &rlen);
+
+            //Set the Green LED on success and the Red one on failure
+            //The SOF interrupt decrement ledTimeout and will reset the LEDs when it
+            //reaches 0
+            ledTimeout = 2;
+            ledSet(LED_GREEN | LED_RED, false);
+            if(status)
+              ledSet(LED_GREEN, true);
+            else
+              ledSet(LED_RED, true);
+            //reactivate OUT1
+            OUT1BC=BCDUMMY;
+
+
+            //Prepare the USB answer, state and ack data
+            ack=status?1:0;
+            if (ack)
+            {
+            if (radioGetRpd()) ack |= 0x02;
+            ack |= radioGetTxRetry()<<4;
+            }
+            IN1BUF[0]=ack;
+            if(!(status&BIT_TX_DS)) rlen=0;
+            memcpy(IN1BUF+1, rbuffer, rlen);
+            //Activate the IN EP with length+status
+            IN1BC = rlen+1;
+          }
+          else
+          {
+            radioSendPacketNoAck(tbuffer, tlen);
+
+            ledTimeout = 2;
+            ledSet(LED_GREEN | LED_RED, false);
+            ledSet(LED_GREEN, true);
+
+            //reactivate OUT1
+            OUT1BC=BCDUMMY;
+          }
         }
-        IN1BUF[0]=ack;
-        if(!(status&BIT_TX_DS)) rlen=0;
-        memcpy(IN1BUF+1, rbuffer, rlen);
-        //Activate the IN EP with length+status
-        IN1BC = rlen+1;
       }
-      else
+      break;
+    case RADIO_MODE_PTX_SYNCRONOUS:
       {
-        radioSendPacketNoAck(tbuffer, tlen);
-        
-        ledTimeout = 2;
-        ledSet(LED_GREEN | LED_RED, false);
-        ledSet(LED_GREEN, true);
-        
-        //reactivate OUT1
-        OUT1BC=BCDUMMY;
+        //Send a packet if something is received on the USB
+        if (!(OUT1CS&EPBSY) && !contCarrier)
+        {
+
+          //Deactivate the USB IN
+          IN1CS = 0x02;
+
+          //Fetch the USB data size. Limit it to 32
+          tlen = OUT1BC;
+          if (tlen>32) tlen=32;
+
+          //Send the packet
+          memcpy(tbuffer, OUT1BUF, tlen);
+          if (needAck)
+          {
+            status = radioSendPacket(tbuffer, tlen, rbuffer, &rlen);
+            // send dummy packages until we receive non-empty response
+            while (rlen == 0)
+            {
+              tbuffer[0] = 0;
+              status = radioSendPacket(tbuffer, 1, rbuffer, &rlen);
+            }
+
+            //Set the Green LED on success and the Red one on failure
+            //The SOF interrupt decrement ledTimeout and will reset the LEDs when it
+            //reaches 0
+            ledTimeout = 2;
+            ledSet(LED_GREEN | LED_RED, false);
+            if(status)
+              ledSet(LED_GREEN, true);
+            else
+              ledSet(LED_RED, true);
+            //reactivate OUT1
+            OUT1BC=BCDUMMY;
+
+
+            //Prepare the USB answer, state and ack data
+            ack=status?1:0;
+            if (ack)
+            {
+            if (radioGetRpd()) ack |= 0x02;
+            ack |= radioGetTxRetry()<<4;
+            }
+            IN1BUF[0]=ack;
+            if(!(status&BIT_TX_DS)) rlen=0;
+            memcpy(IN1BUF+1, rbuffer, rlen);
+            //Activate the IN EP with length+status
+            IN1BC = rlen+1;
+          }
+          else
+          {
+            radioSendPacketNoAck(tbuffer, tlen);
+
+            ledTimeout = 2;
+            ledSet(LED_GREEN | LED_RED, false);
+            ledSet(LED_GREEN, true);
+
+            //reactivate OUT1
+            OUT1BC=BCDUMMY;
+          }
+        }
       }
+      break;
     }
-    
+
     //USB vendor setup handling
     if(usbIsVendorSetup())
       handleUsbVendorSetup();
@@ -166,7 +240,7 @@ void main()
 void handleUsbVendorSetup()
 {
   __xdata struct controllStruct *setup = usbGetSetupPacket();
-  
+
   //The vendor control messages are valide only when the device is configured
   if (usbGetState() >= CONFIGURED)
   {
@@ -177,7 +251,7 @@ void handleUsbVendorSetup()
 
       launchBootloader();
       //Will never come back ...
-      
+
       return;
     }
     else if(setup->request == SET_RADIO_CHANNEL)
@@ -190,7 +264,7 @@ void handleUsbVendorSetup()
     else if(setup->request == SET_DATA_RATE)
     {
       radioSetDataRate(setup->value);
-           
+
       usbAckSetup();
       return;
     }
@@ -201,14 +275,14 @@ void handleUsbVendorSetup()
         usbDismissSetup();
         return;
       }
-      
+
       //Arm and wait for the out transaction
       OUT0BC = BCDUMMY;
       while (EP0CS & OUTBSY);
-      
+
       //Set address of the pipe given by setup's index
       radioSetAddress(OUT0BUF);
-      
+
       //Ack the setup phase
       usbAckSetup();
       return;
@@ -216,21 +290,21 @@ void handleUsbVendorSetup()
     else if(setup->request == SET_RADIO_POWER)
     {
       radioSetPower(setup->value);
-      
+
       usbAckSetup();
       return;
     }
     else if(setup->request == SET_RADIO_ARD)
     {
       radioSetArd(setup->value);
-      
+
       usbAckSetup();
       return;
     }
     else if(setup->request == SET_RADIO_ARC)
     {
       radioSetArc(setup->value);
-      
+
       usbAckSetup();
       return;
     }
@@ -238,17 +312,24 @@ void handleUsbVendorSetup()
     {
       radioSetContCarrier((setup->value)?true:false);
       contCarrier = (setup->value)?true:false;
-      
+
       ledTimeout = -1;
       ledSet(LED_RED, (setup->value)?true:false);
-      
+
       usbAckSetup();
       return;
     }
     else if(setup->request == ACK_ENABLE)
     {
         needAck = (setup->value)?true:false;
-        
+
+        usbAckSetup();
+        return;
+    }
+    else if(setup->request == SET_RADIO_MODE)
+    {
+        radioMode = (setup->value);
+
         usbAckSetup();
         return;
     }
@@ -260,33 +341,33 @@ void handleUsbVendorSetup()
       char inc = 1;
       unsigned char start, stop;
       scannLength = 0;
-      
+
       if(setup->length < 1)
       {
         usbDismissSetup();
         return;
       }
-      
+
       //Start and stop channels
       start = setup->value;
       stop = (setup->index>125)?125:setup->index;
-      
+
       if (radioGetDataRate() == DATA_RATE_2M)
         inc = 2; //2M channel are 2MHz wide
-      
+
       //Arm and wait for the out transaction
       OUT0BC = BCDUMMY;
       while (EP0CS & OUTBSY);
-      
+
       memcpy(tbuffer, OUT0BUF, setup->length);
       for (i=start; i<stop+1 && scannLength<MAX_SCANN_LENGTH; i+=inc)
       {
         radioSetChannel(i);
         status = radioSendPacket(tbuffer, setup->length, rbuffer, &rlen);
-        
+
         if (status)
           IN0BUF[scannLength++] = i;
-        
+
         ledTimeout = 2;
         ledSet(LED_GREEN | LED_RED, false);
         if(status)
@@ -294,7 +375,7 @@ void handleUsbVendorSetup()
         else
           ledSet(LED_RED, true);
       }
-      
+
       //Ack the setup phase
       usbAckSetup();
       return;
@@ -305,13 +386,13 @@ void handleUsbVendorSetup()
       //(if a scann has been launched before ...)
       IN0BC = (setup->length>scannLength)?scannLength:setup->length;
       while (EP0CS & INBSY);
-      
+
       //Ack the setup phase
       usbAckSetup();
       return;
     }
   }
-  
+
   //Stall in error if nothing executed!
   usbDismissSetup();
 }
@@ -319,18 +400,18 @@ void handleUsbVendorSetup()
 // De-init all the peripherical,
 // and launch the Nordic USB bootloader located @ 0x7800
 void launchBootloader()
-{ 
+{
   void (*bootloader)() = (void (*)())0x7800;
-  
+
   //Deactivate the interruptions
   IEN0 = 0x00;
-  
+
   //Deinitialise the USB
   usbDeinit();
-  
+
   //Deinitialise the radio
   radioDeinit();
-  
+
   //Call the bootloader
   bootloader();
 }
