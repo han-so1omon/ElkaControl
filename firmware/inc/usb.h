@@ -130,6 +130,8 @@ enum radioMode_e
   RADIO_MODE_PTX = 0,
   // PTX mode, but waits for a synchronous (non-empty) response
   RADIO_MODE_PTX_SYNCRONOUS = 1,
+  // PRX mode
+  RADIO_MODE_PRX = 2,
 };
 
 #endif /* __USB_H__ */

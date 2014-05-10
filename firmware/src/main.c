@@ -77,7 +77,7 @@ void main()
   ledInit();
   ledSet(LED_GREEN | LED_RED, true);
   // Initialise the radio
-  radioInit();
+  radioInit(MODE_PTX);
 #ifdef PPM_JOYSTICK
   // Initialise the PPM acquisition
   ppmInit();
@@ -228,6 +228,31 @@ void main()
         }
       }
       break;
+    case RADIO_MODE_PRX:
+      {
+        ledSet(LED_RED, true);
+        if (!radioIsRxEmpty())
+        {
+          ledSet(LED_GREEN, true);
+          IN1BC = radioRxPacket(IN1BUF);
+        }
+        //Send a packet if something is received on the USB
+        if (!(OUT1CS&EPBSY) && !contCarrier)
+        {
+          //Deactivate the USB IN
+          IN1CS = 0x02;
+
+          //Fetch the USB data size. Limit it to 32
+          tlen = OUT1BC;
+          if (tlen>32) tlen=32;
+
+          radioAckPacket(0, OUT1BUF, tlen);
+
+          //reactivate OUT1
+          OUT1BC=BCDUMMY;
+        }
+      }
+      break;
     }
 
     //USB vendor setup handling
@@ -329,6 +354,16 @@ void handleUsbVendorSetup()
     else if(setup->request == SET_RADIO_MODE)
     {
         radioMode = (setup->value);
+
+        switch (radioMode)
+        {
+        case RADIO_MODE_PRX:
+          radioSetMode(MODE_PRX);
+          break;
+        default:
+          radioSetMode(MODE_PTX);
+          break;
+        }
 
         usbAckSetup();
         return;
