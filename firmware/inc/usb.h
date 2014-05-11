@@ -132,6 +132,9 @@ enum radioMode_e
   RADIO_MODE_PTX_SYNCRONOUS = 1,
   // PRX mode
   RADIO_MODE_PRX = 2,
+  // Hybrid mode: start in PTX, but switch to PRX to receive
+  //              corresponding responses without polling
+  RADIO_MODE_HYBRID = 3,
 };
 
 #endif /* __USB_H__ */

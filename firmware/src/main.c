@@ -63,6 +63,13 @@ static bool needAck = true;
 
 static enum radioMode_e radioMode = RADIO_MODE_PTX;
 
+enum HybridModeState
+{
+  HybridModeStateRx,
+  HybridModeStateTx,
+};
+static enum HybridModeState hybridModeState = HybridModeStateTx;
+
 void main()
 {
   char status;
@@ -230,7 +237,6 @@ void main()
       break;
     case RADIO_MODE_PRX:
       {
-        ledSet(LED_RED, true);
         if (!radioIsRxEmpty())
         {
           ledSet(LED_GREEN, true);
@@ -250,6 +256,51 @@ void main()
 
           //reactivate OUT1
           OUT1BC=BCDUMMY;
+        }
+      }
+      break;
+    case RADIO_MODE_HYBRID:
+      {
+        switch (hybridModeState)
+        {
+        case HybridModeStateTx:
+          {
+            // wait on USB for a command to send
+            // don't use the Auto Acknowledgment; instead switch to Rx mode
+            // to receive a response
+            if (!(OUT1CS&EPBSY) && !contCarrier)
+            {
+              //ledSet(LED_GREEN, true);
+              //Deactivate the USB IN
+              IN1CS = 0x02;
+
+              //Fetch the USB data size. Limit it to 32
+              tlen = OUT1BC;
+              if (tlen>32) tlen=32;
+
+              //radioSendPacket/*NoAck*/(OUT1BUF, tlen);
+              radioSendPacketNoAck(OUT1BUF, tlen);
+              radioSetMode(MODE_PRX);
+
+              //reactivate OUT1
+              OUT1BC=BCDUMMY;
+
+              hybridModeState = HybridModeStateRx;
+            }
+          }
+          break;
+        case HybridModeStateRx:
+          {
+            // if we received something, put it on USB and go back to TX mode
+            if (!radioIsRxEmpty())
+            {
+              ledSet(LED_GREEN, true);
+              IN1BC = radioRxPacket(IN1BUF);
+              radioSetMode(MODE_PTX);
+              hybridModeState = HybridModeStateTx;
+            }
+          }
+          break;
         }
       }
       break;
@@ -359,6 +410,10 @@ void handleUsbVendorSetup()
         {
         case RADIO_MODE_PRX:
           radioSetMode(MODE_PRX);
+          break;
+        case RADIO_MODE_HYBRID:
+          radioSetMode(MODE_PTX);
+          hybridModeState = HybridModeStateTx;
           break;
         default:
           radioSetMode(MODE_PTX);
