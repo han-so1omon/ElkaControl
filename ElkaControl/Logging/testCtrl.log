@@ -1,0 +1,4 @@
+2015-04-06 14:47:26,774 - testCtrl - DEBUG - 
+Tests sending data and passing data by Queue
+
+2015-04-06 14:47:26,776 - testCtrl - DEBUG - Test: send_data

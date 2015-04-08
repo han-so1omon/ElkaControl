@@ -33,7 +33,7 @@
 
 /* nRF24L SPI commands */
 #define CMD_R_REG 0x00
-#define CMD_W_REG 0x20
+#define CMD_W_REG 0x20 //Command to write to a register
 #define CMD_R_RX_PAYLOAD 0x61
 #define CMD_W_TX_PAYLOAD 0xA0
 #define CMD_FLUSH_TX 0xE1
