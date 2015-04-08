@@ -11,3 +11,4 @@ Folders content:
 - nrfProg:  SPI programmer that uses jtagkey USB addapter
 - usb_tools: Python scripts to reset and bootload Crazyradio from command line
 - lib: Software libraries to use Crazyradio with Pyton
+# ElkaControl
