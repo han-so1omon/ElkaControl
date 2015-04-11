@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
             for i in range(26):
                 toSend.append(0x00 + h)
             #FIXME make sure that outputs are being formed correctly
-            data = DataPacket.output(0, toSend)
+            data = DataPacket.output()
 
             log_outputs.info('Packet {0}: {1}'.format(h, data.data))
         

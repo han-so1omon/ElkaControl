@@ -75,10 +75,6 @@ try:
 
     for t in base._threads:
         t.join()
-    '''
-    while True:
-        pass
-        '''
     
 except JoystickNotFound as e:
     print "Joystick not found"

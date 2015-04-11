@@ -42,8 +42,10 @@ class ElkaDriver(object):
     
         # queue access must be atomic
         self.in_queue = None 
+        ''' 
         #FIXME no longer using out_queue
         self.out_queue = None 
+        '''
         self.ack_queue = None 
         
         # driver runs joystick_ctrl and driver threads
@@ -120,11 +122,13 @@ class ElkaDriver(object):
         # prepare the inter-thread communication queue
         self.ack_queue = Queue.Queue()
         self.in_queue = Queue.Queue()
+        '''
         # limited size out queue to avoid 'Readback effect'
         self.out_queue = Queue.Queue(50)
+        '''
 
-        t = ElkaDriverThread(self.eradio, self.in_queue, self.ack_queue,
-                             self.out_queue)
+        t = ElkaDriverThread(self.eradio, self.in_queue, self.ack_queue)
+                             
         self._threads.append(t)
         
         # start thread as daemon because packet handling occurs
@@ -172,14 +176,16 @@ class ElkaDriverThread(threading.Thread):
 
     RETRYCNT_BEFORE_DISCONNECT = 10
 
-    def __init__(self, eradio, inQueue, ackQueue, outQueue):
+    def __init__(self, eradio, inQueue, ackQueue):
         """ Create the object """
         threading.Thread.__init__(self)
         self.eradio = eradio
         self.in_queue = inQueue
         self.ack_queue = ackQueue
+        '''
         #FIXME no longer using outQueue
         self.out_queue = outQueue
+        '''
         self.sp = False
         self.retry_before_disconnect = self.RETRYCNT_BEFORE_DISCONNECT
 
@@ -212,10 +218,11 @@ class ElkaDriverThread(threading.Thread):
     def package_data(self):
         """ form packet and send to out_queue """
         #FIXME fix header
-        #FIXME problem with self.in_queue.get()
         header = [0, 255, 255] 
         try:
-            pk = DataPacket.output(header, self.in_queue.get())
+            p = self.in_queue.get()
+            pk = DataPacket.output(header, p)
+            #pk = DataPacket.output(header, self.in_queue.get())
         except Queue.Empty:
             pk = DataPacket.output(header) 
 
@@ -238,77 +245,41 @@ class ElkaDriverThread(threading.Thread):
 
     def run(self):
         """ Run the receiver thread """
-        data_out = array.array('B', [0x00])
-        wait_time = 0
-        empty_ctr = 0
         
         logger.debug('\nElkaDriverThread running')
         while not self.sp:
-            try:
-                ack_status = self.eradio.send_packet(data_out)
-            except Exception as e:
-                raise
-
-            if ack_status is None:
-                # primitive version of Bitcraze callbacks
-                log_acks.debug('No ack received')
-                continue
-
-            if ack_status.ack is False:
-                self.retry_before_disconnect -= 1
-
-                #FIXME fix decrementing and resetting retry_before_disconnect
-                if self.retry_before_disconnect == 0:
-                    continue
-            self.retry_before_disconnect = self.RETRYCNT_BEFORE_DISCONNECT
-
-            data = ack_status.data
-
-            # If there is a copter in range, the packet is analyzed and
-            # the next packet is prepared
-            if (len(data) > 0):
-                ack_packet = DataPacket.ack(data[0:3], list(data[3:]))
-                logger.debug('ack packet made')
-                log_acks.info('{0},{1}'.format(
-                    ack_packet.header, ack_packet.data))
-                # print "<- " + ackPacket.__str__()
-                self.ack_queue.put(ack_packet)
-                wait_time = 0
-                empty_ctr = 0
-            else:
-                empty_ctr += 1
-                if (empty_ctr > 10):
-                    empty_ctr = 10
-                    # Relaxation time if the last 10 packets were empty
-                    wait_time = .01
-                else:
-                    wait_time = 0
-
-
-            '''
-            #FIXME not able to retrieve from queue
-            out = self.out_queue.get(True, waitTime)
-            self.package_data(out)
-            '''
+			
+            ackIn = None
+			
+            # Grabs data from in_queue
             pk = self.package_data() 
 
             # array must be unpacked singularly
             data_out_h = array.array('B', *pk._header) # pack header
             data_out_d = array.array('B', *pk._data) # pack data
             data_out = data_out_h + data_out_d
-            logger.debug('header : {0}\ndata: {1}\nboth: {2}'.format(data_out_h,
+            log_outputs.info('header : {0}\ndata: {1}\nboth: {2}'.format(data_out_h,
                 data_out_d, data_out))
+                    
+            # Takes DataPacket and attempts to send it, will wait
+            # on empty data packets
+            while self.retry_before_disconnect and ackIn == None:
+                try:
+                    ackIn = self.eradio.send_packet(data_out)
+                except Exception as e:
+                    raise
 
-            if out_packet:
-                # print "-> " + outPacket.__str__()
-                for h in out_packet.header:
-                    data_out.put(h)
-                for x in out_packet.data:
-                    if type(x) == int:
-                        data_out.put(x)
-                    else:
-                        data_out.put(ord(x))
-            else:
-                data_out.put(0x00)
-
+                if ackIn is None:
+                    # primitive version of Bitcraze callbacks
+                    log_acks.debug('No ack received, RBDct = ' + self.retry_before_disconnect)
+                    self.retry_before_disconnect -= 1
+                    if not self.retry_before_disconnect:
+                            self.sp = True
+                else:
+                    log_acks.info('{0},{1}'.format(
+                            ackIn.header, ackIn.data))
+                    # print "<- " + ackPacket.__str__()
+                    self.ack_queue.put(ackIn)
+                    
+            self.retry_before_disconnect = self.RETRYCNT_BEFORE_DISCONNECT
 ########## End of ElkaDriverThread Class ##########

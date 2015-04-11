@@ -19,6 +19,7 @@ log_acks = logging.getLogger('acks')
 ################################################################################
 
 from Utils.exceptions import ElkaradioNotFound
+from ETP.dataPacket import DataPacket
 
 #USB parameters
 CRADIO_VID = 0x1915
@@ -52,14 +53,6 @@ def _find_devices():
             ret = dev
 
     return ret
-
-
-class _radio_ack(object):
-    ack = False
-    powerDet = False
-    retry = 0
-    data = ()
-
 
 class Elkaradio(object):
     """ Used for communication with the Elkaradio USB dongle """
@@ -196,11 +189,8 @@ class Elkaradio(object):
 
         data = self.dev.read(0x81, 64, 100)
 
-        ackIn = _radio_ack()
-        ackIn.ack = True
-
-        if data is not None:
-            ackIn.data = data
+        #FIXME must reflect ack struct in firmware
+        ackIn = DataPacket.ack(data)
 
         return ackIn
 

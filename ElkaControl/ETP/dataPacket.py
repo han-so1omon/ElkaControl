@@ -17,9 +17,6 @@ logger = logging.getLogger('main.dataPacket')
 ################################################################################
 
 class DataPacket(object):
-    '''
-    packs 3 8-bit ints header and 4 12-bit ints data into binary structs
-    '''
 
     def __init__(self, header = [0]*3, data = [0]*4):
         '''
@@ -29,8 +26,6 @@ class DataPacket(object):
 
         self._header = header 
         self._data = data 
-
-        return both
 
     @staticmethod
     def convert_raw(raw):
@@ -74,13 +69,25 @@ class DataPacket(object):
 
    
     @classmethod
-    def ack(cls, header, data):
-        return DataPacket(header, data)
+    def ack(cls, data = None):
+        if data:
+            return DataPacket([0]*3, data)
+        else:
+            return DataPacket()
 
     @classmethod
-    def output(cls, header, raw):
-        data = DataPacket.convert_raw(raw)
-        return DataPacket(header, data)
+    def output(cls, header = None, raw = None):
+        '''
+        packs 3 8-bit ints header and 4 12-bit ints data into binary structs
+        '''
+        if raw:
+            data = DataPacket.convert_raw(raw)
+            if header:
+                return DataPacket(header, data)
+            else:
+                return DataPacket([0]*3, data)
+        else:
+            return DataPacket([0]*3, [0]*6)
         
     @property
     def header(self):
@@ -92,21 +99,17 @@ class DataPacket(object):
         """ Set requests to send """
         self._update_header(header)
     
+    #FIXME I think that this is broken
     @classmethod
     def _update_header(cls, header):
         ''' Update the header with gains or pilot inputs '''
-        if type(header) == str:
+        logger.debug("_update_header reached")
+        if type(header) == list:
             self._header = header
-        elif type(header) == list or type(header) == tuple:
-            if len(header) == 1:
-                self._header = struct.pack('B', header[0])
-            elif len(header) > 1:
-                self._header = struct.pack('B' * len(header), *header)
-            else:
-                self._header = ''
+            
         else:
-            raise WrongDataTypeException("Header must be str, tuple," +
-                                         "or list type")
+            logger.debug("Header must be list")
+            raise WrongDataTypeException("Header must be list")
 
     
 
@@ -116,18 +119,10 @@ class DataPacket(object):
         return self._data
     
     def _set_data(self, data):
-        if type(data) == str:
+        if type(data) == list:
             self._data = data
-        elif type(data) == list or type(data) == tuple:
-            if len(data) == 1:
-                self._data = struct.pack("B"*2, data[0])
-            elif len(data) > 1:
-                self._data = struct.pack("B" * len(data), *data)
-            else:
-                self._data = ""
         else:
-            raise WrongDataTypeException("Data must be str, tuple, or list type"
-                                        )
+            raise WrongDataTypeException("Data must be list")
         
     def _get_data_l(self):
         """ Get the data in the packet as a list """
