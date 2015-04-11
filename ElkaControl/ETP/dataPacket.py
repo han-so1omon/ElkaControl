@@ -25,9 +25,7 @@ class DataPacket(object):
         '''
         Constructor
         '''
-        # size in bytes using each header element as an 8-bit int and each 
-        # data element as a 10-bit int
-        self._size = sys.getsizeof(header)*8 + sys.getsizeof(data)*10
+        self._size = len(header) + len(data) 
 
         self._header = header 
         self._data = data 
@@ -39,7 +37,7 @@ class DataPacket(object):
         '''
         orig = []
         to_datum = 1
-        trans = 4000
+        trans = 2000
         for r in raw:
             orig.append(int(((r + to_datum)*trans)))
 
@@ -69,7 +67,7 @@ class DataPacket(object):
                 else:
                     b[b_idx] |= (a[i] & mask) << abs(shift)
                 k += 1
-
+        
         return b
 
    

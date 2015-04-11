@@ -1,6 +1,0 @@
-2015-04-11 00:12:04,768 - testCtrl - DEBUG - 
-Tests sending data and passing data by Queue
-
-2015-04-11 00:12:04,769 - testCtrl - DEBUG - Test: send_data
-2015-04-11 00:12:04,833 - testCtrl - DEBUG - Elkaradio 0: <Elkaradio.elkaradioTRX.Elkaradio object at 0x1a1e6d0>
-2015-04-11 00:12:04,884 - testCtrl - DEBUG - Elkaradio 1: <Elkaradio.elkaradioTRX.Elkaradio object at 0x1a1e810>

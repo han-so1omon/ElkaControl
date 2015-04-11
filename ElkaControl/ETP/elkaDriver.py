@@ -42,6 +42,7 @@ class ElkaDriver(object):
     
         # queue access must be atomic
         self.in_queue = None 
+        #FIXME no longer using out_queue
         self.out_queue = None 
         self.ack_queue = None 
         
@@ -60,9 +61,7 @@ class ElkaDriver(object):
             #connect to joystick
             j = JoystickCtrl(self.in_queue)
             self.axes = Axes(j.ctrlr_name)
-            logger.debug('\n{0} joystick has been'.format(j.ctrlr_name) +
-                         ' initialized')
-            
+            logger.debug('\n{0} joystick has been'.format(j.ctrlr_name) + ' initialized') 
             self._threads.append(j)
             j.daemon = True
             j.start()
@@ -179,6 +178,7 @@ class ElkaDriverThread(threading.Thread):
         self.eradio = eradio
         self.in_queue = inQueue
         self.ack_queue = ackQueue
+        #FIXME no longer using outQueue
         self.out_queue = outQueue
         self.sp = False
         self.retry_before_disconnect = self.RETRYCNT_BEFORE_DISCONNECT
@@ -219,10 +219,16 @@ class ElkaDriverThread(threading.Thread):
         except Queue.Empty:
             pk = DataPacket.output(header) 
 
+
+
+        '''
         try:
             self.out_queue.put(pk, true, 2)
         except Queue.Full:
             raise QueueFullException()
+        '''
+
+        return pk
    
     def stop(self):
         """ Stop the thread """
@@ -232,7 +238,6 @@ class ElkaDriverThread(threading.Thread):
         except Exception:
             pass
 
-    #FIXME add logging
     def run(self):
         """ Run the receiver thread """
         data_out = array.array('B', [0x00])
@@ -243,7 +248,6 @@ class ElkaDriverThread(threading.Thread):
         while not self.sp:
             try:
                 ack_status = self.eradio.send_packet(data_out)
-                log_outputs.info('{0}'.format(data_out))
             except Exception as e:
                 raise
 
@@ -255,9 +259,9 @@ class ElkaDriverThread(threading.Thread):
             if ack_status.ack is False:
                 self.retry_before_disconnect -= 1
 
+                #FIXME fix decrementing and resetting retry_before_disconnect
                 if self.retry_before_disconnect == 0:
                     continue
-
             self.retry_before_disconnect = self.RETRYCNT_BEFORE_DISCONNECT
 
             data = ack_status.data
@@ -281,9 +285,16 @@ class ElkaDriverThread(threading.Thread):
                 else:
                     wait_time = 0
 
-            self.package_data(self.out_queue.get(True, waitTime))
-            out_packet = self.out_queue.get(True, waitTime)
-            data_out = array.array('B', *data_out)
+            '''
+            #FIXME not able to retrieve from queue
+            out = self.out_queue.get(True, waitTime)
+            self.package_data(out)
+            '''
+            pk = self.package_data() 
+
+            #out_packet = self.package_data(self.out_queue.get(True, waitTime))
+
+            data_out = array.array('B', *pk.) # 
             if out_packet:
                 # print "-> " + outPacket.__str__()
                 for h in out_packet.header:

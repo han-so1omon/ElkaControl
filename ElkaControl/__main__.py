@@ -11,7 +11,6 @@ Contains main function for Elka Control
 import os, sys, traceback, logging, logging.config, logging.handlers, threading
 #add logging module to path
 p = os.path.join(os.path.split(os.getcwd())[0], 'Logging')
-print p
 sys.path.append(p)
 
 from Inputs.joystickCtrl import *

@@ -11,6 +11,13 @@ import os, sys, usb, usb.core, usb.util, logging
 
 sys.path.append(os.getcwd())
 
+############################## Set up loggers ##################################
+logger = logging.getLogger('main.elkaradioTRX')
+log_inputs = logging.getLogger('inputs')
+log_outputs = logging.getLogger('outputs')
+log_acks = logging.getLogger('acks')
+################################################################################
+
 from Utils.exceptions import ElkaradioNotFound
 
 #USB parameters
@@ -189,8 +196,11 @@ class Elkaradio(object):
 
         data = self.dev.read(0x81, 64, 100)
 
+        ackIn = _radio_ack()
+        ackIn.ack = True
+
         if data is not None:
-            ackIn = _radio_ack()
+            ackIn.data = data
 
         return ackIn
 

@@ -1,10 +1,2 @@
-00:12:04,Ack 0: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e950>
-00:12:04,Ack 1: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e7d0>
-00:12:04,Ack 2: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e790>
-00:12:04,Ack 3: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e950>
-00:12:04,Ack 4: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e7d0>
-00:12:04,Ack 5: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e790>
-00:12:04,Ack 6: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e950>
-00:12:05,Ack 7: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e7d0>
-00:12:05,Ack 8: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e790>
-00:12:05,Ack 9: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e950>
+02:51:38,Acks, 6
+02:51:38,array('B', [1]),[]
