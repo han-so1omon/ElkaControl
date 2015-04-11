@@ -1,31 +1,9 @@
-2015-04-11 08:53:56,081 - main - DEBUG - 
+2015-04-11 15:53:10,223 - main - DEBUG - 
 Runs Elka Transfer Protocol (ETP) for a base node and a receive node
 
-2015-04-11 08:53:56,097 - main - DEBUG - 
-Elkaradio number 0 is base node
-2015-04-11 08:53:56,146 - main - DEBUG - 
-Elkaradio number 1 is receive node
-2015-04-11 08:53:56,147 - main - DEBUG - 
-Elkaradio number 2 is set to primary receive mode
-2015-04-11 08:53:56,194 - main.elkaDriver - DEBUG - 
-ElkaDriverThread running
-2015-04-11 08:53:56,194 - main.elkaDriver - DEBUG - 
-Base node is beginning transmission
-2015-04-11 08:53:56,195 - main.elkaDriver - DEBUG - 
-Elkaradio is connected
-2015-04-11 08:53:56,208 - main.elkaDriver - DEBUG - 
-Generic X-Box pad joystick has been initialized
-2015-04-11 08:53:56,209 - main.joystickCtrl - DEBUG - 
-Joystick thread running
-2015-04-11 08:53:56,214 - main - DEBUG - 
-3 active threads:
- [<_MainThread(MainThread, started 140243128383296)>, <ElkaDriverThread(Thread-1, started daemon 140242686306048)>, <JoystickCtrl(Thread-2, started daemon 140242677913344)>]
-2015-04-11 08:54:02,166 - main.joystickCtrl - DEBUG - 
-Joystick controller closed
-
-2015-04-11 08:54:02,270 - main.elkaradioTRX - DEBUG - 
-Elkaradio is closed
-2015-04-11 08:54:02,270 - main.elkaDriver - DEBUG - 
-ElkaDriver is closed
-2015-04-11 08:54:02,270 - main - DEBUG - 
-Base node closed
+2015-04-11 15:53:10,234 - main - DEBUG - f: <generator object device_iter at 0x22c7f50>
+2015-04-11 15:53:10,234 - main - ERROR - 
+Traceback (most recent call last):
+  File "/home/eric/Desktop/CrazyflieProjects/ElkaControlProject/ElkaControl/ElkaControl/__main__.py", line 81, in <module>
+    base = f.next()
+StopIteration

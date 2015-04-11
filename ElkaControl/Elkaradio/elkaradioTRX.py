@@ -189,10 +189,7 @@ class Elkaradio(object):
 
         data = self.dev.read(0x81, 64, 100)
 
-        #FIXME must reflect ack struct in firmware
-        ackIn = DataPacket.ack(data)
-
-        return ackIn
+        return data
 
     def send(self, data):
         self.dev.write(1, data, 10)

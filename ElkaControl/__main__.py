@@ -8,7 +8,10 @@ Module: __main__.py
 Contains main function for Elka Control
 """
 
-import os, sys, traceback, logging, logging.config, logging.handlers, threading
+import os, sys, traceback, logging, logging.config, logging.handlers, threading, re
+
+from IPython import embed
+
 #add logging module to path
 p = os.path.join(os.path.split(os.getcwd())[0], 'Logging')
 sys.path.append(p)
@@ -42,7 +45,7 @@ log_outputs.info('Outputs, 6')
 log_acks.info('Acks, 6')
 ################################################################################
 
-""" Demonstrate ETP with two ElkaRadios """
+""" Demonstrate ETP with two ElkaRadios 
 try:
     i = 0
     erads = []
@@ -52,10 +55,8 @@ try:
         erads.append(e)
         if i == 0:
             base = ElkaDriver(erads[i])
-            logger.debug("\nElkaradio number {0} is base node".format(i))
         else:
             rx.append(Elkaradio(erads[i]))
-            logger.debug("\nElkaradio number {0} is receive node".format(i))
         i += 1
 
     i = 1
@@ -69,6 +70,14 @@ try:
         base.start()
     else:
         raise ElkaradioNotFound()
+"""
+
+base = None
+
+try:
+    f = _find_devices()
+    base = f.next()
+
 
     logger.debug('\n{0} active threads:\n {1}'.format(threading.active_count(),
             threading.enumerate()))
@@ -95,10 +104,12 @@ finally:
     if base is not None:
         base.close()
         logger.debug('\nBase node closed')
+    '''
     if not rx:
         i = 0
         for r in rx:
             r.close()
             logger.debug('\nRX node {0} closed'.format(i))
             i += 1
+    '''
     print traceback.format_exc()

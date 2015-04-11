@@ -16,7 +16,9 @@ nRF24L01p as specified in ElkaradioTRX.py)
 
 import sys, os
 sys.path.append(os.getcwd()) 
-import Queue, threading, array, logging
+import Queue, threading, struct, logging, math
+
+from IPython import embed
 
 from Elkaradio.elkaradioTRX import Elkaradio
 from Inputs.joystickCtrl import * 
@@ -78,11 +80,6 @@ class ElkaDriver(object):
         except Exception as e:
             raise
 
-    def pause(self):
-        for t in self._threads:
-            t.stop()
-            t = None
-
     def restart(self):
         i = 0
         for t in self._threads:
@@ -101,10 +98,15 @@ class ElkaDriver(object):
             i += 1
 
     def close(self):
+        for t in self._threads:
+            t.stop()
+            t = None
+
         if self.eradio is not None:
             self.eradio.close()
 
         self.eradio = None
+
         logger.debug('\nElkaDriver is closed')
         #also flush in_queue and out_queue contents
 
@@ -155,8 +157,7 @@ class ElkaDriver(object):
         elif self.eradio.radio_mode == 2:
             mode = 'MODE_PRX'
         elif self.eradio.radio_mode == 3:
-            mode = 'MODE_HYBRID'
-        
+            mode = 'MODE_HYBRID' 
         logger.debug('\nElkaradio versio {} in {}'.format(
                         self.eradio.version, mode))
             
@@ -215,26 +216,47 @@ class ElkaDriverThread(threading.Thread):
             except Queue.Empty:
                 return None
 
-    def package_data(self):
-        """ form packet and send to out_queue """
-        #FIXME fix header
-        header = [0, 255, 255] 
-        try:
-            p = self.in_queue.get()
-            pk = DataPacket.output(header, p)
-            #pk = DataPacket.output(header, self.in_queue.get())
-        except Queue.Empty:
-            pk = DataPacket.output(header) 
-
+    @staticmethod
+    def convert_raw(raw):
+        ''' Convert from floating pt number range [-1 1] to 12 bit number range
+            [0 4000]
         '''
-        try:
-            self.out_queue.put(pk, true, 2)
-        except Queue.Full:
-            raise QueueFullException()
-        '''
+        orig = []
+        to_datum = 1
+        trans = 2000
+        for r in raw:
+            orig.append(int(((r + to_datum)*trans)))
 
-        return pk
-   
+        wrd_orig_sz = 12
+        wrd_trans_sz = 8
+
+        trans = ElkaDriverThread.convert_array_wrd_sz(orig, wrd_orig_sz, wrd_trans_sz)
+        return trans 
+
+    @staticmethod
+    def convert_array_wrd_sz(a, wrd_a_sz, wrd_b_sz):
+        ''' converts array a of word size wrd_a_sz into array b of word size
+            wrd_b_sz ''' 
+        in_t = int(math.ceil((float(wrd_a_sz)/float(wrd_b_sz))*len(a)))
+
+        b = [0] * in_t
+
+        k = 0
+        for i in range(len(a)):
+            for j in range(wrd_a_sz):
+                b_idx = int(math.floor(k/wrd_b_sz)) 
+                if j == 0 or (k % wrd_b_sz) == 0: # if at beginning of a[i] or b[i]
+                    shift = (wrd_a_sz - j) - (wrd_b_sz - (k % wrd_b_sz))
+                mask = 1 << ((wrd_a_sz - 1) - j)
+                if shift >= 0:
+                    b[b_idx] |= (a[i] & mask) >> shift
+                else:
+                    b[b_idx] |= (a[i] & mask) << abs(shift)
+                k += 1
+        
+        return b
+
+
     def stop(self):
         """ Stop the thread """
         self.sp = True
@@ -245,27 +267,29 @@ class ElkaDriverThread(threading.Thread):
 
     def run(self):
         """ Run the receiver thread """
-        
         logger.debug('\nElkaDriverThread running')
         while not self.sp:
-			
             ackIn = None
-			
+                        
             # Grabs data from in_queue
-            pk = self.package_data() 
+            # pk = self.package_data() 
 
+            header = [0, 255, 255]
             # array must be unpacked singularly
-            data_out_h = array.array('B', *pk._header) # pack header
-            data_out_d = array.array('B', *pk._data) # pack data
+            data_out_h = struct.pack('B' * len(header), *header) # pack header
+            p = self.in_queue.get()
+            trans = ElkaDriverThread.convert_raw(p)
+            data_out_d = struct.pack('B' * len(trans), *trans) # pack data
             data_out = data_out_h + data_out_d
-            log_outputs.info('header : {0}\ndata: {1}\nboth: {2}'.format(data_out_h,
-                data_out_d, data_out))
-                    
+            log_outputs.info('\nheader : {0}\ndata: {1}\nsize: {2}'.format(header,
+                trans, len(data_out)))
+   
             # Takes DataPacket and attempts to send it, will wait
             # on empty data packets
-            while self.retry_before_disconnect and ackIn == None:
+            while self.retry_before_disconnect and ackIn is None:
                 try:
-                    ackIn = self.eradio.send_packet(data_out)
+                    ackIn = self.eradio.send_packet(data_out) # ackIn is raw imu
+                                                              # data in a struct
                 except Exception as e:
                     raise
 
@@ -276,9 +300,8 @@ class ElkaDriverThread(threading.Thread):
                     if not self.retry_before_disconnect:
                             self.sp = True
                 else:
-                    log_acks.info('{0},{1}'.format(
-                            ackIn.header, ackIn.data))
-                    # print "<- " + ackPacket.__str__()
+                    log_acks.info('ackIn data: {0}'.format(
+                            ackIn))
                     self.ack_queue.put(ackIn)
                     
             self.retry_before_disconnect = self.RETRYCNT_BEFORE_DISCONNECT

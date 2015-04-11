@@ -11,6 +11,7 @@ Data packet for ETP
 """
 
 import struct, sys, logging, math
+from IPython import embed
 
 ############################## Set up loggers ##################################
 logger = logging.getLogger('main.dataPacket')
@@ -24,8 +25,8 @@ class DataPacket(object):
         '''
         self._size = len(header) + len(data) 
 
-        self._header = header 
-        self._data = data 
+        self.header = header 
+        self.data = data 
 
     @staticmethod
     def convert_raw(raw):
@@ -71,9 +72,9 @@ class DataPacket(object):
     @classmethod
     def ack(cls, data = None):
         if data:
-            return DataPacket([0]*3, data)
+            return cls([0]*3, data)
         else:
-            return DataPacket()
+            return cls()
 
     @classmethod
     def output(cls, header = None, raw = None):
@@ -82,12 +83,15 @@ class DataPacket(object):
         '''
         if raw:
             data = DataPacket.convert_raw(raw)
-            if header:
-                return DataPacket(header, data)
+            if header is not None:
+                ret = cls(header, data)
+                #embed()
+                logger.debug('ret: {0}'.format(ret))
+                return ret
             else:
-                return DataPacket([0]*3, data)
+                return cls([0]*3, data)
         else:
-            return DataPacket([0]*3, [0]*6)
+            return cls([0]*3, [0]*6)
         
     @property
     def header(self):
@@ -97,23 +101,12 @@ class DataPacket(object):
     @header.setter
     def header(self, header):
         """ Set requests to send """
-        self._update_header(header)
-    
-    #FIXME I think that this is broken
-    @classmethod
-    def _update_header(cls, header):
-        ''' Update the header with gains or pilot inputs '''
-        logger.debug("_update_header reached")
         if type(header) == list:
             self._header = header
-            
         else:
-            logger.debug("Header must be list")
             raise WrongDataTypeException("Header must be list")
 
-    
-
-    #Some python madness to access different format of the data    
+     #Some python madness to access different format of the data    
     def _get_data(self):
         """ Get packet data """
         return self._data
