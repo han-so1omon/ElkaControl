@@ -10,7 +10,7 @@ Data packet for ETP
 
 """
 
-import struct, sys, logging
+import struct, sys, logging, math
 
 ############################## Set up loggers ##################################
 logger = logging.getLogger('main.dataPacket')
@@ -46,7 +46,7 @@ class DataPacket(object):
         wrd_orig_sz = 12
         wrd_trans_sz = 8
 
-        trans = convert_array_wrd_sz(orig, wrd_orig_sz, wrd_trans_sz)
+        trans = DataPacket.convert_array_wrd_sz(orig, wrd_orig_sz, wrd_trans_sz)
         return trans 
 
     @staticmethod
@@ -74,13 +74,13 @@ class DataPacket(object):
 
    
     @classmethod
-    def ack(cls, header, raw):
+    def ack(cls, header, data):
         return DataPacket(header, data)
 
     @classmethod
-    def output(cls, header, data):
+    def output(cls, header, raw):
         data = DataPacket.convert_raw(raw)
-        return Datapacket(header, data)
+        return DataPacket(header, data)
         
     @property
     def header(self):

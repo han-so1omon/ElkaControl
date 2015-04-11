@@ -61,8 +61,9 @@ class Test(unittest.TestCase):
             log_outputs.info('Packet {0}: {1}'.format(h, data.data))
         
             ack = None
-            if len(eradios) > 2:
+            if len(eradios) > 1:
                 ack = eradios[0].send_packet(data.data)
+
             if ack is not None:
                 log_acks.info('Ack {0}: {1}'.format(h, ack))
             else:

@@ -13,10 +13,6 @@ sys.path.append(os.getcwd())
 
 from Utils.exceptions import ElkaradioNotFound
 
-############################## Set up loggers ##################################
-logger = logging.getLogger('main.elkaradioTRX')
-################################################################################
-
 #USB parameters
 CRADIO_VID = 0x1915
 CRADIO_PID = 0x7777
@@ -190,6 +186,7 @@ class Elkaradio(object):
 
         #may need to take out 0 as third parameter (timeout) for write and read
         self.dev.write(1, dataOut, 10)
+
         data = self.dev.read(0x81, 64, 100)
 
         if data is not None:

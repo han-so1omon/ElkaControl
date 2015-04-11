@@ -209,7 +209,7 @@ class ElkaDriverThread(threading.Thread):
             except Queue.Empty:
                 return None
 
-    def send_packet(self):
+    def package_data(self):
         """ form packet and send to out_queue """
         #FIXME fix header
         #FIXME problem with self.in_queue.get()
@@ -281,7 +281,7 @@ class ElkaDriverThread(threading.Thread):
                 else:
                     wait_time = 0
 
-            self.send_packet()
+            self.package_data(self.out_queue.get(True, waitTime))
             out_packet = self.out_queue.get(True, waitTime)
             data_out = array.array('B', *data_out)
             if out_packet:

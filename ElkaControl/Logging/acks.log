@@ -1,10 +1,10 @@
-14:47:26,Ack 0: No ack received
-14:47:26,Ack 1: No ack received
-14:47:26,Ack 2: No ack received
-14:47:26,Ack 3: No ack received
-14:47:26,Ack 4: No ack received
-14:47:26,Ack 5: No ack received
-14:47:26,Ack 6: No ack received
-14:47:26,Ack 7: No ack received
-14:47:26,Ack 8: No ack received
-14:47:26,Ack 9: No ack received
+00:12:04,Ack 0: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e950>
+00:12:04,Ack 1: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e7d0>
+00:12:04,Ack 2: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e790>
+00:12:04,Ack 3: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e950>
+00:12:04,Ack 4: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e7d0>
+00:12:04,Ack 5: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e790>
+00:12:04,Ack 6: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e950>
+00:12:05,Ack 7: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e7d0>
+00:12:05,Ack 8: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e790>
+00:12:05,Ack 9: <Elkaradio.elkaradioTRX._radio_ack object at 0x1a1e950>
