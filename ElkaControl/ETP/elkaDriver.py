@@ -219,8 +219,6 @@ class ElkaDriverThread(threading.Thread):
         except Queue.Empty:
             pk = DataPacket.output(header) 
 
-
-
         '''
         try:
             self.out_queue.put(pk, true, 2)
@@ -270,6 +268,7 @@ class ElkaDriverThread(threading.Thread):
             # the next packet is prepared
             if (len(data) > 0):
                 ack_packet = DataPacket.ack(data[0:3], list(data[3:]))
+                logger.debug('ack packet made')
                 log_acks.info('{0},{1}'.format(
                     ack_packet.header, ack_packet.data))
                 # print "<- " + ackPacket.__str__()
@@ -285,6 +284,7 @@ class ElkaDriverThread(threading.Thread):
                 else:
                     wait_time = 0
 
+
             '''
             #FIXME not able to retrieve from queue
             out = self.out_queue.get(True, waitTime)
@@ -292,9 +292,13 @@ class ElkaDriverThread(threading.Thread):
             '''
             pk = self.package_data() 
 
-            #out_packet = self.package_data(self.out_queue.get(True, waitTime))
+            # array must be unpacked singularly
+            data_out_h = array.array('B', *pk._header) # pack header
+            data_out_d = array.array('B', *pk._data) # pack data
+            data_out = data_out_h + data_out_d
+            logger.debug('header : {0}\ndata: {1}\nboth: {2}'.format(data_out_h,
+                data_out_d, data_out))
 
-            data_out = array.array('B', *pk.) # 
             if out_packet:
                 # print "-> " + outPacket.__str__()
                 for h in out_packet.header:

@@ -1,34 +1,31 @@
-2015-04-11 02:51:38,027 - main - DEBUG - 
+2015-04-11 03:44:32,001 - main - DEBUG - 
 Runs Elka Transfer Protocol (ETP) for a base node and a receive node
 
-2015-04-11 02:51:38,044 - main - DEBUG - 
+2015-04-11 03:44:32,014 - main - DEBUG - 
 Elkaradio number 0 is base node
-2015-04-11 02:51:38,095 - main - DEBUG - 
+2015-04-11 03:44:32,063 - main - DEBUG - 
 Elkaradio number 1 is receive node
-2015-04-11 02:51:38,095 - main - DEBUG - 
+2015-04-11 03:44:32,064 - main - DEBUG - 
 Elkaradio number 2 is set to primary receive mode
-2015-04-11 02:51:38,150 - main.elkaDriver - DEBUG - 
+2015-04-11 03:44:32,117 - main.elkaDriver - DEBUG - 
 ElkaDriverThread running
-2015-04-11 02:51:38,150 - main.elkaDriver - DEBUG - 
+2015-04-11 03:44:32,118 - main.elkaDriver - DEBUG - 
 Base node is beginning transmission
-2015-04-11 02:51:38,151 - main.elkaDriver - DEBUG - 
+2015-04-11 03:44:32,119 - main.elkaDriver - DEBUG - 
 Elkaradio is connected
-2015-04-11 02:51:38,152 - main.dataPacket - DEBUG - packet size: 1
-2015-04-11 02:51:38,168 - main.elkaDriver - DEBUG - 
+2015-04-11 03:44:32,136 - main.elkaDriver - DEBUG - 
 Sony PLAYSTATION(R)3 Controller joystick has been initialized
-2015-04-11 02:51:38,169 - main.joystickCtrl - DEBUG - 
+2015-04-11 03:44:32,138 - main.joystickCtrl - DEBUG - 
 Joystick thread running
-2015-04-11 02:51:38,169 - main - DEBUG - 
+2015-04-11 03:44:32,146 - main - DEBUG - 
 3 active threads:
- [<_MainThread(MainThread, started 140420499023680)>, <ElkaDriverThread(Thread-1, started daemon 140420063426304)>, <JoystickCtrl(Thread-2, started daemon 140420055033600)>]
-2015-04-11 02:51:38,179 - main.dataPacket - DEBUG - packet size: 9
-2015-04-11 02:51:38,184 - main.elkaDriver - DEBUG - pk: [125, 7, 208, 125, 7, 208]
-2015-04-11 02:51:40,665 - main.joystickCtrl - DEBUG - 
+ [<_MainThread(MainThread, started 140617743791936)>, <ElkaDriverThread(Thread-1, started daemon 140617376323328)>, <JoystickCtrl(Thread-2, started daemon 140617296377600)>]
+2015-04-11 03:44:33,554 - main.joystickCtrl - DEBUG - 
 Joystick controller closed
 
-2015-04-11 02:51:40,865 - main.elkaradioTRX - DEBUG - 
+2015-04-11 03:44:33,754 - main.elkaradioTRX - DEBUG - 
 Elkaradio is closed
-2015-04-11 02:51:40,865 - main.elkaDriver - DEBUG - 
+2015-04-11 03:44:33,754 - main.elkaDriver - DEBUG - 
 ElkaDriver is closed
-2015-04-11 02:51:40,866 - main - DEBUG - 
+2015-04-11 03:44:33,755 - main - DEBUG - 
 Base node closed

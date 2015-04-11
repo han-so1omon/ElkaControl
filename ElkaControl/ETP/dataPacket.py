@@ -30,6 +30,8 @@ class DataPacket(object):
         self._header = header 
         self._data = data 
 
+        return both
+
     @staticmethod
     def convert_raw(raw):
         ''' Convert from floating pt number range [-1 1] to 12 bit number range
