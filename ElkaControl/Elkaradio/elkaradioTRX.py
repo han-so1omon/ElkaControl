@@ -9,6 +9,8 @@ Module: elkaDriver.py
 
 import os, sys, usb, usb.core, usb.util, logging
 
+from IPython import embed
+
 sys.path.append(os.getcwd())
 
 ############################## Set up loggers ##################################
@@ -39,9 +41,6 @@ SCANN_CHANNELS = 0x21
 RADIO_MODE = 0x22 # Additional firmware compatible flag to set radio mode
 LAUNCH_BOOTLOADER = 0xFF
 
-#FIXME change this to a class function with:
-# @classmethod
-# def _find_devices(cls)
 def _find_devices():
     """
     Returns a list of Elkaradio devices currently connected to the computer
@@ -50,7 +49,7 @@ def _find_devices():
 
     dev = usb.core.find(idVendor=0x1915, idProduct=0x7777, find_all=1)
     if dev is not None:
-            ret = dev
+        ret = dev
 
     return ret
 
@@ -75,25 +74,28 @@ class Elkaradio(object):
         """ Create object and scan for USB dongle if no device is supplied """
         if device is None:
             try:
-                devices = _find_devices()
+                devices = _find_devices() # polls for device if none provided
                 #FIXME continue scanning for a device not in use
                 device = next(devices, None)
             except Exception:
                 raise ElkaradioNotFound("Cannot find an open Elkaradio Dongle")
 
+        
+        log_acks.debug("well at least we can write to the logs")
+
         self.dev = device
         self.dev.set_configuration(1)
         self.version = float("{0:x}.{1:x}".format(self.dev.bcdDevice >> 8,
         				self.dev.bcdDevice & 0x0FF))
-        self.set_data_rate(Elkaradio.DR_2MPS)
-        self.set_channel(2)
+        self.set_data_rate(Elkaradio.DR_250KPS)
+        self.set_channel(40)
         self.set_cont_carrier(False)
-        self.set_address((0xE7,) * 5)
-        self.set_power(Elkaradio.P_0DBM)
+        self.set_address((0x34, 0x43, 0x10, 0x10, 0x01))
+        self.set_power(Elkaradio.P_M12DBM)
         self.set_arc(3)
         self.set_ard_bytes(32)
         
-        self.radio_mode = Elkaradio.MODE_PTX
+        self.radio_mode = Elkaradio.MODE_HYBRID
 
     def close(self):
         self.set_radio_mode(Elkaradio.MODE_PTX)
@@ -184,21 +186,15 @@ class Elkaradio(object):
         #self.ep_write(dataOut, 10)
         #data = self.ep_read(64, 10)
 
-        #may need to take out 0 as third parameter (timeout) for write and read
-        self.dev.write(1, dataOut, 10)
-
-        data = self.dev.read(0x81, 64, 100)
+        self.dev.write(1, dataOut, 1000)
+        
+        try:
+            data = self.dev.read(0x81, 64, 1000)
+        except usb.USBError as e:
+            logger.exception(e)
 
         return data
 
-    def send(self, data):
-        self.dev.write(1, data, 10)
-
-    def receive(self):
-        #try:
-        return self.dev.read(0x81, 64, 1000)
-        #except usb.core.USBError:
-        #	return
 
     #Private utility functions
     def _send_vendor_setup(self, request, value, index, data):

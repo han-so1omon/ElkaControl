@@ -31,7 +31,7 @@ pygame.init()
 size = [500, 700]
 screen = pygame.display.set_mode(size)
 
-pygame.display.set_caption(" Crazyradio Inputs ")
+pygame.display.set_caption(" Elkaradio Input ")
 
 ########## InputDisp class ##########
 class InputDisp(object):
@@ -196,9 +196,9 @@ class JoystickCtrl(threading.Thread):
 
                 raw = [None] * 4
                 # send back raw data
-                raw[0] = self.axes[axes_enum.RightHL]
-                raw[1] = self.axes[axes_enum.RightVU]
-                raw[2] = self.axes[axes_enum.LeftVU]
+                raw[0] = self.axes[axes_enum.LeftVU]
+                raw[1] = self.axes[axes_enum.RightHL]
+                raw[2] = self.axes[axes_enum.RightVU]
                 raw[3] = self.axes[axes_enum.LeftHL]
                 self.in_queue.put(raw)
                 log_inputs.info('{0}'.format(raw))

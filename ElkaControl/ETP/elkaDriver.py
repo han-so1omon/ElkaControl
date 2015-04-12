@@ -44,10 +44,7 @@ class ElkaDriver(object):
     
         # queue access must be atomic
         self.in_queue = None 
-        ''' 
-        #FIXME no longer using out_queue
-        self.out_queue = None 
-        '''
+
         self.ack_queue = None 
         
         # driver runs joystick_ctrl and driver threads
@@ -91,17 +88,13 @@ class ElkaDriver(object):
                     self.axes_enum = Axes(t.ctrlr_name)
                 elif i == 1:
                     t= ElkaDriverThread(self.eradio, self,in_queue, 
-                            self.ack_queue, self.out_queue)
+                            self.ack_queue)
                 t.daemon = True
                 t.start()
             logger.debug('\nElkaDriverThread thread has restarted')
             i += 1
 
     def close(self):
-        for t in self._threads:
-            t.stop()
-            t = None
-
         if self.eradio is not None:
             self.eradio.close()
 
@@ -111,7 +104,7 @@ class ElkaDriver(object):
         #also flush in_queue and out_queue contents
 
     def connect(self):
-        channel = 2
+        channel = 40
         datarate = Elkaradio.DR_250KPS
         if self.eradio is None:
             try:
@@ -170,12 +163,11 @@ class ElkaDriver(object):
 
 ########## End of ElkaDriver Class ##########
 
+RETRYCNT_BEFORE_DISCONNECT = 10
 ########## ElkaDriverThread Class ##########
 class ElkaDriverThread(threading.Thread):
     """ Radio link receiver thread used to read data from the Elkaradio
         USB driver. """
-
-    RETRYCNT_BEFORE_DISCONNECT = 10
 
     def __init__(self, eradio, inQueue, ackQueue):
         """ Create the object """
@@ -188,7 +180,7 @@ class ElkaDriverThread(threading.Thread):
         self.out_queue = outQueue
         '''
         self.sp = False
-        self.retry_before_disconnect = self.RETRYCNT_BEFORE_DISCONNECT
+        self.retry_before_disconnect = RETRYCNT_BEFORE_DISCONNECT
 
     def receive_packet(self, time=0):
         """
@@ -218,25 +210,32 @@ class ElkaDriverThread(threading.Thread):
 
     @staticmethod
     def convert_raw(raw):
-        ''' Convert from floating pt number range [-1 1] to 12 bit number range
-            [0 4000]
+        ''' Convert from floating pt number range [-1 1] to 16 bit number
         '''
-        orig = []
+        out = []
         to_datum = 1
-        trans = 2000
-        for r in raw:
-            orig.append(int(((r + to_datum)*trans)))
+        trans = 1000
+        for i in len(range(raw)):
+            if i == 0: # transform to [1000 2000]
+                out.append(int((1.5 + raw[i]) * 1000))
+            else: # transform to [-1000 1000]
+                out.append(int(raw[i]*1000))
 
+            out.append(int(((r + to_datum)*trans)))
+
+        '''
         wrd_orig_sz = 12
         wrd_trans_sz = 8
+        '''
 
-        trans = ElkaDriverThread.convert_array_wrd_sz(orig, wrd_orig_sz, wrd_trans_sz)
-        return trans 
+        # trans = ElkaDriverThread.convert_array_wrd_sz(orig, wrd_orig_sz, wrd_trans_sz)
+        return out
 
     @staticmethod
     def convert_array_wrd_sz(a, wrd_a_sz, wrd_b_sz):
-        ''' converts array a of word size wrd_a_sz into array b of word size
-            wrd_b_sz ''' 
+        ''' Not necessary, but cool
+        converts array a of word size wrd_a_sz into array b of word size
+            wrd_b_sz 
         in_t = int(math.ceil((float(wrd_a_sz)/float(wrd_b_sz))*len(a)))
 
         b = [0] * in_t
@@ -255,15 +254,7 @@ class ElkaDriverThread(threading.Thread):
                 k += 1
         
         return b
-
-
-    def stop(self):
-        """ Stop the thread """
-        self.sp = True
-        try:
-            self.join()
-        except Exception:
-            pass
+        '''
 
     def run(self):
         """ Run the receiver thread """
@@ -290,12 +281,14 @@ class ElkaDriverThread(threading.Thread):
                 try:
                     ackIn = self.eradio.send_packet(data_out) # ackIn is raw imu
                                                               # data in a struct
+
                 except Exception as e:
                     raise
 
                 if ackIn is None:
                     # primitive version of Bitcraze callbacks
-                    log_acks.debug('No ack received, RBDct = ' + self.retry_before_disconnect)
+                    log_acks.debug('No ack received, RBDct ='\
+                            '{0}'.format(self.retry_before_disconnect))
                     self.retry_before_disconnect -= 1
                     if not self.retry_before_disconnect:
                             self.sp = True
@@ -304,5 +297,5 @@ class ElkaDriverThread(threading.Thread):
                             ackIn))
                     self.ack_queue.put(ackIn)
                     
-            self.retry_before_disconnect = self.RETRYCNT_BEFORE_DISCONNECT
+            self.retry_before_disconnect = RETRYCNT_BEFORE_DISCONNECT
 ########## End of ElkaDriverThread Class ##########

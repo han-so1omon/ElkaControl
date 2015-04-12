@@ -75,16 +75,22 @@ try:
 base = None
 
 try:
-    f = _find_devices()
-    base = f.next()
-
+    base = ElkaDriver()
+    
+    if base is not None:
+        base.start()
+    else:
+        raise ElkaradioNotFound()
 
     logger.debug('\n{0} active threads:\n {1}'.format(threading.active_count(),
             threading.enumerate()))
 
+    while True:
+        pass
+
     for t in base._threads:
         t.join()
-    
+
 except JoystickNotFound as e:
     print "Joystick not found"
     logger.exception(e)
@@ -104,12 +110,5 @@ finally:
     if base is not None:
         base.close()
         logger.debug('\nBase node closed')
-    '''
-    if not rx:
-        i = 0
-        for r in rx:
-            r.close()
-            logger.debug('\nRX node {0} closed'.format(i))
-            i += 1
-    '''
     print traceback.format_exc()
+    print threading.enumerate()
