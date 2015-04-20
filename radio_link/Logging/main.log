@@ -1,0 +1,30 @@
+2015-04-20 14:05:34,577 - main - DEBUG - 
+Runs Elka Transfer Protocol (ETP) for a base node and a receive node
+
+2015-04-20 14:05:34,642 - main.elkaDriver - DEBUG - 
+ElkaDriverThread running
+2015-04-20 14:05:34,642 - main.elkaDriver - DEBUG - 
+Base node is beginning transmission
+2015-04-20 14:05:34,643 - main.elkaDriver - DEBUG - 
+Elkaradio is connected
+2015-04-20 14:05:34,654 - main.elkaDriver - DEBUG - 
+Generic X-Box pad joystick has been initialized
+2015-04-20 14:05:34,655 - main - DEBUG - 
+3 active threads:
+ [<_MainThread(MainThread, started 140324003768128)>, <ElkaDriverThread(Thread-1, started daemon 140323552487168)>, <JoystickCtrl(Thread-2, started daemon 140323544094464)>]
+2015-04-20 14:05:34,655 - main.joystickCtrl - DEBUG - 
+Joystick thread running
+2015-04-20 14:05:38,056 - main - ERROR - 
+Traceback (most recent call last):
+  File "/home/eric/Desktop/CrazyflieProjects/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 91, in <module>
+    pass
+KeyboardInterrupt
+2015-04-20 14:05:38,256 - main.elkaradioTRX - DEBUG - 
+Elkaradio is closed
+2015-04-20 14:05:38,256 - main.elkaDriver - DEBUG - 
+ElkaDriver is closed
+2015-04-20 14:05:38,259 - main - DEBUG - 
+Base node closed
+2015-04-20 14:05:38,604 - main.joystickCtrl - DEBUG - 
+Joystick controller closed
+

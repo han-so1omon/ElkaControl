@@ -72,6 +72,8 @@ try:
         raise ElkaradioNotFound()
 """
 
+''' Demonstrate ETP with one ElkaRadio and an ELKA module
+'''
 base = None
 
 try:

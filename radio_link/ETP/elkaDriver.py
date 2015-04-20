@@ -18,6 +18,7 @@ import sys, os
 sys.path.append(os.getcwd()) 
 import Queue, threading, struct, logging, math
 
+from time import sleep
 from IPython import embed
 
 from Elkaradio.elkaradioTRX import Elkaradio
@@ -163,7 +164,6 @@ class ElkaDriver(object):
 
 ########## End of ElkaDriver Class ##########
 
-RETRYCNT_BEFORE_DISCONNECT = 10
 ########## ElkaDriverThread Class ##########
 class ElkaDriverThread(threading.Thread):
     """ Radio link receiver thread used to read data from the Elkaradio
@@ -180,7 +180,6 @@ class ElkaDriverThread(threading.Thread):
         self.out_queue = outQueue
         '''
         self.sp = False
-        self.retry_before_disconnect = RETRYCNT_BEFORE_DISCONNECT
 
     def receive_packet(self, time=0):
         """
@@ -210,92 +209,77 @@ class ElkaDriverThread(threading.Thread):
 
     @staticmethod
     def convert_raw(raw):
-        ''' Convert from floating pt number range [-1 1] to 16 bit number
-        '''
+        ''' Convert from floating pt number range [-1 1] to 16 bit number '''
         out = []
         to_datum = 1
         trans = 1000
-        for i in len(range(raw)):
+        for i in range(len(raw)):
             if i == 0: # transform to [1000 2000]
                 out.append(int((1.5 + raw[i]) * 1000))
             else: # transform to [-1000 1000]
                 out.append(int(raw[i]*1000))
 
-            out.append(int(((r + to_datum)*trans)))
-
-        '''
-        wrd_orig_sz = 12
-        wrd_trans_sz = 8
-        '''
-
-        # trans = ElkaDriverThread.convert_array_wrd_sz(orig, wrd_orig_sz, wrd_trans_sz)
         return out
-
-    @staticmethod
-    def convert_array_wrd_sz(a, wrd_a_sz, wrd_b_sz):
-        ''' Not necessary, but cool
-        converts array a of word size wrd_a_sz into array b of word size
-            wrd_b_sz 
-        in_t = int(math.ceil((float(wrd_a_sz)/float(wrd_b_sz))*len(a)))
-
-        b = [0] * in_t
-
-        k = 0
-        for i in range(len(a)):
-            for j in range(wrd_a_sz):
-                b_idx = int(math.floor(k/wrd_b_sz)) 
-                if j == 0 or (k % wrd_b_sz) == 0: # if at beginning of a[i] or b[i]
-                    shift = (wrd_a_sz - j) - (wrd_b_sz - (k % wrd_b_sz))
-                mask = 1 << ((wrd_a_sz - 1) - j)
-                if shift >= 0:
-                    b[b_idx] |= (a[i] & mask) >> shift
-                else:
-                    b[b_idx] |= (a[i] & mask) << abs(shift)
-                k += 1
-        
-        return b
-        '''
 
     def run(self):
         """ Run the receiver thread """
         logger.debug('\nElkaDriverThread running')
+        
+        # send the first packet
+        first = True
+
         while not self.sp:
             ackIn = None
-                        
-            # Grabs data from in_queue
-            # pk = self.package_data() 
-
-            header = [0, 255, 255]
-            # array must be unpacked singularly
+            header = [4, 255, 255]
             data_out_h = struct.pack('B' * len(header), *header) # pack header
-            p = self.in_queue.get()
-            trans = ElkaDriverThread.convert_raw(p)
-            data_out_d = struct.pack('B' * len(trans), *trans) # pack data
-            data_out = data_out_h + data_out_d
-            log_outputs.info('\nheader : {0}\ndata: {1}\nsize: {2}'.format(header,
-                trans, len(data_out)))
-   
-            # Takes DataPacket and attempts to send it, will wait
-            # on empty data packets
-            while self.retry_before_disconnect and ackIn is None:
-                try:
-                    ackIn = self.eradio.send_packet(data_out) # ackIn is raw imu
-                                                              # data in a struct
 
+            # get raw data from controller
+            raw = self.in_queue.get()
+
+            data = ElkaDriverThread.convert_raw(raw)
+            
+            data_out_d = ''
+            for d in data:
+                d1 = (d >> 8) & 0xff
+                d2 = d & 0xff
+                data_out_d += struct.pack('B', d1) # data
+                data_out_d += struct.pack('B', d2) # data
+
+            data_out = data_out_h + data_out_d
+            while len(data_out) < 32:
+                data_out += struct.pack('B', 0)
+
+            # log formatted output. data size includes padded zeros
+            log_outputs.info('\nheader : {0}\ndata: {1}\ndata size: {2}\n'.format(header,
+                data, len(data_out)))
+
+            ackIn = self.eradio.send_packet(data_out)
+
+            ''' Debugging
+            log_acks.info('ackIn data: {0}\n'.format(ackIn))
+            self.ack_queue.put(ackIn)
+            '''
+
+            #Debugging
+            #sleep(.04) 
+
+            # Sixth bit in the status register (read from register) will always
+            # be one. Read the 6th bit in the status register until a good
+            # packet has been received.
+            #FIXME debugging
+            if first:
+                first = False
+                continue
+
+            logger.debug('ackIn >> 6: {0}\n'.format(ackIn >> 6))
+
+            while (ackIn >> 6) == 0:
+                try:
+                    ackIn = self.dev.read(0x81, 64, 1000)
                 except Exception as e:
                     raise
 
-                if ackIn is None:
-                    # primitive version of Bitcraze callbacks
-                    log_acks.debug('No ack received, RBDct ='\
-                            '{0}'.format(self.retry_before_disconnect))
-                    self.retry_before_disconnect -= 1
-                    if not self.retry_before_disconnect:
-                            self.sp = True
-                else:
-                    log_acks.info('ackIn data: {0}'.format(
-                            ackIn))
-                    self.ack_queue.put(ackIn)
-                    
-            self.retry_before_disconnect = RETRYCNT_BEFORE_DISCONNECT
+            log_acks.info('ackIn data: {0}'.format(
+                    ackIn))
+            self.ack_queue.put(ackIn)
 ########## End of ElkaDriverThread Class ##########
