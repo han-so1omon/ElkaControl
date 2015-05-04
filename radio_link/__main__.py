@@ -8,12 +8,13 @@ Module: __main__.py
 Contains main function for Elka Control
 """
 
-import os, sys, traceback, logging, logging.config, logging.handlers, threading, re
+import os, sys, traceback, logging, logging.config, logging.handlers,\
+       threading, re, string
 
-from IPython import embed
+from IPython import embed # debugging
 
 #add logging module to path
-p = os.path.join(os.path.split(os.getcwd())[0], 'Logging')
+p = os.path.join(os.getcwd(), 'Logging/Logs')
 sys.path.append(p)
 
 from Inputs.joystickCtrl import *
@@ -21,14 +22,16 @@ from ETP.elkaDriver import ElkaDriver
 from Elkaradio.elkaradioTRX import Elkaradio
 from Elkaradio.elkaradioTRX import _find_devices 
 from Utils.exceptions import *
+from Logging.logParser import LogParser
+from Logging.dataPlotter import DataPlotter
 
 ############################## Set up loggers ##################################
 # clear previous contents of logging files
-open('./Logging/main.log', 'w').close()
-open('./Logging/inputs.log', 'w').close()
-open('./Logging/outputs.log', 'w').close()
+open('./Logging/Logs/main.log', 'w').close()
+open('./Logging/Logs/inputs.log', 'w').close()
+open('./Logging/Logs/outputs.log', 'w').close()
 
-logging.config.fileConfig('./Logging/logging.conf', disable_existing_loggers=False)
+logging.config.fileConfig('./Logging/Logs/logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger('main')
 log_inputs = logging.getLogger('inputs')
 log_outputs = logging.getLogger('outputs')
@@ -37,16 +40,43 @@ log_acks = logging.getLogger('acks')
 logger.debug('\nRuns Elka Transfer Protocol (ETP) for a base node and a receive'+
              ' node\n')
 
-# Each stream file is headed with the stream name ',' and number of elements per
-# line
-log_inputs.info('Inputs, 4')
-log_outputs.info('Outputs, 6')
-#FIXME fix acks elements per line
-log_acks.info('Acks, 6')
+# Stream file headers:
+# datefmt
+# stream name ',' lines per entry, num el per line 1/.../num el per line n
+log_inputs.info('\nInputs, 1, 4')
+log_outputs.info('\nOutputs, 2, 4/6')
+log_acks.info('\nAcks, 1, 27')
 ################################################################################
 
-""" Demonstrate ETP with two ElkaRadios 
-try:
+######################### Define helper functions ##############################
+def parse_raw_cmd(r_cmd):
+    r_cmd = r_cmd.strip()
+    if r_cmd:
+        return [word.strip(string.punctuation) for word in r_cmd.split()]
+    else:
+        return 'Invalid command' 
+
+
+def run_elka_control():
+    ''' Demonstrate ETP with one ElkaRadio and an ELKA module '''
+    base = None
+
+    base = ElkaDriver()
+    
+    if base is not None:
+        base.start()
+    else:
+        raise ElkaradioNotFound()
+
+    logger.debug('\n{0} active threads:\n {1}'.format(threading.active_count(),
+            threading.enumerate()))
+
+    while True:
+        pass
+
+
+def run_two_radios():
+    ''' Demonstrate ETP with two ElkaRadios '''
     i = 0
     erads = []
     base = None # single base node
@@ -70,19 +100,6 @@ try:
         base.start()
     else:
         raise ElkaradioNotFound()
-"""
-
-''' Demonstrate ETP with one ElkaRadio and an ELKA module
-'''
-base = None
-
-try:
-    base = ElkaDriver()
-    
-    if base is not None:
-        base.start()
-    else:
-        raise ElkaradioNotFound()
 
     logger.debug('\n{0} active threads:\n {1}'.format(threading.active_count(),
             threading.enumerate()))
@@ -90,8 +107,74 @@ try:
     while True:
         pass
 
-    for t in base._threads:
-        t.join()
+
+def parse_logs():
+    # Display displays set names, export sends to spreadsheet,
+    # Plot plots with x,y,z as axes values
+    # Return returns to Main
+    p_options = ('\nDisplay available data sets <display>'
+                '\nExport data to formatted file <export>'
+                '\nPlot data <plot(x,y)>/<plot(x,y,z)>'
+                '\nReturn to main menu <return>')
+
+    lp = LogParser()
+    dp = DataPlotter()
+    
+    # parse logs
+    lp.parse_log('inputs')
+    lp.parse_log('outputs')
+    lp.parse_log('acks')
+
+    while not sp:
+        # prompt next step
+        print '\nParse Logs:\nWhat would you like to do?'
+        print p_options
+
+        r_cmd = raw_input('<')
+        cmd = parse_raw_cmd(r_cmd)
+
+        if cmd[0] == 'display' and len(cmd) == 1:
+            pass
+        elif cmd[0] == 'plot' and len(cmd) == 1:
+            # output able to plot the following: 
+            pass
+        elif cmd[0] == 'plot' and len(cmd) > 1:
+            # send to grapher
+            pass
+        elif cmd[0] == 'return' and len(cmd) == 1:
+            break
+        else:
+            print 'Invalid command'
+            continue
+################################################################################
+
+################################ Main method ###################################
+try:
+    base = None # base node
+
+    sp = False
+    options = ('\nExit <exit>\nRun ElkaControl with Elka <run elka>\n'
+              'Run ElkaControl with two ElkaRadios <run radios>\n'
+              'Parse log files <parse>')
+    while not sp:
+        print '\nMain:\nWhat would you like to do?'
+        print options
+        
+        r_cmd = raw_input('< ')
+        cmd = parse_raw_cmd(r_cmd)
+
+        if cmd[0] == 'exit':
+            sp = True
+        elif cmd[0] == 'run' and cmd[1] == 'elka':
+            run_elka_control()
+        elif cmd[0] == 'run' and cmd[1] == 'radios':
+            # mainly for debugging
+            run_two_radios() 
+        elif cmd[0] == 'parse':
+            parse_logs()
+        else:
+            print 'Invalid command'
+            continue
 
 except JoystickNotFound as e:
     print "Joystick not found"
@@ -110,7 +193,13 @@ except Exception as e:
     logger.exception(e)
 finally:
     if base is not None:
+        # end threads and close eradio
+        for t in base._threads:
+            t.join()
+
         base.close()
+
         logger.debug('\nBase node closed')
     print traceback.format_exc()
     print threading.enumerate()
+

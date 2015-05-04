@@ -63,12 +63,12 @@ class ElkaDriver(object):
             #connect to joystick
             j = JoystickCtrl(self.in_queue)
             self.axes = Axes(j.ctrlr_name)
+
             logger.debug('\n{0} joystick has been'.format(j.ctrlr_name) + ' initialized') 
+
             self._threads.append(j)
             j.daemon = True
             j.start()
-
-
         except JoystickNotFound as e:
             raise
         except LinkException as e:
@@ -190,20 +190,20 @@ class ElkaDriverThread(threading.Thread):
         if time == 0:
             try:
                 pk = self.ack_queue.get(False)
-                log_acks.info('{0}'.format(pk))
+                log_acks.info('\n{0}'.format(pk))
                 return pk
             except Queue.Empty:
                 return None
         elif time < 0:
             try:
                 pk = self.ack_queue.get(True)
-                log_acks.info('{0}'.format(pk))
+                log_acks.info('\n{0}'.format(pk))
             except Queue.Empty:
                 return None
         else:
             try:
                 pk = self.ack_queue.get(True, time)
-                log_acks.info('{0}'.format(pk))
+                log_acks.info('\n{0}'.format(pk))
             except Queue.Empty:
                 return None
 
@@ -224,9 +224,6 @@ class ElkaDriverThread(threading.Thread):
     def run(self):
         """ Run the receiver thread """
         logger.debug('\nElkaDriverThread running')
-        
-        # send the first packet
-        first = True
 
         while not self.sp:
             ackIn = None
@@ -250,30 +247,19 @@ class ElkaDriverThread(threading.Thread):
                 data_out += struct.pack('B', 0)
 
             # log formatted output. data size includes padded zeros
-            log_outputs.info('\nheader : {0}\ndata: {1}\ndata size: {2}\n'.format(header,
-                data, len(data_out)))
+            log_outputs.info('\nheader : {0}\ndata: {1}'.format(header, data))
 
             ackIn = self.eradio.send_packet(data_out)
-
-            ''' Debugging
-            log_acks.info('ackIn data: {0}\n'.format(ackIn))
-            self.ack_queue.put(ackIn)
-            '''
-
-            #Debugging
-            #sleep(.04) 
 
             # Sixth bit in the status register (read from register) will always
             # be one. Read the 6th bit in the status register until a good
             # packet has been received.
-            #FIXME debugging
-            if first:
-                first = False
-                continue
 
-            logger.debug('ackIn >> 6: {0}\n'.format(ackIn >> 6))
+            ''' Length of ackIn will be 1 (e.g. single 0) if an invalid packet
+            is read
+            '''
 
-            while (ackIn >> 6) == 0:
+            while len(ackIn) == 1:
                 try:
                     ackIn = self.dev.read(0x81, 64, 1000)
                 except Exception as e:

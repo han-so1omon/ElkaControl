@@ -20,15 +20,16 @@ logger = logging.getLogger('main.joystickCtrl')
 log_inputs = logging.getLogger('inputs')
 log_outputs = logging.getLogger('outputs')
 ################################################################################
-    
-# Define some colors
+
+# Define some colors for display
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
-pygame.init()
-
 # Set the width and height of the screen [width,height]
 size = [500, 700]
+
+pygame.init()
+
 screen = pygame.display.set_mode(size)
 
 pygame.display.set_caption(" Elkaradio Input ")
@@ -40,6 +41,7 @@ class InputDisp(object):
     It has nothing to do with the joysticks, just outputting the
     information.
     """
+
     def __init__(self):
         """ Constructor """
         self.reset()
@@ -201,7 +203,7 @@ class JoystickCtrl(threading.Thread):
                 raw[2] = self.axes[axes_enum.RightVU]
                 raw[3] = self.axes[axes_enum.LeftHL]
                 self.in_queue.put(raw)
-                log_inputs.info('{0}'.format(raw))
+                log_inputs.info('\n{0}'.format(raw))
 
         except KeyboardInterrupt as e:
             raise
