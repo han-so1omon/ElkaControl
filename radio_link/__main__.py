@@ -44,7 +44,7 @@ logger.debug('\nRuns Elka Transfer Protocol (ETP) for a base node and a receive'
 # datefmt
 # stream name ',' lines per entry, num el per line 1/.../num el per line n
 log_inputs.info('\nInputs, 1, 4')
-log_outputs.info('\nOutputs, 2, 4/6')
+log_outputs.info('\nOutputs, 2, 3/4')
 log_acks.info('\nAcks, 1, 27')
 ################################################################################
 
@@ -57,16 +57,9 @@ def parse_raw_cmd(r_cmd):
         return 'Invalid command' 
 
 
-def run_elka_control():
+def run_elka_control(base=None):
     ''' Demonstrate ETP with one ElkaRadio and an ELKA module '''
-    base = None
-
-    base = ElkaDriver()
-    
-    if base is not None:
-        base.start()
-    else:
-        raise ElkaradioNotFound()
+    base.start()
 
     logger.debug('\n{0} active threads:\n {1}'.format(threading.active_count(),
             threading.enumerate()))
@@ -75,21 +68,9 @@ def run_elka_control():
         pass
 
 
-def run_two_radios():
+def run_two_radios(base=None, rx=[]):
     ''' Demonstrate ETP with two ElkaRadios '''
     i = 0
-    erads = []
-    base = None # single base node
-    rx = [] # array of receive nodes
-    for e in _find_devices():
-        erads.append(e)
-        if i == 0:
-            base = ElkaDriver(erads[i])
-        else:
-            rx.append(Elkaradio(erads[i]))
-        i += 1
-
-    i = 1
     for r in rx:
         r.set_radio_mode(Elkaradio.MODE_PRX)
         i += 1
@@ -121,9 +102,9 @@ def parse_logs():
     dp = DataPlotter()
     
     # parse logs
-    lp.parse_log('inputs')
-    lp.parse_log('outputs')
-    lp.parse_log('acks')
+    lp.parse_in()
+    lp.parse_out()
+    lp.parse_ack()
 
     while not sp:
         # prompt next step
@@ -149,57 +130,77 @@ def parse_logs():
 ################################################################################
 
 ################################ Main method ###################################
-try:
-    base = None # base node
+def main():
+    try:
+        base = None # base node
 
-    sp = False
-    options = ('\nExit <exit>\nRun ElkaControl with Elka <run elka>\n'
-              'Run ElkaControl with two ElkaRadios <run radios>\n'
-              'Parse log files <parse>')
-    while not sp:
-        print '\nMain:\nWhat would you like to do?'
-        print options
-        
-        r_cmd = raw_input('< ')
-        cmd = parse_raw_cmd(r_cmd)
+        sp = False
+        options = ('\nExit <exit>\nRun ElkaControl with Elka <run elka>\n'
+                  'Run ElkaControl with two ElkaRadios <run radios>\n'
+                  'Parse log files <parse>')
+        while not sp:
+            print '\nMain:\nWhat would you like to do?'
+            print options
+            
+            r_cmd = raw_input('< ')
+            cmd = parse_raw_cmd(r_cmd)
 
-        if cmd[0] == 'exit':
-            sp = True
-        elif cmd[0] == 'run' and cmd[1] == 'elka':
-            run_elka_control()
-        elif cmd[0] == 'run' and cmd[1] == 'radios':
-            # mainly for debugging
-            run_two_radios() 
-        elif cmd[0] == 'parse':
-            parse_logs()
-        else:
-            print 'Invalid command'
-            continue
+            if cmd[0] == 'exit':
+                sp = True
+            elif cmd[0] == 'run' and cmd[1] == 'elka':
+                base = ElkaDriver()
+                run_elka_control(base)
+            elif cmd[0] == 'run' and cmd[1] == 'radios':
+                # mainly for debugging
+                i = 0
+                erads = []
+                base = None # single base node
+                rx = [] # array of receive nodes
+                for e in _find_devices():
+                    erads.append(e)
+                    if i == 0:
+                        base = ElkaDriver(erads[i])
+                    else:
+                        rx.append(Elkaradio(erads[i]))
+                    i += 1
+                run_two_radios(base, rx) 
+            elif cmd[0] == 'parse':
+                parse_logs()
+            else:
+                print 'Invalid command'
+                continue
 
-except JoystickNotFound as e:
-    print "Joystick not found"
-    logger.exception(e)
-except KeyboardInterrupt as e:
-    print "Keyboard Interrupt"
-    logger.exception(e)
-except ElkaradioNotFound as e:
-    print "Elkaradio not found"
-    logger.exception(e)
-except LinkException as e:
-    print "Exception in comm link" 
-    logger.exception(e)
-except Exception as e:
-    print "Exception"
-    logger.exception(e)
-finally:
-    if base is not None:
-        # end threads and close eradio
-        for t in base._threads:
-            t.join()
+    except JoystickNotFound as e:
+        print "Joystick not found"
+        logger.exception(e)
+    except KeyboardInterrupt as e:
+        print "Keyboard Interrupt"
+        logger.exception(e)
+    except ElkaradioNotFound as e:
+        print "Elkaradio not found"
+        logger.exception(e)
+    except LinkException as e:
+        print "Exception in comm link" 
+        logger.exception(e)
+    except JoystickThreadFinished as e:
+        print 'Joystick thread has stopped'
+        logger.exception(e)
+    except Exception as e:
+        print "Exception"
+        logger.exception(e)
+    finally:
+        if base is not None:
+            # end threads and close eradio
+            for t in base._threads:
+                # each stop method results in a join call
+                t.stop()
+                logger.debug('\nThread {0} stopped'.format(t.name))
 
-        base.close()
+            base.close()
 
-        logger.debug('\nBase node closed')
-    print traceback.format_exc()
-    print threading.enumerate()
+            logger.debug('\nBase node closed')
+        logger.debug(traceback.format_exc())
+        logger.debug(threading.enumerate())
 
+if __name__ == '__main__':
+    main()

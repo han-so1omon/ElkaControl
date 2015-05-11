@@ -50,3 +50,7 @@ class WrongDataTypeException(Exception):
     ''' Data must be str, tuple, or list type '''
     pass
 
+class JoystickThreadFinished(Exception):
+    ''' Loop break condition is satisfied, so thread stops '''
+    pass
+

@@ -50,6 +50,8 @@ def _find_devices():
     dev = usb.core.find(idVendor=0x1915, idProduct=0x7777, find_all=1)
     if dev is not None:
         ret = dev
+    else:
+        raise ValueError('No radios found')
 
     return ret
 
@@ -99,7 +101,7 @@ class Elkaradio(object):
 
     def close(self):
         self.set_radio_mode(Elkaradio.MODE_PTX)
-        self.dev.reset()
+        usb.util.dispose_resources(self.dev)
         self.dev = None
         logger.debug('\nElkaradio is closed')
 

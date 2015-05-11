@@ -11,7 +11,6 @@ Takes inputs from a joystick controller and converts them to data packets.
 Data packets are sent via Elkaradio wireless link to tethered Elka inertial
 quadrotor autopilot system. Receives acks from tethered Elka (or any compatible
 nRF24L01p as specified in ElkaradioTRX.py) 
-
 """
 
 import sys, os
@@ -45,7 +44,6 @@ class ElkaDriver(object):
     
         # queue access must be atomic
         self.in_queue = None 
-
         self.ack_queue = None 
         
         # driver runs joystick_ctrl and driver threads
@@ -98,11 +96,8 @@ class ElkaDriver(object):
     def close(self):
         if self.eradio is not None:
             self.eradio.close()
-
         self.eradio = None
-
         logger.debug('\nElkaDriver is closed')
-        #also flush in_queue and out_queue contents
 
     def connect(self):
         channel = 40
@@ -175,10 +170,6 @@ class ElkaDriverThread(threading.Thread):
         self.eradio = eradio
         self.in_queue = inQueue
         self.ack_queue = ackQueue
-        '''
-        #FIXME no longer using outQueue
-        self.out_queue = outQueue
-        '''
         self.sp = False
 
     def receive_packet(self, time=0):
@@ -190,20 +181,20 @@ class ElkaDriverThread(threading.Thread):
         if time == 0:
             try:
                 pk = self.ack_queue.get(False)
-                log_acks.info('\n{0}'.format(pk))
+                log_acks.info('{0}'.format(pk))
                 return pk
             except Queue.Empty:
                 return None
         elif time < 0:
             try:
                 pk = self.ack_queue.get(True)
-                log_acks.info('\n{0}'.format(pk))
+                log_acks.info('{0}'.format(pk))
             except Queue.Empty:
                 return None
         else:
             try:
                 pk = self.ack_queue.get(True, time)
-                log_acks.info('\n{0}'.format(pk))
+                log_acks.info('{0}'.format(pk))
             except Queue.Empty:
                 return None
 
@@ -218,54 +209,61 @@ class ElkaDriverThread(threading.Thread):
                 out.append(int((1.5 + raw[i]) * 1000))
             else: # transform to [-1000 1000]
                 out.append(int(raw[i]*1000))
-
         return out
 
     def run(self):
         """ Run the receiver thread """
-        logger.debug('\nElkaDriverThread running')
+        try:
+            logger.debug('\nElkaDriverThread running')
 
-        while not self.sp:
-            ackIn = None
-            header = [4, 255, 255]
-            data_out_h = struct.pack('B' * len(header), *header) # pack header
+            while not self.sp:
+                ackIn = None
+                header = [4, 255, 255]
+                data_out_h = struct.pack('B' * len(header), *header) # pack header
 
-            # get raw data from controller
-            raw = self.in_queue.get()
+                # get raw data from controller
+                raw = self.in_queue.get()
 
-            data = ElkaDriverThread.convert_raw(raw)
-            
-            data_out_d = ''
-            for d in data:
-                d1 = (d >> 8) & 0xff
-                d2 = d & 0xff
-                data_out_d += struct.pack('B', d1) # data
-                data_out_d += struct.pack('B', d2) # data
+                data = ElkaDriverThread.convert_raw(raw)
+                
+                data_out_d = ''
+                for d in data:
+                    d1 = (d >> 8) & 0xff
+                    d2 = d & 0xff
+                    data_out_d += struct.pack('B', d1) # data
+                    data_out_d += struct.pack('B', d2) # data
 
-            data_out = data_out_h + data_out_d
-            while len(data_out) < 32:
-                data_out += struct.pack('B', 0)
+                data_out = data_out_h + data_out_d
+                while len(data_out) < 32:
+                    data_out += struct.pack('B', 0)
 
-            # log formatted output. data size includes padded zeros
-            log_outputs.info('\nheader : {0}\ndata: {1}'.format(header, data))
+                # log output
+                log_outputs.info('{0}{1}'.format(header, data))
 
-            ackIn = self.eradio.send_packet(data_out)
+                ackIn = self.eradio.send_packet(data_out)
 
-            # Sixth bit in the status register (read from register) will always
-            # be one. Read the 6th bit in the status register until a good
-            # packet has been received.
+                log_acks.debug('here')
+                ''' Length of ackIn will be 1 (e.g. single 0) if an invalid packet
+                is read
+                '''
 
-            ''' Length of ackIn will be 1 (e.g. single 0) if an invalid packet
-            is read
-            '''
+                #while not ackIn or len(ackIn) == 1:
+                while not ackIn:
+                    try:
+                        log_acks.debug('here')
+                        ackIn = self.dev.read(0x81, 64, 1000)
+                    except Exception as e:
+                        raise
 
-            while len(ackIn) == 1:
-                try:
-                    ackIn = self.dev.read(0x81, 64, 1000)
-                except Exception as e:
-                    raise
+                log_acks.info('ackIn data: {0}'.format(
+                        ackIn))
+                self.ack_queue.put(ackIn)
+        except Exception as e:
+            raise
+        finally:
+            self.join()
 
-            log_acks.info('ackIn data: {0}'.format(
-                    ackIn))
-            self.ack_queue.put(ackIn)
+    def stop(self):
+        """ Stop the thread. Should only be called from another thread """
+        self.sp = True
 ########## End of ElkaDriverThread Class ##########

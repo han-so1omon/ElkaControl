@@ -17,37 +17,57 @@ import re
 class LogParser(object):
     def __init__(self):
         
-        self.inl = open('./Logging/Logs/inputs.log')
-        self.outl = open('./Logging/Logs/outputs.log')
-        self.ackl = open('./Logging/Logs/acks.log')
+        self.inl = open('./Logging/Logs/inputs.log', 'r')
+        self.outl = open('./Logging/Logs/outputs.log', 'r')
+        self.ackl = open('./Logging/Logs/acks.log', 'r')
 
-        # each element is a 5 element array of format:
-        # [del_t, axis1, axis2, axis3, axis4]
-        self.inputs = []
+        # store input times and data
+        self.in_epoch = None
+        self.in_ic = []
+        self.input_t = []
+        self.input_d = []
 
-        # each element is a 6 element array of format:
-        # [del_t, header, data1, data2, data3, data4]
-        self.outputs = []
+        # store output times, header, and data
+        self.out_epoch = None
+        self.out_ic = []
+        self.output_t = []
+        self.output_h = []
+        self.output_d = []
 
-        # each element is a 28 element array of format:
-        # [del_t, data1, ... , data27]
-        self.acks = []
+        # store ack times and imudata
+        self.ack_epoch = None
+        self.ack_ic = []
+        self.ack_t = []
+        self.ack_accel = []
+        self.ack_euler = []
+        self.ack_commanded = []
 
-    # parse a list of floating point numbers
+    # parse a list of floating point numbers from a text string
     def parse_ln(self, line):
         return re.findall(r'[+-]?\d*\.*\d+', line)
 
-    def parse_log(self, log):
-        # while not EOF send to parse_ln
-        if log == 'inputs':
-            for l in self.inl:
-                self.inputs.append(self.parse_ln(l))
-            print self.inputs
-        elif log == 'outputs':
-            # parse whether header or data
-            for l in self.outl:
-                self.outputs.append(self.parse_ln(l))
-        elif log == 'acks':
-            for l in self.ackl:
-                self.acks.append(self.parse_ln(l))
+    def parse_in(self):
+        init = 2
+        for l in self.inl:
+            ln = self.par_ln(l)
+            if init == 2:
+                init -= 1 
+
+    def parse_out(self):
+        init = 2
+        for l in self.outl:
+            ln = self.par_ln(l)
+            if init == 2:
+                init -= 1 
+                self.out_epoch = sum(ln)
+            elif init == 1:
+                init -= 1
+                self.out_ic = ln
+            else:
+                pass
+
+    def parse_ack(self):
+        for l in self.ackl:
+            self.acks.append(self.parse_ln(l))
+
 ########## End of Parser Class ##########

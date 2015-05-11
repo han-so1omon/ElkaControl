@@ -1,3 +1,53 @@
-2015-05-04 00:49:13,952 - main - DEBUG - 
+2015-05-10 21:59:02,476 - main - DEBUG - 
 Runs Elka Transfer Protocol (ETP) for a base node and a receive node
 
+2015-05-10 21:59:06,005 - main.elkaDriver - DEBUG - 
+ElkaDriverThread running
+2015-05-10 21:59:06,005 - main.elkaDriver - DEBUG - 
+Base node is beginning transmission
+2015-05-10 21:59:06,005 - main.elkaDriver - DEBUG - 
+Elkaradio is connected
+2015-05-10 21:59:06,019 - main.elkaDriver - DEBUG - 
+Sony PLAYSTATION(R)3 Controller joystick has been initialized
+2015-05-10 21:59:06,020 - main.joystickCtrl - DEBUG - 
+Joystick thread running
+2015-05-10 21:59:06,028 - main - DEBUG - 
+3 active threads:
+ [<_MainThread(MainThread, started 139954566973248)>, <ElkaDriverThread(Thread-1, started daemon 139954118190848)>, <JoystickCtrl(Thread-2, started daemon 139954109798144)>]
+2015-05-10 21:59:07,036 - main.elkaradioTRX - ERROR - [Errno 110] Operation timed out
+Traceback (most recent call last):
+  File "./Elkaradio/elkaradioTRX.py", line 194, in send_packet
+    data = self.dev.read(0x81, 64, 1000)
+  File "/usr/local/lib/python2.7/dist-packages/usb/core.py", line 918, in read
+    self.__get_timeout(timeout))
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 777, in bulk_read
+    timeout)
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 880, in __read
+    _check(retval)
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 560, in _check
+    raise USBError(_str_error[ret], ret, _libusb_errno[ret])
+USBError: [Errno 110] Operation timed out
+2015-05-10 21:59:09,800 - main - ERROR - 
+Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 151, in <module>
+    run_elka_control(base)
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 67, in run_elka_control
+    while True:
+KeyboardInterrupt
+2015-05-10 21:59:13,897 - main.joystickCtrl - DEBUG - 
+Joystick controller closed
+
+2015-05-10 21:59:13,899 - main.elkaradioTRX - DEBUG - 
+Elkaradio is closed
+2015-05-10 21:59:13,899 - main.elkaDriver - DEBUG - 
+ElkaDriver is closed
+2015-05-10 21:59:13,899 - main - DEBUG - 
+Base node closed
+2015-05-10 21:59:13,899 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 151, in <module>
+    run_elka_control(base)
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 67, in run_elka_control
+    while True:
+KeyboardInterrupt
+
+2015-05-10 21:59:13,899 - main - DEBUG - [<_MainThread(MainThread, started 139954566973248)>]

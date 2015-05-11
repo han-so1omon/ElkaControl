@@ -84,7 +84,8 @@ class Axes(object):
 
         # For current implementation, only use the following:
         #   LeftHL, LeftVU, RightHL, RightVU
-        if joystick_name == 'Generic X-Box pad':
+        if joystick_name == 'Generic X-Box pad' or
+           joystick_name == 'Controller (Gamepad F310)':
             self.LeftHL = 0
             self.LeftVU = 1
             self.LeftIO = 2
@@ -142,12 +143,6 @@ class JoystickCtrl(threading.Thread):
         else:
             raise JoystickNotFound()
 
-    def close(self):
-        # clean up pygame
-        pygame.joystick.quit()
-        pygame.quit()
-        logger.debug('\nJoystick controller closed\n')
-
     # Get inputs indefinitely
     def run(self):
         try:
@@ -203,22 +198,21 @@ class JoystickCtrl(threading.Thread):
                 raw[2] = self.axes[axes_enum.RightVU]
                 raw[3] = self.axes[axes_enum.LeftHL]
                 self.in_queue.put(raw)
-                log_inputs.info('\n{0}'.format(raw))
+                log_inputs.info('{0}'.format(raw))
 
         except KeyboardInterrupt as e:
             raise
         except Exception, e:
             raise
         finally:
-            #Quit pygame and close screen
-            self.close()
+            #Quit pygame, close screen, and propagate closing to main thread
+            pygame.joystick.quit()
+            pygame.quit()
+            logger.debug('\nJoystick controller closed\n')
+            self.join
             
     def stop(self):
-        """ Stop the thread """
+        """ Stop the thread. Should only be called from another thread """
         self.sp = True
-        try:
-            self.join()
-        except Exception:
-            pass
 
 ########## End of JoystickCtrl class ##########
