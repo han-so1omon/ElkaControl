@@ -5,9 +5,12 @@ Lab: Alfred Gessow Rotorcraft Center
 Package: Elkaradio 
 Module: elkaDriver.py 
 
+Handles control transfers to USB radio dongle.
+Used mainly for setup and teardown.
 """
 
-import os, sys, usb, usb.core, usb.util, logging
+import os, sys, usb, usb.core, usb.util, logging, platform, platform,\
+       serial.tools.list_ports, time, string
 
 from IPython import embed
 
@@ -49,11 +52,35 @@ def _find_devices():
 
     dev = usb.core.find(idVendor=0x1915, idProduct=0x7777, find_all=1)
     if dev is not None:
-        ret = dev
+        return dev
     else:
         raise ValueError('No radios found')
 
-    return ret
+# FIXME Generates inappropriate ioctl for device when attempting to write to
+# /dev/elkaradio
+# Identify serial port to send packets to
+def _find_serial_port():
+    eradio_port = None
+
+    if platform.system() == 'Linux':
+        if not os.path.exists('/etc/udev/rules.d/99-crazyradio.rules'):
+            with open('/tmp/99-crazyradio.rules', 'w+') as outf:
+                outf.write('SUBSYSTEM=="usb", ATTRS{idVendor}=="1915",\
+                        ATTRS{idProduct}=="7777", MODE="0664",\
+                        GROUP="plugdev", SYMLINK+="elkaradio"')
+            os.system('sudo mv /tmp/99-crazyradio.rules /etc/udev/rules.d')
+            #FIXME change once GUI implemented
+            # os.system('gksu mv /tmp/99-crazyradio.rules /etc/udev/rules.d')
+        eradio_port = '/dev/elkaradio'
+    elif platform.system() == 'Windows':
+        ports = list(serial.tools.list_ports.comports())
+        for p in ports:
+            if 'Bitcraze' in p[1]:
+                #FIXME where are COM ports in Windows?
+                eradio_port = '/dev' + target
+            else:
+                raise ElkaradioNotFound
+    return eradio_port
 
 class Elkaradio(object):
     """ Used for communication with the Elkaradio USB dongle """
@@ -89,6 +116,8 @@ class Elkaradio(object):
         self.dev.set_configuration(1)
         self.version = float("{0:x}.{1:x}".format(self.dev.bcdDevice >> 8,
         				self.dev.bcdDevice & 0x0FF))
+        self.port = _find_serial_port() 
+
         self.set_data_rate(Elkaradio.DR_250KPS)
         self.set_channel(40)
         self.set_cont_carrier(False)
@@ -96,8 +125,8 @@ class Elkaradio(object):
         self.set_power(Elkaradio.P_M12DBM)
         self.set_arc(3)
         self.set_ard_bytes(32)
-        
-        self.radio_mode = Elkaradio.MODE_HYBRID
+
+        self.radio_mode = Elkaradio.MODE_PTX
 
     def close(self):
         self.set_radio_mode(Elkaradio.MODE_PTX)
@@ -168,7 +197,7 @@ class Elkaradio(object):
         elif mode == 3:
             self.radio_mode = 'MODE_HYBRID'
 
-    def scan_channels(self, start, stop, packet):
+    def scann_channels(self, start, stop, packet):
         # Slow PC-driven scann
         result = tuple()
         for i in range(start, stop + 1):
@@ -179,24 +208,40 @@ class Elkaradio(object):
         return result
 
     ### Data transfers ###
-    def send_packet(self, dataOut):
-        """ Send a packet and receive the ack from the radio dongle
-            The ack contains information about the packet transmition
-            and a data payload if the ack packet contained any """
+    # Working, but soon to be deprecated.
+    def send_packet(self, data_out):
+      """ Send a packet and receive the ack from the radio dongle
+          The ack contains information about the packet transmition
+          and a data payload if the ack packet contained any """
+
+      ackIn = None
+      self.dev.write(1, data_out, 100)
+      try:
+        ackIn = self.dev.read(0x81, 26, 100)
+      except usb.USBError as e:
+        logger.exception(e)
+      return ackIn
+
+    """ Send a packet and receive the ack from the radio dongle.
+        The ack contains information about the packet transmition
+        and a data payload if the ack packet contained any.
+
+        Sending packets takes data_out as a set of contiguous bytes to send to
+        USB device.
+
+        Returns 26 bytes read from USB device."""
+    def send(self, data_out):
+
         ackIn = None
-        data = None
-        #self.ep_write(dataOut, 10)
-        #data = self.ep_read(64, 10)
-
-        self.dev.write(1, dataOut, 1000)
-        
+        self.dev.write(1, data_out, 10)
+        ackIn = self.dev.read(0x81, 26, 10)
+        '''
         try:
-            data = self.dev.read(0x81, 64, 1000)
+          ackIn = self.dev.read(0x81, 26, 100)
         except usb.USBError as e:
-            logger.exception(e)
-
-        return data
-
+          logger.exception(e)
+        '''
+        return ackIn
 
     #Private utility functions
     def _send_vendor_setup(self, request, value, index, data):

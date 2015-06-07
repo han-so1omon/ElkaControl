@@ -56,17 +56,13 @@ def parse_raw_cmd(r_cmd):
     else:
         return 'Invalid command' 
 
-
 def run_elka_control(base=None):
     ''' Demonstrate ETP with one ElkaRadio and an ELKA module '''
     base.start()
-
     logger.debug('\n{0} active threads:\n {1}'.format(threading.active_count(),
             threading.enumerate()))
-
     while True:
         pass
-
 
 def run_two_radios(base=None, rx=[]):
     ''' Demonstrate ETP with two ElkaRadios '''
@@ -87,7 +83,6 @@ def run_two_radios(base=None, rx=[]):
 
     while True:
         pass
-
 
 def parse_logs():
     # Display displays set names, export sends to spreadsheet,

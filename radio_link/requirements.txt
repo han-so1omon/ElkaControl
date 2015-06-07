@@ -1,0 +1,4 @@
+pyserial==2.6
+pyusb==1.9.9rc1
+pygame==1.9.1release
+
