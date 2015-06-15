@@ -234,13 +234,10 @@ class Elkaradio(object):
 
         ackIn = None
         self.dev.write(1, data_out, 10)
-        ackIn = self.dev.read(0x81, 26, 10)
-        '''
         try:
-          ackIn = self.dev.read(0x81, 26, 100)
+          ackIn = self.dev.read(0x81, 64, 100)
         except usb.USBError as e:
           logger.exception(e)
-        '''
         return ackIn
 
     #Private utility functions

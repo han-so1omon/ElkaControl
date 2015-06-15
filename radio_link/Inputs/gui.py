@@ -1,3 +1,4 @@
+''' Use web browswer for gui '''
 from Tkinter import *
 
 class GUI(object):

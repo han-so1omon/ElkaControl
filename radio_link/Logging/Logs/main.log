@@ -1,44 +1,87 @@
-2015-06-06 23:16:02,060 - main - DEBUG - 
+2015-06-15 13:49:35,698 - main - DEBUG - 
 Runs Elka Transfer Protocol (ETP) for a base node and a receive node
 
-2015-06-06 23:16:04,844 - main.elkaDriver - DEBUG - 
-Base node is beginning transmission
-2015-06-06 23:16:04,845 - main.elkaDriver - DEBUG - 
-Elkaradio is connected to base station CPU
-2015-06-06 23:16:04,858 - main.elkaDriver - DEBUG - 
-Sony PLAYSTATION(R)3 Controller joystick has been initialized
-2015-06-06 23:16:04,859 - main.elkaDriver - DEBUG - 
-ElkaDriverThread running
-2015-06-06 23:16:04,859 - main.joystickCtrl - DEBUG - 
-Joystick thread running
-2015-06-06 23:16:04,860 - main - DEBUG - 
-3 active threads:
- [<_MainThread(MainThread, started 139724952692544)>, <ElkaDriverThread(Thread-1, started daemon 139724480050944)>, <JoystickCtrl(Thread-2, started daemon 139724471658240)>]
-2015-06-06 23:16:06,453 - main - ERROR - 
+2015-06-15 13:49:38,395 - main - ERROR - 'NoneType' object has no attribute 'set_configuration'
 Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 147, in main
-    run_elka_control(base)
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 65, in run_elka_control
-    pass
-KeyboardInterrupt
-2015-06-06 23:16:06,454 - main - DEBUG - 
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 162, in main
+    run_elka_control()
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 90, in run_elka_control
+    run_elka()
+  File "./ETP/elkaThread.py", line 118, in run_elka
+    eradio = Elkaradio()
+  File "./Elkaradio/elkaradioTRX.py", line 116, in __init__
+    self.dev.set_configuration(1)
+AttributeError: 'NoneType' object has no attribute 'set_configuration'
+2015-06-15 13:49:38,396 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 162, in main
+    run_elka_control()
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 90, in run_elka_control
+    run_elka()
+  File "./ETP/elkaThread.py", line 118, in run_elka
+    eradio = Elkaradio()
+  File "./Elkaradio/elkaradioTRX.py", line 116, in __init__
+    self.dev.set_configuration(1)
+AttributeError: 'NoneType' object has no attribute 'set_configuration'
+
+2015-06-15 13:49:38,397 - main - DEBUG - [<_MainThread(MainThread, started 140079280240448)>]
+2015-06-15 13:49:55,421 - main.joy_read - DEBUG - 
+Joystick: Generic X-Box pad
+2015-06-15 13:49:55,421 - main.joy_read - DEBUG - 
+Joystick thread running
+2015-06-15 13:50:42,676 - main.elkaThread - DEBUG - 
 Thread Thread-1 stopped
-2015-06-06 23:16:06,454 - main - DEBUG - 
+2015-06-15 13:50:42,676 - main.elkaThread - DEBUG - 
 Thread Thread-2 stopped
-2015-06-06 23:16:06,456 - main.elkaradioTRX - DEBUG - 
-Elkaradio is closed
-2015-06-06 23:16:06,456 - main.elkaDriver - DEBUG - 
-ElkaDriver is closed
-2015-06-06 23:16:06,457 - main - DEBUG - 
-Base node closed
-2015-06-06 23:16:06,457 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 147, in main
-    run_elka_control(base)
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 65, in run_elka_control
-    pass
+2015-06-15 13:50:42,677 - main - ERROR - 
+Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 162, in main
+    run_elka_control()
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 90, in run_elka_control
+    run_elka()
+  File "./ETP/elkaThread.py", line 132, in run_elka
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 132, in <lambda>
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 112, in chk_thread
+    t.join(1)
+  File "/usr/lib/python2.7/threading.py", line 960, in join
+    self.__block.wait(delay)
+  File "/usr/lib/python2.7/threading.py", line 358, in wait
+    _sleep(delay)
+KeyboardInterrupt
+2015-06-15 13:50:42,679 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 162, in main
+    run_elka_control()
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 90, in run_elka_control
+    run_elka()
+  File "./ETP/elkaThread.py", line 132, in run_elka
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 132, in <lambda>
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 112, in chk_thread
+    t.join(1)
+  File "/usr/lib/python2.7/threading.py", line 960, in join
+    self.__block.wait(delay)
+  File "/usr/lib/python2.7/threading.py", line 358, in wait
+    _sleep(delay)
 KeyboardInterrupt
 
-2015-06-06 23:16:06,457 - main - DEBUG - [<_MainThread(MainThread, started 139724952692544)>, <JoystickCtrl(Thread-2, started daemon 139724471658240)>]
-2015-06-06 23:16:06,669 - main.joystickCtrl - DEBUG - 
-Joystick controller closed
+2015-06-15 13:50:42,679 - main - DEBUG - [<_MainThread(MainThread, started 140079280240448)>]
+2015-06-15 13:50:44,251 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 162, in main
+    run_elka_control()
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 90, in run_elka_control
+    run_elka()
+  File "./ETP/elkaThread.py", line 132, in run_elka
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 132, in <lambda>
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 112, in chk_thread
+    t.join(1)
+  File "/usr/lib/python2.7/threading.py", line 960, in join
+    self.__block.wait(delay)
+  File "/usr/lib/python2.7/threading.py", line 358, in wait
+    _sleep(delay)
+KeyboardInterrupt
 
+2015-06-15 13:50:44,252 - main - DEBUG - [<_MainThread(MainThread, started 140079280240448)>]

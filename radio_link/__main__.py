@@ -17,13 +17,14 @@ from IPython import embed # debugging
 p = os.path.join(os.getcwd(), 'Logging/Logs')
 sys.path.append(p)
 
-from Inputs.joystickCtrl import *
 from ETP.elkaDriver import ElkaDriver
 from Elkaradio.elkaradioTRX import Elkaradio
 from Elkaradio.elkaradioTRX import _find_devices 
 from Utils.exceptions import *
 from Logging.logParser import LogParser
 from Logging.dataPlotter import DataPlotter
+
+from ETP.elkaThread import run_elka
 
 ############################## Set up loggers ##################################
 # clear previous contents of logging files
@@ -56,33 +57,48 @@ def parse_raw_cmd(r_cmd):
     else:
         return 'Invalid command' 
 
+""" Old run elka base station. Communicates with anything on the other end of the
+    radio link
 def run_elka_control(base=None):
-    ''' Demonstrate ETP with one ElkaRadio and an ELKA module '''
-    base.start()
-    logger.debug('\n{0} active threads:\n {1}'.format(threading.active_count(),
-            threading.enumerate()))
-    while True:
-        pass
+  def chk_thread(t):
+    if t.isAlive():
+      t.join(1)
 
-def run_two_radios(base=None, rx=[]):
+  def stop_thread(t):
+    t.stop()
+    logger.debug('\nThread {0} stopped'.format(t.name))
+
+  if base is not None:
+      base.start()
+  else:
+      raise ElkaradioNotFound('Base could not start because no radio is found')
+
+  # should show 3 threads running
+  logger.debug('\n{0} active threads:\n {1}'.format(threading.active_count(),
+            threading.enumerate()))
+  try:
+    while(True):
+      map(lambda t: chk_thread(t), base._threads)
+  except:
+    map(lambda t: stop_thread(t), base._threads)
+    base.close()
+    logger.debug('\nBase node closed')
+    raise
+"""
+""" New way """
+def run_elka_control():
+   run_elka()
+
+def run_two_radios(rx=[]):
     ''' Demonstrate ETP with two ElkaRadios '''
     i = 0
     for r in rx:
-        r.set_radio_mode(Elkaradio.MODE_PRX)
-        i += 1
-        logger.debug('\nElkaradio number {0} is set to primary receive mode'\
-                     .format(i))
+      r.set_radio_mode(Elkaradio.MODE_PRX)
+      i += 1
+      logger.debug('\nElkaradio number {0} is set to primary receive mode'\
+                   .format(i))
 
-    if base is not None:
-        base.start()
-    else:
-        raise ElkaradioNotFound()
-
-    logger.debug('\n{0} active threads:\n {1}'.format(threading.active_count(),
-            threading.enumerate()))
-
-    while True:
-        pass
+    run_elka_control()
 
 def parse_logs():
     # Display displays set names, export sends to spreadsheet,
@@ -126,76 +142,65 @@ def parse_logs():
 
 ################################ Main method ###################################
 def main():
-    try:
-        base = None # base node
+  sp = False
+  try:
+      base = None # base node
 
-        sp = False
-        options = ('\nExit <exit>\nRun ElkaControl with Elka <run elka>\n'
-                  'Run ElkaControl with two ElkaRadios <run radios>\n'
-                  'Parse log files <parse>')
-        while not sp:
-            print '\nMain:\nWhat would you like to do?'
-            print options
-            
-            r_cmd = raw_input('< ')
-            cmd = parse_raw_cmd(r_cmd)
+      options = ('\nExit <exit>\nRun ElkaControl with Elka <run elka>\n'
+                'Run ElkaControl with two ElkaRadios <run radios>\n'
+                'Parse log files <parse>')
+      while not sp:
+          print '\nMain:\nWhat would you like to do?'
+          print options
+          
+          r_cmd = raw_input('< ')
+          cmd = parse_raw_cmd(r_cmd)
 
-            if cmd[0] == 'exit':
-                sp = True
-            elif cmd[0] == 'run' and cmd[1] == 'elka':
-                base = ElkaDriver()
-                run_elka_control(base)
-            elif cmd[0] == 'run' and cmd[1] == 'radios':
-                # mainly for debugging
-                i = 0
-                erads = []
-                base = None # single base node
-                rx = [] # array of receive nodes
-                for e in _find_devices():
-                    erads.append(e)
-                    if i == 0:
-                        base = ElkaDriver(erads[i])
-                    else:
-                        rx.append(Elkaradio(erads[i]))
-                    i += 1
-                run_two_radios(base, rx) 
-            elif cmd[0] == 'parse':
-                parse_logs()
-            else:
-                print 'Invalid command'
-                continue
+          if cmd[0] == 'exit':
+              sp = True
+          elif cmd[0] == 'run' and cmd[1] == 'elka':
+              run_elka_control()
+          elif cmd[0] == 'run' and cmd[1] == 'radios':
+              # mainly for debugging
+              i = 0
+              erads = []
+              rx = [] # array of receive nodes
+              for e in _find_devices():
+                  erads.append(e)
+                  if i != 0:
+                      rx.append(Elkaradio(erads[i]))
+                  i += 1
+              run_two_radios(rx) 
+          elif cmd[0] == 'parse':
+              parse_logs()
+          else:
+              print 'Invalid command'
+              continue
 
-    except JoystickNotFound as e:
-        print "Joystick not found"
-        logger.exception(e)
-    except KeyboardInterrupt as e:
-        print "Keyboard Interrupt"
-        logger.exception(e)
-    except ElkaradioNotFound as e:
-        print "Elkaradio not found"
-        logger.exception(e)
-    except LinkException as e:
-        print "Exception in comm link" 
-        logger.exception(e)
-    except JoystickThreadFinished as e:
-        print 'Joystick thread has stopped'
-        logger.exception(e)
-    except Exception as e:
-        print "Exception"
-        logger.exception(e)
-    finally:
-        if base is not None:
-            # end threads and close eradio
-            for t in base._threads:
-                # each stop method results in a join call
-                t.stop()
-                logger.debug('\nThread {0} stopped'.format(t.name))
-
-            base.close()
-
-            logger.debug('\nBase node closed')
-        logger.debug(traceback.format_exc())
-        logger.debug(threading.enumerate())
+  except JoystickNotFound as e:
+    print "Joystick not found"
+    logger.exception(e)
+  except KeyboardInterrupt as e:
+    print "Keyboard Interrupt"
+    logger.exception(e)
+  except ElkaradioNotFound as e:
+    print "Elkaradio not found"
+    logger.exception(e)
+  except LinkException as e:
+    print "Exception in comm link" 
+    logger.exception(e)
+  except JoystickThreadFinished as e:
+    print 'Joystick thread has stopped'
+    logger.exception(e)
+  except Exception as e:
+    print "Exception"
+    logger.exception(e)
+  finally:
+    logger.debug(traceback.format_exc())
+    # should only show main thread as alive
+    logger.debug(threading.enumerate()) 
+    if not sp:
+      main()
 
 if __name__ == '__main__':
     main()
