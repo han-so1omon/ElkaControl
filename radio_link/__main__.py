@@ -17,7 +17,6 @@ from IPython import embed # debugging
 p = os.path.join(os.getcwd(), 'Logging/Logs')
 sys.path.append(p)
 
-from ETP.elkaDriver import ElkaDriver
 from Elkaradio.elkaradioTRX import Elkaradio
 from Elkaradio.elkaradioTRX import _find_devices 
 from Utils.exceptions import *

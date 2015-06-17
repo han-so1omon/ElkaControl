@@ -1,46 +1,23 @@
-2015-06-15 13:49:35,698 - main - DEBUG - 
+2015-06-17 12:18:16,695 - main - DEBUG - 
 Runs Elka Transfer Protocol (ETP) for a base node and a receive node
 
-2015-06-15 13:49:38,395 - main - ERROR - 'NoneType' object has no attribute 'set_configuration'
-Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 162, in main
-    run_elka_control()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 90, in run_elka_control
-    run_elka()
-  File "./ETP/elkaThread.py", line 118, in run_elka
-    eradio = Elkaradio()
-  File "./Elkaradio/elkaradioTRX.py", line 116, in __init__
-    self.dev.set_configuration(1)
-AttributeError: 'NoneType' object has no attribute 'set_configuration'
-2015-06-15 13:49:38,396 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 162, in main
-    run_elka_control()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 90, in run_elka_control
-    run_elka()
-  File "./ETP/elkaThread.py", line 118, in run_elka
-    eradio = Elkaradio()
-  File "./Elkaradio/elkaradioTRX.py", line 116, in __init__
-    self.dev.set_configuration(1)
-AttributeError: 'NoneType' object has no attribute 'set_configuration'
-
-2015-06-15 13:49:38,397 - main - DEBUG - [<_MainThread(MainThread, started 140079280240448)>]
-2015-06-15 13:49:55,421 - main.joy_read - DEBUG - 
+2015-06-17 12:18:19,917 - main.joy_read - DEBUG - 
 Joystick: Generic X-Box pad
-2015-06-15 13:49:55,421 - main.joy_read - DEBUG - 
+2015-06-17 12:18:19,919 - main.joy_read - DEBUG - 
 Joystick thread running
-2015-06-15 13:50:42,676 - main.elkaThread - DEBUG - 
-Thread Thread-1 stopped
-2015-06-15 13:50:42,676 - main.elkaThread - DEBUG - 
-Thread Thread-2 stopped
-2015-06-15 13:50:42,677 - main - ERROR - 
+2015-06-17 12:18:21,942 - main.elkaThread - DEBUG - 
+Thread-1 stopped
+2015-06-17 12:18:21,942 - main.elkaThread - DEBUG - 
+Thread-2 stopped
+2015-06-17 12:18:21,942 - main - ERROR - 
 Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 162, in main
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 161, in main
     run_elka_control()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 90, in run_elka_control
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 89, in run_elka_control
     run_elka()
-  File "./ETP/elkaThread.py", line 132, in run_elka
+  File "./ETP/elkaThread.py", line 133, in run_elka
     map(lambda t: chk_thread(t), threads)
-  File "./ETP/elkaThread.py", line 132, in <lambda>
+  File "./ETP/elkaThread.py", line 133, in <lambda>
     map(lambda t: chk_thread(t), threads)
   File "./ETP/elkaThread.py", line 112, in chk_thread
     t.join(1)
@@ -49,32 +26,14 @@ Traceback (most recent call last):
   File "/usr/lib/python2.7/threading.py", line 358, in wait
     _sleep(delay)
 KeyboardInterrupt
-2015-06-15 13:50:42,679 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 162, in main
+2015-06-17 12:18:21,944 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 161, in main
     run_elka_control()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 90, in run_elka_control
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 89, in run_elka_control
     run_elka()
-  File "./ETP/elkaThread.py", line 132, in run_elka
+  File "./ETP/elkaThread.py", line 133, in run_elka
     map(lambda t: chk_thread(t), threads)
-  File "./ETP/elkaThread.py", line 132, in <lambda>
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP/elkaThread.py", line 112, in chk_thread
-    t.join(1)
-  File "/usr/lib/python2.7/threading.py", line 960, in join
-    self.__block.wait(delay)
-  File "/usr/lib/python2.7/threading.py", line 358, in wait
-    _sleep(delay)
-KeyboardInterrupt
-
-2015-06-15 13:50:42,679 - main - DEBUG - [<_MainThread(MainThread, started 140079280240448)>]
-2015-06-15 13:50:44,251 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 162, in main
-    run_elka_control()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 90, in run_elka_control
-    run_elka()
-  File "./ETP/elkaThread.py", line 132, in run_elka
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP/elkaThread.py", line 132, in <lambda>
+  File "./ETP/elkaThread.py", line 133, in <lambda>
     map(lambda t: chk_thread(t), threads)
   File "./ETP/elkaThread.py", line 112, in chk_thread
     t.join(1)
@@ -84,4 +43,22 @@ KeyboardInterrupt
     _sleep(delay)
 KeyboardInterrupt
 
-2015-06-15 13:50:44,252 - main - DEBUG - [<_MainThread(MainThread, started 140079280240448)>]
+2015-06-17 12:18:21,944 - main - DEBUG - [<_MainThread(MainThread, started 140371879638848)>]
+2015-06-17 12:18:23,009 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 161, in main
+    run_elka_control()
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 89, in run_elka_control
+    run_elka()
+  File "./ETP/elkaThread.py", line 133, in run_elka
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 133, in <lambda>
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 112, in chk_thread
+    t.join(1)
+  File "/usr/lib/python2.7/threading.py", line 960, in join
+    self.__block.wait(delay)
+  File "/usr/lib/python2.7/threading.py", line 358, in wait
+    _sleep(delay)
+KeyboardInterrupt
+
+2015-06-17 12:18:23,010 - main - DEBUG - [<_MainThread(MainThread, started 140371879638848)>]

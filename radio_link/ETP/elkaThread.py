@@ -113,11 +113,12 @@ def run_elka():
 
   def stop_thread(t):
     t.stop()
-    logger.debug('\nThread {0} stopped'.format(t.name))
+    logger.debug('\n{0} stopped'.format(t.name))
 
   eradio = Elkaradio()
-  in_queue = Queue.Queue()
 
+  #LIFO such that new commands are taken first
+  in_queue = Queue.LifoQueue()
   threads = []
   joy = JoyThread(in_queue)
   joy.start()
