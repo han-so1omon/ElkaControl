@@ -1,6 +1,7 @@
 import sys, os, pygame, threading, Queue, logging
 sys.path.append(os.getcwd()) 
 
+from collections import deque
 from Utils.exceptions import *
 from Utils.exThread import ExThread
 
@@ -64,10 +65,11 @@ class JoyThread(ExThread):
     self.raw[1] = self.j.get_axis(self.axes_enum.RightHL)
     self.raw[2] = self.j.get_axis(self.axes_enum.RightVU)
     self.raw[3] = self.j.get_axis(self.axes_enum.LeftHL)
-    self.in_queue.put(self.raw)
+    self.in_queue.append(self.raw)
 
   def run_w_exc(self):
     logger.debug('\nJoystick thread running')
+    raw = [None] * 4
     while not self.sp:
       self.get()
       log_inputs.info('{}'.format(self.raw))

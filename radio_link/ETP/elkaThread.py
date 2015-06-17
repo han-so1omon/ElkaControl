@@ -1,6 +1,7 @@
 import sys, os, Queue, threading, logging, traceback
 sys.path.append(os.getcwd()) 
 
+from collections import deque
 from Elkaradio.elkaradioTRX import *
 from Inputs.joy_read import JoyThread 
 from Utils.exceptions import *
@@ -92,7 +93,7 @@ class DriverThread(ExThread):
       ackIn = None
 
       # get raw data from controller
-      raw = self.in_queue.get()
+      raw = self.in_queue.pop()
       
       payload = header + map(chr,flatten(map(split_bytes, convert_raw(raw))))
       payload = ''.join(payload)
@@ -117,8 +118,8 @@ def run_elka():
 
   eradio = Elkaradio()
 
-  #LIFO such that new commands are taken first
-  in_queue = Queue.LifoQueue()
+  #limit queue size to prevent command buffer from forming
+  in_queue = deque(maxlen = 50)
   threads = []
   joy = JoyThread(in_queue)
   joy.start()
