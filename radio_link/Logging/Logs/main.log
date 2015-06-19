@@ -1,19 +1,19 @@
-2015-06-17 13:23:15,162 - main - DEBUG - 
-Runs Elka Transfer Protocol (ETP) for a base node and a receive node
-
-2015-06-17 13:23:17,441 - main.joy_read - DEBUG - 
+2015-06-19 13:00:08,880 - main - DEBUG - 
+Log files cleared
+2015-06-19 13:00:11,006 - main - DEBUG - Running Elka Control
+2015-06-19 13:00:11,237 - main.joy_read - DEBUG - 
 Joystick: Generic X-Box pad
-2015-06-17 13:23:17,442 - main.joy_read - DEBUG - 
+2015-06-19 13:00:11,237 - main.joy_read - DEBUG - 
 Joystick thread running
-2015-06-17 13:23:18,802 - main.elkaThread - DEBUG - 
+2015-06-19 13:00:13,138 - main.elkaThread - DEBUG - 
 Thread-1 stopped
-2015-06-17 13:23:18,802 - main.elkaThread - DEBUG - 
+2015-06-19 13:00:13,138 - main.elkaThread - DEBUG - 
 Thread-2 stopped
-2015-06-17 13:23:18,803 - main - ERROR - 
+2015-06-19 13:00:13,139 - main - ERROR - 
 Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 161, in main
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 139, in main
     run_elka_control()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 89, in run_elka_control
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 62, in run_elka_control
     run_elka()
   File "./ETP/elkaThread.py", line 134, in run_elka
     map(lambda t: chk_thread(t), threads)
@@ -26,10 +26,10 @@ Traceback (most recent call last):
   File "/usr/lib/python2.7/threading.py", line 358, in wait
     _sleep(delay)
 KeyboardInterrupt
-2015-06-17 13:23:18,804 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 161, in main
+2015-06-19 13:00:13,140 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 139, in main
     run_elka_control()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 89, in run_elka_control
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 62, in run_elka_control
     run_elka()
   File "./ETP/elkaThread.py", line 134, in run_elka
     map(lambda t: chk_thread(t), threads)
@@ -43,24 +43,11 @@ KeyboardInterrupt
     _sleep(delay)
 KeyboardInterrupt
 
-2015-06-17 13:23:18,804 - main - DEBUG - [<_MainThread(MainThread, started 140042100365120)>, <DriverThread(Thread-2, started 140041628149504)>]
-2015-06-17 13:23:18,804 - main.elkaradioTRX - ERROR - [Errno 19] No such device (it may have been disconnected)
-Traceback (most recent call last):
-  File "./Elkaradio/elkaradioTRX.py", line 238, in send
-    ackIn = self.dev.read(0x81, 64, 100)
-  File "/usr/local/lib/python2.7/dist-packages/usb/core.py", line 918, in read
-    self.__get_timeout(timeout))
-  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 777, in bulk_read
-    timeout)
-  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 880, in __read
-    _check(retval)
-  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 560, in _check
-    raise USBError(_str_error[ret], ret, _libusb_errno[ret])
-USBError: [Errno 19] No such device (it may have been disconnected)
-2015-06-17 13:23:20,977 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 161, in main
+2015-06-19 13:00:13,140 - main - DEBUG - [<_MainThread(MainThread, started 139703292823360)>]
+2015-06-19 13:00:16,284 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 139, in main
     run_elka_control()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 89, in run_elka_control
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 62, in run_elka_control
     run_elka()
   File "./ETP/elkaThread.py", line 134, in run_elka
     map(lambda t: chk_thread(t), threads)
@@ -74,4 +61,4 @@ USBError: [Errno 19] No such device (it may have been disconnected)
     _sleep(delay)
 KeyboardInterrupt
 
-2015-06-17 13:23:20,977 - main - DEBUG - [<_MainThread(MainThread, started 140042100365120)>]
+2015-06-19 13:00:16,284 - main - DEBUG - [<_MainThread(MainThread, started 139703292823360)>]
