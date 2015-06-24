@@ -1,11 +1,18 @@
-Source code and tools for the Bitcraze Crazyradio USB dongle.
+Source code and tools for the ElkaControl basestation and Elkaradio USB dongle.
 
 See http://wiki.bitcraze.se/projects:crazyradio:index for more information about
 Crazyradio and the USB protocol used.
 
-Folders content:
+Content:
+- Firmware: The Elkaradio firmware source code
+- nrfProg:  SPI programmer that uses jtagkey USB adapter
+- usb_tools: Python scripts to reset and bootload elkaradio from command line
+- radio_link: Python app to run ElkaControl and manage Elkaradio 
 
-- Firmware: The firmware source code
-- nrfProg:  SPI programmer that uses jtagkey USB addapter
-- usb_tools: Python scripts to reset and bootload Crazyradio from command line
-- lib: Software libraries to use Crazyradio with Pyton
+Usage:
+- Follow http://wiki.bitcraze.se/projects:crazyradio:index for information about
+  how to use Elkaradio nrfProg and usb_tools
+- Run pip install -r requirements.txt to install dependencies
+- To use radio_link app:
+    Navigate to radio_link folder using 'cd radio_link'
+    run app using 'python ./'

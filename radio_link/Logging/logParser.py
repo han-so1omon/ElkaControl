@@ -14,78 +14,55 @@ sys.path.append(os.getcwd())
 ########## Parser Class ##########
 class LogParser(object):
     def __init__(self):
-        self.inl = open('./Logging/Logs/inputs.log', 'r')
-        self.outl = open('./Logging/Logs/outputs.log', 'r')
-        self.ackl = open('./Logging/Logs/acks.log', 'r')
+        # store in, out, and ack data parsed from logs
+        self.inp = {}
+        self.out = {}
+        self.acks = {}
 
-        # store most recently parsed input times and data
-        self.in_epoch = None
-        self.in_ic = []
-        self.input_t = []
-        self.input_d = []
-
-        # store most recently parsed output times, header, and data
-        self.out_epoch = None
-        self.out_ic = []
-        self.output_t = []
-        self.output_h = []
-        self.output_d = []
-
-        # store most recently parsed ack times and imudata
-        self.ack_epoch = None
-        self.ack_ic = []
-        self.ack_t = []
-        self.ack_accel = []
-        self.ack_euler = []
-        self.ack_commanded = []
-
-    """ Parse a file
-    def parse(self, fpath):
-        f = open(fpath, 'r')
-        r = re.compile(r'((\d+):(\d+):(\d+.\d+)),(\W+)'
-        head = f.readline()
-        """
-        
-
-    """ Save a log file to the appropriate location
-    def save(self, fstr=None, nm=None, loc=None):
-      m = None
-      fstr = './Logging/Logs/inputs.log'
+    """ Save a log file to the appropriate location """
+    def save_file(self, fstr=None, nm=None):
+      pth = None
 
       if not fstr:
         raise OSError(
             'File not able to be copied. Invalid file name given')
       else:
-        r = re.compile(.(?<=[/|\\])(\w+)+.(\w+))
-        # first match is directories, second match is file
-        m = re.findall(fstr) 
+        #matches filename.extension
+        r = re.compile(r'(?<=[/|\\])([\w|\d|\-|\_]+).([\w|\d]+)\Z')
+        m_in = r.findall(fstr) 
 
-      if (not nm) and (m is not None):
+      #FIXME clean this up
+      if (not nm) and m_in:
         d = datetime.datetime.fromtimestamp(time.time())
-        if len(m) = 2:
-          nm = '{0}-{1}-{2}-{3}_{4}_{5}_{6}.log'.format(
-              m[1][1],d.year,d.month,d.day,d.hour,d.minute,d.second)
-        else:
-          nm = '{0}-{1}-{2}-{3}_{4}_{5}_{6}.log'.format(
-              m[0][1],d.year,d.month,d.day,d.hour,d.minute,d.second)
-
-
-      if not loc:
+        m_out = '{0}-{1}-{2}-{3}_{4}_{5}_{6}.{7}'.format(
+          m_in[0][0],d.year,d.month,d.day,d.hour,d.minute,d.second,
+          m_in[0][1])
         try:
           os.mkdir('{}/Logging/PrevLogs'.format(os.getcwd()))
         except OSError:
           pass # directory already exists
-        nm = './Logging/PrevLogs/' + nm
+        m_out = './Logging/PrevLogs/' + m_out
+      else:
+        m_out = r.findall(nm)
+        pth = nm.split('/') #requires that path splits with '/'
+        pth = [pth[i] for i in range(0,len(pth)-1)]
+        pth = '/'.join(pth) # return path without filename
+        try:
+          os.mkdir(pth)
+        except OSError:
+          pass # directory already exists
+        m_out = pth + '/' + '{0}.{1}'.format(m_out[0][0], m_out[0][1])
+        print m_out
 
-      shutil.copy2(fstr, nm)
-      print nm
-      """
+      shutil.copy2(fstr, m_out)
 
-    def parse_in(self):
+    """ Parse inputs log. Store time and raw data as tuples
+        in self.inp dict. """
+    def parse_in(self, ipf='./Logging/Logs/inputs.log'):
         r = re.compile(r'((\d+):(\d+):(\d+.\d+)),'
                 r'\[((\d+.\d+),(\d+.\d+),(\d+.\d+),(\d+.\d+))\]')
         el = [None] * 2
-        with open('./Logging/Logs/inputs.log', 'r') as inf:
+        with open(ipf, 'r') as inf:
             for l in inf:
                 el = r.match(l)
                 if el[0] is not None:
@@ -93,14 +70,43 @@ class LogParser(object):
                 else:
                     print "re not matched"
 
-    def parse_out(self):
-        with open('./Logging/Logs/outputs.log', 'r') as outf:
+    """ Parse outputs log. Store time and transformed data as tuples
+        in self.out dict. """
+    def parse_out(self, otf ='./Logging/Logs/outputs.log'):
+        with open(otf, 'r') as outf:
             for l in outf:
                 pass
 
-    def parse_ack(self):
-        with open('./Logging/Logs/acks.log', 'r') as ackf:
-            for l in ackf:
-                pass
+    """ Parse acks log. Store gyro, euler angles, and commands  as tuples
+        in self.acks dict. """
+    def parse_ack(self, acf ='./Logging/Logs/acks.log'):
+        # FIXME use look forward to more efficiently capture the last or first
+        # digit
+        #FIXME this process should be done by reading the header
+        self.acks['gyro'] = []
+        self.acks['euler'] = []
+        self.acks['commanded'] = []
+        self.acks['none'] = []
 
-########## End of Parser Class ##########
+        r = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),array\(\'B\',\s\[((\d+,?\s?)+)\]\)')
+        ralt = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),(None)')
+        with open(acf, 'r') as ackf:
+          for l in ackf:
+            m = None
+            m = r.match(l)
+            if not m: #Line must be None
+              m = ralt.match(l)
+              self.acks['none'].append(m[1]*3600 + m[2]*60 + m[3]
+                                       + m[4]*.001)
+            else:
+              t = m[1]*3600 + m[2]*60 + m[3] + m[4]*.001
+              rec = map(int,','.split(m[5]))
+              self.acks['gyro'].append([t] +
+                    [rec[i] for i in range(0,6)])
+              self.acks['euler'].append([t] +
+                    [rec[i] for i in range(6,9)])
+              self.acks['commanded'].append([t] +
+                    [rec[i] for i in range(9,len(rec))])
+          return self.acks
+        raise IOError('file not found')
+########## End of LogParser Class ##########

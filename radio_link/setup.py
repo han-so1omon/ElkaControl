@@ -8,9 +8,9 @@ from distutils.core import setup
 from setuptools import *
 
 setup(name = 'ElkaControl',
-      version = '1.0.0b1',
+      version = '0.1.0b1',
       description = 'ELKA MAV testbed suite and GUI'
-      author = 'Eric Solomon, Vikram Hrishikeshavan, Ryan Duffy',
+      author = 'Eric Solomon',
       license='beerware',
       url = https://github.com/han-so1omon/ElkaControl.git
       packages=find_packages(), 

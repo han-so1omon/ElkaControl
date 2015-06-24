@@ -24,7 +24,7 @@ from Logging.dataPlotter import DataPlotter
 from ETP.elkaThread import run_elka
 
 ########################### Set up loggers ##############################
-""" Log headers are <name>: [<tuple1 elements>][<tuple2 elements>]... """
+""" Log headers are <name>: tuple1[<tuple1 elements>] tuple2[<tuple2 elements>]... """
 
 #Establish loggers as module level globals
 logger = None
@@ -38,27 +38,30 @@ open('./Logging/Logs/outputs.log', 'w').close()
 logging.config.fileConfig('./Logging/Logs/logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger('main')
 log_inputs = logging.getLogger('inputs')
-log_inputs.info('inputs: [3][4]')
 log_outputs = logging.getLogger('outputs')
-log_outputs.info('outputs: [][]')
 log_acks = logging.getLogger('acks')
-log_outputs.info('acks: [][]')
 logger.debug('\nLog files cleared')
+#log_inputs.info('raw_in[4]')
+#log_outputs.info('controls[8]/gains[8]') # also contains gains
+#log_acks.info('gyro[6] euler[4] commanded[16]')
 
 ######################### Define helper functions ##############################
+r = re.compile(r'(\S+)') # global re for raw parse
 def parse_raw_cmd(r_cmd):
-  r_cmd = r_cmd.strip()
-  if r_cmd:
-    return [word.strip(string.punctuation) for word in r_cmd.split()]
-  else:
-    return 'Invalid command' 
+  global r
+  return r.findall(r_cmd)
 
 """ Run elka control """
 def run_elka_control(rx=None):
-  global logger
+  global logger, log_inputs, log_outputs, log_acks
   if rx:
     setup_radios(rx)
   logger.debug('Running Elka Control')
+  ''' Headers... necessary?
+  log_inputs.info('inputs: [3][4]')
+  log_outputs.info('outputs: [][]')
+  log_acks.info('acks: [][]')
+  '''
   run_elka()
 
 def setup_radios(rx=[]):
@@ -76,19 +79,17 @@ def parse_logs():
   # Display displays set names, export sends to spreadsheet,
   # Plot plots with x,y,z as axes values
   # Return returns to Main
-  p_options = ('\nDisplay available data sets <display>'
+  p_options = ('\nHelp <help>'
+               '\nDisplay available data sets <display>'
+              '\nSave data file <save <./path/to/file.bar>>'
               '\nExport data to formatted file <export>'
               '\nPlot data <plot(x,y)>/<plot(x,y,z)>'
+              '\nParse log file <parse <logtype> <./path/to/x.log>>'
               '\nReturn to main menu <return>')
 
   lp = LogParser()
   dp = DataPlotter()
-  
-  # parse logs
-  ind = lp.parse_in()
-  outd = lp.parse_out()
-  ackd = lp.parse_ack()
-
+ 
   sp = False
   while not sp:
     # prompt next step
@@ -98,22 +99,34 @@ def parse_logs():
     r_cmd = raw_input('<')
     cmd = parse_raw_cmd(r_cmd)
 
-    if cmd[0] == 'display' and len(cmd) == 1:
+    if cmd[0] == 'help':
+        #FIXME display options
+        pass
+    elif cmd[0] == 'display' and len(cmd) == 1:
       print 'Input data: {}'.format(ind)
       print 'Output data: {}'.format(outd)
       print 'Ack data: {}'.format(ackd)
-    elif cmd[0] == 'plot' and len(cmd) == 1:
-      # output able to plot the following: 
-      pass
-    elif cmd[0] == 'plot' and len(cmd) > 1:
-      # send to grapher
+    elif cmd[0] == 'plot':
       pass
     elif cmd[0] == 'return' and len(cmd) == 1:
       break
-    elif cmd[0] == 'save'
+    elif cmd[0] == 'save':
+        if len(cmd) > 2:
+            lp.save_file(cmd[1], cmd[2])
+        else:
+            lp.save_file(cmd[1], None)
+    elif cmd[0] == 'parse':
+      # parse logs
+      if cmd[1] == 'input' and len(cmd) == 3:
+        ind = lp.parse_in(cmd[2])
+      elif cmd[1] == 'output' and len(cmd) == 3:
+        outd = lp.parse_out(cmd[2])
+      elif cmd[1] == 'ack' and len(cmd) == 3:
+        ackd = lp.parse_ack(cmd[2])
+        print ackd
+      else: print 'could not parse {}'.format(cmd[2])
     else:
       print 'Invalid command'
-      continue
 ################################################################################
 
 ################################ Main method ###################################
@@ -121,10 +134,11 @@ def main():
   global logger
   sp = False
   try:
-    #setup_main_log()
-    base = None # base node
+    base = None
 
-    options = ('\nExit <exit>\nRun ElkaControl with Elka <run elka>\n'
+    options = ('\nHelp<help>\n'
+               'Exit <exit>\n'
+               'Run ElkaControl with Elka <run elka>\n'
               'Run ElkaControl with two ElkaRadios <run radios>\n'
               'Parse log files <parse>')
     while not sp:
@@ -134,8 +148,12 @@ def main():
       r_cmd = raw_input('< ')
       cmd = parse_raw_cmd(r_cmd)
 
+      """ main option tree """
       if cmd[0] == 'exit':
         sp = True
+      elif cmd[0] == 'help':
+          #FIXME print options
+          pass
       elif cmd[0] == 'run' and cmd[1] == 'elka':
         run_elka_control()
       elif cmd[0] == 'run' and cmd[1] == 'radios':

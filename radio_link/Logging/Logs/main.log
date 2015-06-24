@@ -1,64 +1,38 @@
-2015-06-19 13:00:08,880 - main - DEBUG - 
+2015-06-23 13:59:50,563 - main - DEBUG - 
 Log files cleared
-2015-06-19 13:00:11,006 - main - DEBUG - Running Elka Control
-2015-06-19 13:00:11,237 - main.joy_read - DEBUG - 
-Joystick: Generic X-Box pad
-2015-06-19 13:00:11,237 - main.joy_read - DEBUG - 
-Joystick thread running
-2015-06-19 13:00:13,138 - main.elkaThread - DEBUG - 
-Thread-1 stopped
-2015-06-19 13:00:13,138 - main.elkaThread - DEBUG - 
-Thread-2 stopped
-2015-06-19 13:00:13,139 - main - ERROR - 
+2015-06-23 14:00:08,762 - main - ERROR - '_sre.SRE_Match' object has no attribute '__getitem__'
 Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 139, in main
-    run_elka_control()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 62, in run_elka_control
-    run_elka()
-  File "./ETP/elkaThread.py", line 134, in run_elka
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP/elkaThread.py", line 134, in <lambda>
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP/elkaThread.py", line 113, in chk_thread
-    t.join(1)
-  File "/usr/lib/python2.7/threading.py", line 960, in join
-    self.__block.wait(delay)
-  File "/usr/lib/python2.7/threading.py", line 358, in wait
-    _sleep(delay)
-KeyboardInterrupt
-2015-06-19 13:00:13,140 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 139, in main
-    run_elka_control()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 62, in run_elka_control
-    run_elka()
-  File "./ETP/elkaThread.py", line 134, in run_elka
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP/elkaThread.py", line 134, in <lambda>
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP/elkaThread.py", line 113, in chk_thread
-    t.join(1)
-  File "/usr/lib/python2.7/threading.py", line 960, in join
-    self.__block.wait(delay)
-  File "/usr/lib/python2.7/threading.py", line 358, in wait
-    _sleep(delay)
-KeyboardInterrupt
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 171, in main
+    parse_logs()
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 125, in parse_logs
+    ackd = lp.parse_ack(cmd[2])
+  File "./Logging/logParser.py", line 100, in parse_ack
+    + m[4]*.001)
+TypeError: '_sre.SRE_Match' object has no attribute '__getitem__'
+2015-06-23 14:00:08,763 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 171, in main
+    parse_logs()
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 125, in parse_logs
+    ackd = lp.parse_ack(cmd[2])
+  File "./Logging/logParser.py", line 100, in parse_ack
+    + m[4]*.001)
+TypeError: '_sre.SRE_Match' object has no attribute '__getitem__'
 
-2015-06-19 13:00:13,140 - main - DEBUG - [<_MainThread(MainThread, started 139703292823360)>]
-2015-06-19 13:00:16,284 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 139, in main
-    run_elka_control()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 62, in run_elka_control
-    run_elka()
-  File "./ETP/elkaThread.py", line 134, in run_elka
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP/elkaThread.py", line 134, in <lambda>
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP/elkaThread.py", line 113, in chk_thread
-    t.join(1)
-  File "/usr/lib/python2.7/threading.py", line 960, in join
-    self.__block.wait(delay)
-  File "/usr/lib/python2.7/threading.py", line 358, in wait
-    _sleep(delay)
-KeyboardInterrupt
+2015-06-23 14:00:08,763 - main - DEBUG - [<_MainThread(MainThread, started 140535100114752)>]
+2015-06-23 14:09:33,169 - main - ERROR - 
+Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 148, in main
+    r_cmd = raw_input('< ')
+EOFError
+2015-06-23 14:09:33,170 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 148, in main
+    r_cmd = raw_input('< ')
+EOFError
 
-2015-06-19 13:00:16,284 - main - DEBUG - [<_MainThread(MainThread, started 139703292823360)>]
+2015-06-23 14:09:33,170 - main - DEBUG - [<_MainThread(MainThread, started 140535100114752)>]
+2015-06-23 14:09:34,189 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 148, in main
+    r_cmd = raw_input('< ')
+EOFError
+
+2015-06-23 14:09:34,189 - main - DEBUG - [<_MainThread(MainThread, started 140535100114752)>]
