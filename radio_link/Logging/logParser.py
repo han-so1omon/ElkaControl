@@ -62,7 +62,7 @@ class LogParser(object):
         r = re.compile(r'((\d+):(\d+):(\d+.\d+)),'
                 r'\[((\d+.\d+),(\d+.\d+),(\d+.\d+),(\d+.\d+))\]')
         el = [None] * 2
-        with open(ipf, 'r') as inf:
+        with open(ipf, 'r') as inf:c
             for l in inf:
                 el = r.match(l)
                 if el[0] is not None:
@@ -73,15 +73,35 @@ class LogParser(object):
     """ Parse outputs log. Store time and transformed data as tuples
         in self.out dict. """
     def parse_out(self, otf ='./Logging/Logs/outputs.log'):
-        with open(otf, 'r') as outf:
-            for l in outf:
-                pass
+      #FIXME this process should be done by reading the header
+      self.out['gains'] = []
+      self.out['p_in'] = [] # pilot inputs
+
+      rp = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),\[(((\d+),?\s?){11})\]')
+      rg = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),\[(((\d+),?\s?){15})\]')
+      with open(otf, 'r') as outf:
+        print 'here'
+        for l in outf:
+          m = None
+          m = rp.match(l)
+          if m:
+            t = int(m.group(1))*3600 + int(m.group(2))*60 \
+                    + int(m.group(3)) + int(m.group(4))*.001
+            out = map(int,m.group(5).split(', '))
+            self.out['p_in'].append([t] +
+                  [out[i] for i in range(3,11)])
+          else:
+            m = rg.match(l)
+            t = int(m.group(1))*3600 + int(m.group(2))*60 \
+                    + int(m.group(3)) + int(m.group(4))*.001
+            out = map(int,m.group(5).split(', '))
+            self.out['gains'].append([t] +
+                  [out[i] for i in range(3,15)])
+      return self.out
 
     """ Parse acks log. Store gyro, euler angles, and commands  as tuples
         in self.acks dict. """
     def parse_ack(self, acf ='./Logging/Logs/acks.log'):
-        # FIXME use look forward to more efficiently capture the last or first
-        # digit
         #FIXME this process should be done by reading the header
         self.acks['gyro'] = []
         self.acks['euler'] = []
@@ -101,7 +121,7 @@ class LogParser(object):
             if not m: #Line must be None, [0], or some invalid list
               # capture [0]
               m = ralt1.match(l)
-              if not m:
+              if not m: # capture None
                 m = ralt2.match(l)
               self.acks['none'].append(int(m.group(1))*3600 + int(m.group(2))*60 \
                     + int(m.group(3)) + int(m.group(4))*.001)

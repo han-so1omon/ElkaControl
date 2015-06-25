@@ -1,17 +1,17 @@
-2015-06-25 12:28:52,591 - main - DEBUG - 
+2015-06-25 13:49:33,865 - main - DEBUG - 
 Log files cleared
-2015-06-25 12:28:53,936 - main - DEBUG - Running Elka Control
-2015-06-25 12:28:54,145 - main.joy_read - DEBUG - 
+2015-06-25 13:49:37,475 - main - DEBUG - Running Elka Control
+2015-06-25 13:49:37,682 - main.joy_read - DEBUG - 
 Joystick: Generic X-Box pad
-2015-06-25 12:28:54,145 - main.joy_read - DEBUG - 
+2015-06-25 13:49:37,682 - main.joy_read - DEBUG - 
 Joystick thread running
-2015-06-25 12:28:58,330 - main.elkaThread - DEBUG - 
+2015-06-25 13:49:40,155 - main.elkaThread - DEBUG - 
 Thread-1 stopped
-2015-06-25 12:28:58,330 - main.elkaThread - DEBUG - 
+2015-06-25 13:49:40,156 - main.elkaThread - DEBUG - 
 Thread-2 stopped
-2015-06-25 12:28:58,331 - main - ERROR - 
+2015-06-25 13:49:40,157 - main - ERROR - 
 Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 158, in main
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 160, in main
     run_elka_control()
   File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 65, in run_elka_control
     run_elka()
@@ -26,26 +26,8 @@ Traceback (most recent call last):
   File "/usr/lib/python2.7/threading.py", line 358, in wait
     _sleep(delay)
 KeyboardInterrupt
-2015-06-25 12:28:58,333 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 158, in main
-    run_elka_control()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 65, in run_elka_control
-    run_elka()
-  File "./ETP/elkaThread.py", line 144, in run_elka
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP/elkaThread.py", line 144, in <lambda>
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP/elkaThread.py", line 123, in chk_thread
-    t.join(1)
-  File "/usr/lib/python2.7/threading.py", line 960, in join
-    self.__block.wait(delay)
-  File "/usr/lib/python2.7/threading.py", line 358, in wait
-    _sleep(delay)
-KeyboardInterrupt
-
-2015-06-25 12:28:58,334 - main - DEBUG - [<_MainThread(MainThread, started 140220909180736)>]
-2015-06-25 12:29:53,879 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 158, in main
+2015-06-25 13:49:40,158 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 160, in main
     run_elka_control()
   File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 65, in run_elka_control
     run_elka()
@@ -61,4 +43,22 @@ KeyboardInterrupt
     _sleep(delay)
 KeyboardInterrupt
 
-2015-06-25 12:29:53,879 - main - DEBUG - [<_MainThread(MainThread, started 140220909180736)>]
+2015-06-25 13:49:40,158 - main - DEBUG - [<_MainThread(MainThread, started 139697933338432)>]
+2015-06-25 13:50:24,344 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 160, in main
+    run_elka_control()
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 65, in run_elka_control
+    run_elka()
+  File "./ETP/elkaThread.py", line 144, in run_elka
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 144, in <lambda>
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 123, in chk_thread
+    t.join(1)
+  File "/usr/lib/python2.7/threading.py", line 960, in join
+    self.__block.wait(delay)
+  File "/usr/lib/python2.7/threading.py", line 358, in wait
+    _sleep(delay)
+KeyboardInterrupt
+
+2015-06-25 13:50:24,345 - main - DEBUG - [<_MainThread(MainThread, started 139697933338432)>]

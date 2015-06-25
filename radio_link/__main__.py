@@ -121,10 +121,12 @@ def parse_logs():
         ind = lp.parse_in(cmd[2])
       elif cmd[1] == 'output' and len(cmd) == 3:
         outd = lp.parse_out(cmd[2])
+        print outd
       elif cmd[1] == 'ack' and len(cmd) == 3:
         ackd = lp.parse_ack(cmd[2])
         print ackd
-      else: print 'could not parse {}'.format(cmd)
+      else: print 'could not parse {}'.format(
+              [cmd[i] for i in range(1,len(cmd))])
     else:
       print 'Invalid command'
 ################################################################################
