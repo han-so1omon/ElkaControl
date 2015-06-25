@@ -88,19 +88,27 @@ class LogParser(object):
         self.acks['commanded'] = []
         self.acks['none'] = []
 
-        r = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),array\(\'B\',\s\[((\d+,?\s?)+)\]\)')
-        ralt = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),(None)')
+        # capture valid ack from ELKA
+        r = re.compile(
+          r'(\d+):(\d+):(\d+)\.(\d+),array\(\'B\',\s\[((\d+,?\s?){27})\]\)')
+        ralt1 = re.compile(
+          r'(\d+):(\d+):(\d+)\.(\d+),array\(\'B\',\s\[((\d+?\s?))\]\)')
+        ralt2 = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),(None)')
         with open(acf, 'r') as ackf:
           for l in ackf:
             m = None
             m = r.match(l)
-            if not m: #Line must be None
-              m = ralt.match(l)
-              self.acks['none'].append(m[1]*3600 + m[2]*60 + m[3]
-                                       + m[4]*.001)
+            if not m: #Line must be None, [0], or some invalid list
+              # capture [0]
+              m = ralt1.match(l)
+              if not m:
+                m = ralt2.match(l)
+              self.acks['none'].append(int(m.group(1))*3600 + int(m.group(2))*60 \
+                    + int(m.group(3)) + int(m.group(4))*.001)
             else:
-              t = m[1]*3600 + m[2]*60 + m[3] + m[4]*.001
-              rec = map(int,','.split(m[5]))
+              t = int(m.group(1))*3600 + int(m.group(2))*60 \
+                    + int(m.group(3)) + int(m.group(4))*.001
+              rec = map(int,m.group(5).split(', '))
               self.acks['gyro'].append([t] +
                     [rec[i] for i in range(0,6)])
               self.acks['euler'].append([t] +

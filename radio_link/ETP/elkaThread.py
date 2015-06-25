@@ -47,6 +47,13 @@ def split_bytes(vals):
     l.append(vals&0xff)
   return l
 
+############## gains enum class ###################
+class Headers(object):
+  def __init__(self):
+    self.debug = [chr(0),chr(255),chr(255)]
+    self.gains = [chr(1),chr(255),chr(255)]
+    self.pilot_inputs = [chr(2),chr(255),chr(255)]
+
 ############## driver thread class #################
 """ New way to run the receiver thread """
 class DriverThread(ExThread):
@@ -55,6 +62,7 @@ class DriverThread(ExThread):
     self.eradio = eradio
     self.sp = False
     self.in_queue = inQueue
+    self.header = Headers()
 
   def run_w_exc(self):
     #FIXME temp
@@ -65,7 +73,6 @@ class DriverThread(ExThread):
     kpyaw = 1
     kdyaw = 1
 
-    header = [chr(0),chr(255),chr(255)]
     pitch_gains = split_bytes(kppitch) +\
                   split_bytes(kdpitch)
     roll_gains = split_bytes(kproll) +\
@@ -76,18 +83,19 @@ class DriverThread(ExThread):
     # Initial packet with gains
     payload = pitch_gains + roll_gains + yaw_gains
     payload = map(chr,payload)
-    payload = header + payload
+    payload = self.header.gains + payload
     # Format payload as string to comply with pyusb standards
     payload = ''.join(payload)
-    log_outputs.info('{}'.format(payload))
     
     ackIn = None
     ackIn = self.eradio.send(payload)
 
+    payload = map(ord,list(payload))
+    log_outputs.info('{}'.format(payload))
     log_acks.info('{}'.format(ackIn))
 
     # New header for control inputs
-    header = [chr(0),chr(255),chr(255)]
+    header = self.header.pilot_inputs
 
     while not self.sp:
       ackIn = None
@@ -97,10 +105,12 @@ class DriverThread(ExThread):
       
       payload = header + map(chr,flatten(map(split_bytes, convert_raw(raw))))
       payload = ''.join(payload)
-      log_outputs.info('{}'.format(payload))
 
       #''' New way to send and receive packets '''
       ackIn = self.eradio.send(payload)
+      # convert payload back to readable format
+      payload = map(ord,list(payload))
+      log_outputs.info('{}'.format(payload))
       log_acks.info('{}'.format(ackIn))
           
   def stop(self):
@@ -119,7 +129,7 @@ def run_elka():
   eradio = Elkaradio()
 
   #limit queue size to prevent command buffer from forming
-  in_queue = deque(maxlen = 50)
+  in_queue = deque(maxlen=50)
   threads = []
   joy = JoyThread(in_queue)
   joy.start()

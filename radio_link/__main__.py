@@ -124,7 +124,7 @@ def parse_logs():
       elif cmd[1] == 'ack' and len(cmd) == 3:
         ackd = lp.parse_ack(cmd[2])
         print ackd
-      else: print 'could not parse {}'.format(cmd[2])
+      else: print 'could not parse {}'.format(cmd)
     else:
       print 'Invalid command'
 ################################################################################
@@ -136,7 +136,7 @@ def main():
   try:
     base = None
 
-    options = ('\nHelp<help>\n'
+    options = ('\nHelp <help>\n'
                'Exit <exit>\n'
                'Run ElkaControl with Elka <run elka>\n'
               'Run ElkaControl with two ElkaRadios <run radios>\n'
