@@ -9,6 +9,7 @@ Parses inputs, outputs, and acks logs into usable data sets
 """
 
 import sys, os, re, shutil, datetime, time
+import numpy as np
 sys.path.append(os.getcwd()) 
 
 ########## Parser Class ##########
@@ -59,16 +60,23 @@ class LogParser(object):
     """ Parse inputs log. Store time and raw data as tuples
         in self.inp dict. """
     def parse_in(self, ipf='./Logging/Logs/inputs.log'):
-        r = re.compile(r'((\d+):(\d+):(\d+.\d+)),'
-                r'\[((\d+.\d+),(\d+.\d+),(\d+.\d+),(\d+.\d+))\]')
-        el = [None] * 2
-        with open(ipf, 'r') as inf:c
-            for l in inf:
-                el = r.match(l)
-                if el[0] is not None:
-                    print el
-                else:
-                    print "re not matched"
+      #FIXME this process should be done by reading the header
+      self.inp['raw'] = []
+
+      r = re.compile(
+            r'(\d+):(\d+):(\d+)\.(\d+),\[((-?\d+\.\d+(e-?\d+)?,?\s?){4})\]')
+      with open(ipf, 'r') as inf:
+        for l in inf:
+          m = None
+          m = r.match(l)
+          if not m:
+            raise IOError('unexpected line read in {}'.format(inf))
+          t = int(m.group(1))*3600 + int(m.group(2))*60 \
+                + int(m.group(3)) + int(m.group(4))*.001
+          raw = map(float,m.group(5).split(', '))
+          self.inp['raw'].append([t] +
+                [raw[i] for i in range(0,4)])
+      return self.inp
 
     """ Parse outputs log. Store time and transformed data as tuples
         in self.out dict. """
@@ -77,8 +85,8 @@ class LogParser(object):
       self.out['gains'] = []
       self.out['p_in'] = [] # pilot inputs
 
-      rp = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),\[(((\d+),?\s?){11})\]')
-      rg = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),\[(((\d+),?\s?){15})\]')
+      rp = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),\[(((\d+),?\s?){12})\]')
+      rg = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),\[(((\d+),?\s?){16})\]')
       with open(otf, 'r') as outf:
         print 'here'
         for l in outf:
@@ -89,14 +97,16 @@ class LogParser(object):
                     + int(m.group(3)) + int(m.group(4))*.001
             out = map(int,m.group(5).split(', '))
             self.out['p_in'].append([t] +
-                  [out[i] for i in range(3,11)])
+                  [out[i] for i in range(4,12)])
           else:
             m = rg.match(l)
+            if not m:
+              raise IOError('unexpected line read in {}'.format(outf))
             t = int(m.group(1))*3600 + int(m.group(2))*60 \
                     + int(m.group(3)) + int(m.group(4))*.001
             out = map(int,m.group(5).split(', '))
             self.out['gains'].append([t] +
-                  [out[i] for i in range(3,15)])
+                  [out[i] for i in range(4,16)])
       return self.out
 
     """ Parse acks log. Store gyro, euler angles, and commands  as tuples
@@ -135,6 +145,11 @@ class LogParser(object):
                     [rec[i] for i in range(6,9)])
               self.acks['commanded'].append([t] +
                     [rec[i] for i in range(9,len(rec))])
+            if not m:
+              raise IOError('unexpected line read in {}'.format(ackf))
           return self.acks
-        raise IOError('file not found')
+
+    def plot_data(x=None,y=None,z=None):
+      pass
+
 ########## End of LogParser Class ##########

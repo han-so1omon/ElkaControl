@@ -229,7 +229,7 @@ class Elkaradio(object):
         Sending packets takes data_out as a set of contiguous bytes to send to
         USB device.
 
-        Returns 26 bytes read from USB device."""
+        Returns 27 bytes read from USB device."""
     def send(self, data_out):
 
         ackIn = None

@@ -119,6 +119,7 @@ def parse_logs():
       # parse logs
       if cmd[1] == 'input' and len(cmd) == 3:
         ind = lp.parse_in(cmd[2])
+        print ind
       elif cmd[1] == 'output' and len(cmd) == 3:
         outd = lp.parse_out(cmd[2])
         print outd

@@ -51,8 +51,8 @@ def split_bytes(vals):
 class Headers(object):
   def __init__(self):
     self.debug = [chr(0),chr(255),chr(255)]
-    self.gains = [chr(1),chr(255),chr(255)]
-    self.pilot_inputs = [chr(2),chr(255),chr(255)]
+    self.gains = [chr(5),chr(255),chr(255)]
+    self.pilot_inputs = [chr(4),chr(255),chr(255)]
 
 ############## driver thread class #################
 """ New way to run the receiver thread """
