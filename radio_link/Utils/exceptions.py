@@ -54,3 +54,6 @@ class JoystickThreadFinished(Exception):
     ''' Loop break condition is satisfied, so thread stops '''
     pass
 
+class InvalidCommand(Exception):
+    ''' Invalid command given to interpreter '''
+    pass
