@@ -8,10 +8,19 @@ Logging contains parser, grapher, and directory containing log files
 
 Logging/Logs contains configuration and files
 
+TODO
 Stream file headers: 
-datefmt
-stream name ',' lines per entry, num el per line 1/.../num el per line n
 
-all log data elements begin on a new line with a '[' char, contain comma delimited data
-elements, and end with a ']' char
+TODO
+Stream file formats:
+
+Input:
+timestamp,[pitch, roll, thrust, yaw]
+
+Output:
+timestamp,[pitch, roll, thrust, yaw]
+
+Ack:
+timestamp,[information_available, gyro1,...,gyro6, euler1,...,euler3, 
+commanded1,...,commanded16]
 """

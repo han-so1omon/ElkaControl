@@ -3,11 +3,11 @@ Project: Crazyradio control of quadrotors
 Lab: Alfred Gessow Rotorcraft Center
 Package: Inputs
 
-External inputs for CrazyradioControl
+External inputs for ElkaControl
 
-How do I pass a pointer in python?
-How does exception catching/raising work in threads?
-    make new method in joystick class to stop thread/program on keyboard
-    interrupt
-    make input to data conversion a linear process handled at the input level
+From joystick:
+  LVU = 0th = thrust
+  RHL = 1st = roll
+  RVU = 2nd = pitch
+  LHL = 3rd = yaw
 """

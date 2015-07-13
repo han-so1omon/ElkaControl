@@ -20,6 +20,14 @@ class LogParser(object):
         self.inp = {}
         self.out = {}
         self.acks = {}
+        plt.ion()
+        self.fig_num = 1
+        self.pdets = dict(zip([
+          'title', 'xlabel', 'ylabel', 'text', 'axis', 'grid'
+          ],
+          [
+          plt.title, plt.xlabel, plt.ylabel, plt.text, plt.axis, plt.grid
+          ]))
 
     """ Save a log file to the appropriate location """
     def save_file(self, fstr=None, nm=None):
@@ -54,7 +62,7 @@ class LogParser(object):
         except OSError:
           pass # directory already exists
         m_out = pth + '/' + '{0}.{1}'.format(m_out[0][0], m_out[0][1])
-        print m_out
+        print 'Saved to {}'.format(m_out)
 
       shutil.copy2(fstr, m_out)
 
@@ -73,14 +81,12 @@ class LogParser(object):
           t = int(m.group(1))*3600 + int(m.group(2))*60 \
                 + int(m.group(3)) + int(m.group(4))*.001
           raw = np.float32([t] + map(float,m.group(5).split(', ')))
-          #print raw
           if first:
             # change this if float32 is too small
             self.inp['raw'] = np.float32(raw)
             first = False
           else:
             self.inp['raw'] = np.vstack((self.inp['raw'], raw))
-            #print self.inp['raw']
       return self.inp
 
     """ Parse outputs log. Store time and transformed data as tuples
@@ -91,7 +97,6 @@ class LogParser(object):
       rp = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),\[(((\d+),?\s?){12})\]')
       rg = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),\[(((\d+),?\s?){16})\]')
       with open(otf, 'r') as outf:
-        print 'here'
         for l in outf:
           m = None
           m = rp.match(l)
@@ -100,10 +105,10 @@ class LogParser(object):
                     + int(m.group(3)) + int(m.group(4))*.001
             out = np.float32([t]+map(int,m.group(5).split(', ')))
             if firstP:
-              self.out['p_in'] = np.hstack((out[0],out[5:13]))
+              self.out['trans'] = np.hstack((out[0],out[5:13]))
               firstP = False
             else:
-                self.out['p_in'] = np.vstack((self.out['p_in'],
+                self.out['trans'] = np.vstack((self.out['trans'],
                       np.hstack((out[0],out[5:13]))))
           else:
             m = rg.match(l)
@@ -136,6 +141,7 @@ class LogParser(object):
           r'(\d+):(\d+):(\d+)\.(\d+),array\(\'B\',\s\[((\d+?\s?))\]\)')
         ralt2 = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),(None)')
         with open(acf, 'r') as ackf:
+          drop_ctr = 1 
           for l in ackf:
             m = None
             m = r.match(l)
@@ -146,13 +152,18 @@ class LogParser(object):
               if not m:
                 raise IOError('unexpected line read in {}'.format(ackf))
               if firstI:
-                self.acks['none'] = np.float32([int(m.group(1))*3600 +
-                    int(m.group(2))*60 + int(m.group(3)) + int(m.group(4))*.001])
+                self.acks['none'] = np.hstack((
+                    [int(m.group(1))*3600 + int(m.group(2))*60 +
+                    int(m.group(3)) + int(m.group(4))*.001],
+                    [drop_ctr]))
+                drop_ctr += 1
                 firstI = False
               else:
-                self.acks['none'] = np.vstack(self.acks['none'] +
-                    [int(m.group(1))*3600 + int(m.group(2))*60
-                    + int(m.group(3)) + int(m.group(4))*.001])
+                self.acks['none'] = np.vstack((self.acks['none'],
+                    np.hstack(([int(m.group(1))*3600 + int(m.group(2))*60
+                    + int(m.group(3)) + int(m.group(4))*.001],
+                    [drop_ctr]))))
+                drop_ctr += 1
             else:
               t = int(m.group(1))*3600 + int(m.group(2))*60 \
                     + int(m.group(3)) + int(m.group(4))*.001
@@ -173,70 +184,25 @@ class LogParser(object):
               raise IOError('unexpected line read in {}'.format(ackf))
         return self.acks
 
-    """ Pass in plot type (e.g. euler angles) and array (e.g. acks).
-        Decode plot request and send to plot_data function
     """
-    def plt_ctrl(typ=None,arr=None):
-      if typ[0] == 'input':
-        # plot raw thrust, roll, pitch, yaw each wrt time
-        if typ[1] == 'all':
-            pass
-        elif typ[1] == 'thrust':
-            pass
-        elif typ[1] == 'roll':
-            pass
-        elif typ[1] == 'pitch':
-            pass
-        elif typ[1] == 'yaw':
-            pass
-        else:
-          raise InvalidCommand('Invalid input plot type.'
-                  'Must be all, thrust, roll, pitch, or yaw')
-            
-      elif typ[0] == 'output':
-        # plot transformed thrust, roll, pitch, yaw each wrt time
-        # or gains wrt time
-        if typ[1] == 'all':
-            pass
-        elif typ[1] == 'thrust':
-            pass
-        elif typ[1] == 'roll':
-            pass
-        elif typ[1] == 'pitch':
-            pass
-        elif typ[1] == 'yaw':
-            pass
-        else:
-          raise InvalidCommand('Invalid output plot type.'
-                  'Must be all, thrust, roll, pitch, or yaw')
-      elif typ[0] == 'ack':
-        # plot each element of gyro data, euler data, commanded data
-        # wrt time
-        if typ[1] == 'all':
-            pass
-        elif typ[1] == 'gyro':
-            pass
-        elif typ[1] == 'euler':
-            pass
-        elif typ[1] == 'commanded':
-            pass
-        else:
-          raise InvalidCommand('Invalid ack plot type.'
-                  'Must be all, gyro, euler, or commanded')
-      else:
-        raise InvalidCommand('Invalid plot type.'
-          'Must be input, output, or ack')
-
+    Pass up to four arrays and specify a plot style.
+    Line styles and plot styles are specified at:
+      http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot
     
-    def plot_data(x=None,y=None,x_step=None,y_step=None,
-                  plotname='Plot',linename='Line 1',linestyle='rs-',
-                  xlabel='x',ylabel='y',legendlocation='upper left'):
-      fig = plt.figure()
-      ax = fig.add_axes([.1,.1,.8,.7],label=plotname,ylabel=ylabel,
-              xlabel=xlabel)
-      s1 = ax.plot(x,y,style)
-      fig.legend((l1),(linename),legendlocation)
+    Returns matplotlib.pyplot figure
+    """
+    def plot_data(self,fdata,arrs,style):
+      print fdata
+      f = plt.figure(num=self.fig_num)
+      self.fig_num += 1
+      ax = plt.subplot(111)
+      for d in fdata.keys():
+        self.pdets[d](fdata[d])
+      if style:
+        plt.plot(*arrs,**style)
+      else:
+        plt.plot(*arrs)
       plt.show()
-      return fig
+      return f
 
 ########## End of LogParser Class ##########

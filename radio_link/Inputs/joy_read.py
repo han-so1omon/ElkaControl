@@ -22,7 +22,7 @@ class Axes(object):
         #   Axis zero = {L[eft], R[ight], I[n], O[ut]
 
         # For current implementation, only use the following:
-        #   LeftHL, LeftVU, RightHL, RightVU
+        # LeftHL - yaw, LeftVU - pitch, RightHL - roll, RightVU - thrust
         if joystick_name == 'Generic X-Box pad' or\
            joystick_name == 'Controller (Gamepad F310)':
             self.LeftHL = 0

@@ -1,5 +1,19 @@
-2015-07-02 12:32:12,034 - main - DEBUG - 
+2015-07-13 10:15:04,638 - main - DEBUG - 
 Log files cleared
-2015-07-02 12:52:56,391 - main - DEBUG - None
+2015-07-13 10:16:48,362 - main - ERROR - Incorrect plot lines specified. Must specify between one and four valid lines.
+Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 203, in parse_logs
+    parse_plot(fcmd,pcmd,ind,outd,ackd))))
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 116, in parse_plot
+    return parse_style(fcmd), parse_arrs(cmd,ind,outd,ackd), parse_style(cmd)
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 112, in parse_arrs
+    else: raise InvalidCommand('Incorrect plot lines specified. '
+InvalidCommand: Incorrect plot lines specified. Must specify between one and four valid lines.
+2015-07-13 10:18:08,703 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 282, in main
+    parse_logs()
+  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 181, in parse_logs
+    sys.exit(0)
+SystemExit: 0
 
-2015-07-02 12:52:56,391 - main - DEBUG - [<_MainThread(MainThread, started 140489686214464)>]
+2015-07-13 10:18:08,703 - main - DEBUG - [<_MainThread(MainThread, started 140162795849536)>]

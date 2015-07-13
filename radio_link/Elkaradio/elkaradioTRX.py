@@ -56,6 +56,7 @@ def _find_devices():
     else:
         raise ValueError('No radios found')
 
+# Deprecated
 # FIXME Generates inappropriate ioctl for device when attempting to write to
 # /dev/elkaradio
 # Identify serial port to send packets to
