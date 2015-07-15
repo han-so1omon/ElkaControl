@@ -232,6 +232,8 @@ def parse_logs():
           else:
             raise InvalidCommand('Could not parse {}'.format(cmd))
           data_available = True
+        elif cmd[0] == 'export':
+          pass
         else:
           raise InvalidCommand('Invalid command for submenu Parse Logs.')
     except InvalidCommand as e:
