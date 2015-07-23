@@ -20,6 +20,7 @@ class LogParser(object):
         self.inp = {}
         self.out = {}
         self.acks = {}
+        self.rfile = re.compile(r'(?<=[/|\\])([\w|\d|\-|\_]+).([\w|\d]+)\Z')
         plt.ion()
         self.fig_num = 1
         self.pdets = dict(zip([
@@ -38,8 +39,7 @@ class LogParser(object):
             'File not able to be copied. Invalid file name given')
       else:
         #matches filename.extension
-        r = re.compile(r'(?<=[/|\\])([\w|\d|\-|\_]+).([\w|\d]+)\Z')
-        m_in = r.findall(fstr) 
+        m_in = self.rfile.findall(fstr) 
 
       #FIXME clean this up
       if (not nm) and m_in:
@@ -53,8 +53,12 @@ class LogParser(object):
           pass # directory already exists
         m_out = './Logging/PrevLogs/' + m_out
       else:
-        m_out = r.findall(nm)
-        pth = nm.split('/') #requires that path splits with '/'
+        m_out = self.rfile.findall(nm)
+        if '/' in nm:
+          pth = nm.split('/') #requires that path splits with '/'
+        elif '\\'in nm:
+          pth = nm.split('\\') #requires that path splits with '\'
+        else: pth = ['./']
         pth = [pth[i] for i in range(0,len(pth)-1)]
         pth = '/'.join(pth) # return path without filename
         try:
@@ -192,17 +196,41 @@ class LogParser(object):
     Returns matplotlib.pyplot figure
     """
     def plot_data(self,fdata,arrs,style):
-      print fdata
       f = plt.figure(num=self.fig_num)
       self.fig_num += 1
       ax = plt.subplot(111)
-      for d in fdata.keys():
-        self.pdets[d](fdata[d])
+      if fdata:
+        for d in fdata.keys():
+          self.pdets[d](fdata[d])
       if style:
         plt.plot(*arrs,**style)
       else:
         plt.plot(*arrs)
       plt.show()
       return f
+
+    """
+    Pass an array, header, and delimiter to save a numpy ndarray to a text
+    file.
+    """
+    def export_arr(self,arr=None,header=None,delimiter=",",filename='tmp.csv'):
+      if '/' in filename:
+        pth = filename.split('/') #path splits with '/'
+        pth = [pth[i] for i in range(0,len(pth)-1)]
+        pth = '/'.join(pth) # return path without filename
+      elif '\\'in nm:
+        pth = filename.split('\\') #path splits with '\'
+        pth = [pth[i] for i in range(0,len(pth)-1)]
+        pth = '/'.join(pth) # return path without filename
+      else: pth = '.' # last element is a dummy
+      try:
+        os.mkdir(pth)
+      except OSError:
+        pass # directory already exists
+      filename = self.rfile.findall(filename)
+      filename = pth + '/' + '{0}.{1}'.format(filename[0][0],filename[0][1])
+
+      np.savetxt(filename,arr,delimiter=delimiter,header=header)
+      print 'Saved to {}'.format(filename)     
 
 ########## End of LogParser Class ##########

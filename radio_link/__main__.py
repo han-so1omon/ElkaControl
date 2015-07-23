@@ -45,6 +45,12 @@ logger.debug('\nLog files cleared')
 #log_outputs.info('controls[8]/gains[8]') # also contains gains
 #log_acks.info('gyro[6] euler[4] commanded[16]')
 
+### set up parsed data arrays
+ind = []
+outd = []
+ackd = []
+data_available = False # true after parse call
+
 ######################### Define helper functions ##############################
 # Global regexps for slight time efficiency
 r = re.compile(r'(\S+)')
@@ -115,6 +121,23 @@ def parse_plot(fcmd,cmd,ind,outd,ackd):
   
   return parse_style(fcmd), parse_arrs(cmd,ind,outd,ackd), parse_style(cmd)
 
+def retrieve_arr(arr_typ,arr_num):
+  ret_arr_idx = dict(zip([
+    'in','out','gyro','euler','commanded','dropped'
+    ],[
+    (ind,'raw','t=time;th=thrust;r=roll;p=pitch;y=yaw\n'
+         't1,th1,r1,p1,y1'),
+    (outd,'trans','t=time;th=thrust;r=roll;p=pitch;y=yaw\n'
+         't1,th1,r1,p1,y1'),
+    (ackd,'gyro','t=time;g=gyro\nt1,g1,g2,g3,g4,g5,g6'),
+    (ackd,'euler','t=time;e=euler\nt1,e1,e2,e3,e4'),
+    (ackd,'commanded','t=time;c=commanded\nt1,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10'
+        'c11,c12,c13,c14,c15,c16'),
+    (ackd,'none','t=time;d=dropped\nt1,d1')
+    ]))
+  arr_idx = ret_arr_idx[arr_typ]
+  return arr_idx[0][arr_num][arr_idx[1]],arr_idx[2],','
+
 """ Run elka control """
 def run_elka_control(rx=None):
   global logger, log_inputs, log_outputs, log_acks
@@ -133,6 +156,7 @@ def setup_radios(rx=[]):
   logger.debug('Setting up radios')
   ''' Demonstrate ETP with two ElkaRadios '''
   i = 0
+  data_available = False # true after parse call
   for r in rx:
     r.set_radio_mode(Elkaradio.MODE_PRX)
     i += 1
@@ -140,6 +164,7 @@ def setup_radios(rx=[]):
                  .format(i))
 
 def parse_logs():
+  global ind,outd,ackd,data_available
   # Display displays set names, export sends to spreadsheet,
   # Plot plots with x,y,z as axes values
   # Return returns to Main
@@ -155,10 +180,6 @@ def parse_logs():
   lp = LogParser()
   dp = DataPlotter()
 
-  ind = []
-  outd = []
-  ackd = []
-  data_available = False # true after parse call
   sp = False
 
   # FIXME make sure that threading is not broken because while loop is now
@@ -193,7 +214,7 @@ def parse_logs():
           Next, specify figure data if desired using keywords.
           No commas allowed.
           Use the following format:
-          title = Dropped packets, 
+          title = Dropped packets, xlabel = time (s) 
           '''
           if not data_available: raise InvalidCommand('No data available.')
           pcmd = raw_input('<Specify up to four lines and style\n<')
@@ -222,18 +243,31 @@ def parse_logs():
           # parse logs
           if cmd[1] == 'in':
             ind.append(lp.parse_in(cmd[2]))
-            print 'Parsed in data: {}'.format(ind)
+            print 'Parsed in data: {}'.format(ind[-1])
           elif cmd[1] == 'out':
             outd.append(lp.parse_out(cmd[2]))
-            print 'Parsed out data: {}'.format(outd)
+            print 'Parsed out data: {}'.format(outd[-1])
           elif cmd[1] == 'ack':
             ackd.append(lp.parse_ack(cmd[2]))
-            print 'Parsed ack data: {}'.format(ackd)
+            print 'Parsed ack data: {}'.format(ackd[-1])
           else:
             raise InvalidCommand('Could not parse {}'.format(cmd))
           data_available = True
         elif cmd[0] == 'export':
-          pass
+          '''
+          Export entire log file in csv format.
+          Specify: export <arr_type> <arr_num> <filename>
+          '''
+          '''
+          arr,header,delimiter = retrieve_arr(cmd[1],int(cmd[2]))))
+          print arr
+          print type(arr)
+          lp.export_arr(filename=cmd[3],arr=arr,
+                  header=header,delimiter=delimiter)
+          '''
+          lp.export_arr(filename=cmd[3],
+                  **dict(zip(['arr','header','delimiter'],
+                  retrieve_arr(cmd[1],int(cmd[2])))))
         else:
           raise InvalidCommand('Invalid command for submenu Parse Logs.')
     except InvalidCommand as e:
