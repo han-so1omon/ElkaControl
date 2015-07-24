@@ -1,0 +1,7 @@
+pyusb
+pygame
+pyserial
+pyusb
+matplotlib
+numpy
+numpydoc

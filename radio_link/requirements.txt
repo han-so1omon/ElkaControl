@@ -1,6 +1,0 @@
-pyserial==2.6
-pyusb==1.0.0rc1
-pygame==1.9.1release
-matplotlib==1.4.3
-numpy==1.8.2
-numpydoc==0.5
