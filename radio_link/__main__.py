@@ -176,6 +176,58 @@ def parse_logs():
               '\nParse log file <parse <logtype <./path/to/x.log>>>'
               '\nReturn to main menu <return>'
               '\nExit program <exit>')
+  help_options = (
+    '\nexit'
+    '\n\tUsage:'
+    '\n\t\tEnter <exit> from a particular submenu to exit the program.'
+    '\n\tBehavior:'
+    '\n\t\tExits program with system call. Leaves any active data unsaved.'
+
+    '\nhelp'
+    '\n\tUsage:'
+    '\n\t\tEnter <help> from a particular submenu to display help menu.'
+    '\n\tBehavior:'
+    '\n\t\tDisplays help menu. Help menu contains usage information and'
+    '\n\t\texpected behavior for each command.'
+
+    '\ndisplay'
+    '\n\tUsage:'
+    '\n\t\tEnter <display> from the \'Parse\' submenu to display the usable'
+    '\n\t\tdata sets.'
+    '\n\tBehavior:'
+    '\n\t\tDisplays data sets that were parsed during the current session.'
+    '\n\t\tData sets are persistent across menu changes. There are three types'
+    '\n\t\tof data sets: in, out, and ack.'
+    '\n\t\tin data is the raw data sent by the controller to the internal'
+    '\n\t\tmodel. It contains the raw versions of thrust, roll,'
+    '\n\t\tpitch, and yaw.'
+    '\n\t\tout data is the transformed data that is to be sent to the'
+    '\n\t\treceive node. It contains the transformed versions of thrust,'
+    '\n\t\troll, pitch, and yaw.'
+    '\n\t\tack data is the specified return packet data from the receive'
+    '\n\t\tnode. When operating with an elka vehicle, this packet contains'
+    '\n\t\t6 bytes gyro data, 4 bytes euler angles, and 16 bytes commanded'
+    '\n\t\tdata.'
+
+    '\nplot'
+    '\n\tUsage:'
+    '\n\t\tEnter <plot> from the \'Parse\' submenu to enter a two-part plot'
+    '\n\t\tprompt. In the first prompt, enter up to four valid lines to plot.'
+    '\n\t\tIn the second prompt, specify plot details.'
+    '\n\tBehavior:'
+    '\n\t\tSpecify up to four linetype,linestyle tuples.'
+    '\n\t\tLinestyles can also be specified with keyword arguments separated'
+    '\n\t\t
+    '''Specify lntyp0,lnsty0,...,pltsty up to four lntyp,lnsty tuples.
+          Line styles can also be specified with keyword arguments.
+          Use the following format:
+          in thrust1 'rs-', out thrust2 '>c'; color=green, linestyle = '-' 
+          Next, specify figure data if desired using keywords.
+          No commas allowed.
+          Use the following format:
+          title = Dropped packets, xlabel = time (s)
+    '''
+    )
 
   lp = LogParser()
   dp = DataPlotter()
@@ -187,7 +239,7 @@ def parse_logs():
   while not sp:
     try:
         # prompt next step
-        print '\nParse Logs:\nWhat would you like to do?'
+        print '\nParse:\nWhat would you like to do?'
         print p_options
 
         r_cmd = raw_input('<')
@@ -195,10 +247,10 @@ def parse_logs():
 
         if cmd[0] == 'help':
           ''' Display options '''
-          #FIXME display options
-          pass
+          print help_options
         elif cmd[0] == 'exit':
           ''' Clean up and exit program '''
+          #TODO clean up program before exiting
           sys.exit(0)
         elif cmd[0] == 'display' and len(cmd) == 1:
           ''' Display usable data sets '''
@@ -286,7 +338,48 @@ def main():
   options = ('\nHelp <help>\n'
                'Exit program <exit>\n'
                'Run ElkaControl with Elka <run elka>\n' 'Run ElkaControl with two ElkaRadios <run radios>\n'
-              'Parse log files <parse>')
+              'Parse log files <parse>'
+            )
+  help_options = (
+    '\nexit'
+    '\n\tUsage:'
+    '\n\t\tEnter <exit> from a particular submenu to exit the program.'
+    '\n\tBehavior:'
+    '\n\t\tExits program with system call. Leaves any active data unsaved.'
+
+    '\nhelp'
+    '\n\tUsage:'
+    '\n\t\tEnter <help> from a particular submenu to display help menu.'
+    '\n\tBehavior:'
+    '\n\t\tDisplays help menu. Help menu contains usage information and'
+    '\n\t\texpected behavior for each command.'
+
+    '\n\nrun elka'
+    '\n\tUsage:'
+    '\n\t\tEnter <run elka> from the \'Main\' menu to run elka with a vehicle.'
+    '\n\t\tTo stop running elka, press CTRL-C.'
+    '\n\tBehavior:'
+    '\n\t\tRuns elka as the basestation for a vehicle. Requires that the'
+    '\n\t\tvehicle and the base station transceivers are both set to the same'
+    '\n\t\tfrequency and the vehicle is set in receive mode.'
+
+    '\n\nrun radios'
+    '\n\tUsage:'
+    '\n\t\tEnter <run radios> from the \'Main\' menu to run elka with radios.'
+    '\n\t\tTo stop running elka, press CTRL-C.'
+    '\n\tBehavior:'
+    '\n\t\tRuns elka as the basestation for another elkaradio dongle.'
+    '\n\t\tRequires that the vehicle and the base station transceivers are'
+    '\n\t\tboth set to the same frequency. This is a mainly a debug mode.'
+
+    '\n\nparse'
+    '\n\tUsage:'
+    '\n\t\tEnter <parse> from the \'Main\' menu to enter the \'Parse\' submenu.'
+    '\n\tBehavior:'
+    '\n\t\tEnters the \'Parse\' submenu. From there, you may parse and'
+    '\n\t\tmanipulate recently captured as well as previously stored data.'
+    )
+
   while not sp:
     try:
       print '\nMain:\nWhat would you like to do?'
@@ -299,8 +392,7 @@ def main():
       if cmd[0] == 'exit':
         sp = True
       elif cmd[0] == 'help':
-          #FIXME print options
-          pass
+        print help_options
       elif cmd[0] == 'run' and cmd[1] == 'elka':
         run_elka_control()
       elif cmd[0] == 'run' and cmd[1] == 'radios':
