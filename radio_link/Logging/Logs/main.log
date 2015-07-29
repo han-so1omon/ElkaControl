@@ -1,10 +1,11 @@
-2015-07-24 21:17:58,981 - main - DEBUG - 
+2015-07-29 13:16:10,175 - main - DEBUG - 
 Log files cleared
-2015-07-24 21:18:28,806 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 391, in main
-    parse_logs()
-  File "/home/eric/Desktop/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 235, in parse_logs
-    sys.exit(0)
-SystemExit: 0
+2015-07-29 13:16:21,376 - main - DEBUG - None
 
-2015-07-24 21:18:28,806 - main - DEBUG - [<_MainThread(MainThread, started 140314110920512)>]
+2015-07-29 13:16:21,377 - main - DEBUG - [<_MainThread(MainThread, started 140249160841024)>]
+2015-07-29 13:16:22,413 - main - DEBUG - None
+
+2015-07-29 13:16:22,413 - main - DEBUG - [<_MainThread(MainThread, started 140249160841024)>]
+2015-07-29 13:16:26,829 - main - DEBUG - None
+
+2015-07-29 13:16:26,829 - main - DEBUG - [<_MainThread(MainThread, started 140249160841024)>]

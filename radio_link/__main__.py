@@ -215,18 +215,46 @@ def parse_logs():
     '\n\t\tprompt. In the first prompt, enter up to four valid lines to plot.'
     '\n\t\tIn the second prompt, specify plot details.'
     '\n\tBehavior:'
-    '\n\t\tSpecify up to four linetype,linestyle tuples.'
+    '\n\t\tSpecify up to four linetype,linestyle tuples. The following'
+    '\n\t\tlinetypes are available:'
+    '\n\t\tin thrust/roll/pitch/yaw'
+    '\n\t\tout thrust/roll/pitch/yaw'
+    '\n\t\tack gyro[1-16]/euler[1-4]/commanded[1-16]/dropped'
     '\n\t\tLinestyles can also be specified with keyword arguments separated'
-    '\n\t\t
-    '''Specify lntyp0,lnsty0,...,pltsty up to four lntyp,lnsty tuples.
-          Line styles can also be specified with keyword arguments.
-          Use the following format:
-          in thrust1 'rs-', out thrust2 '>c'; color=green, linestyle = '-' 
-          Next, specify figure data if desired using keywords.
-          No commas allowed.
-          Use the following format:
-          title = Dropped packets, xlabel = time (s)
-    '''
+    '\n\t\tby commas.'
+    '\n\t\tlinestyles and keyword arguments can be found at'
+    '\n\t\thttp://matplotlib.org/1.3.1/api/axes_api.html#matplotlib.axes.Axes.plot'
+    '\n\t\te.g. ack gyro1 0 \'rs-\', in thrust 0 \'g--\';linewidth=1.0'
+    '\n\t\tThen, specify plot details. The following details are available:'
+    '\n\t\ttitle, xlabel, ylabel, text, axes, and grid.'
+
+    '\nsave'
+    '\n\tUsage:'
+    '\n\t\tEnter <save> <logtype> <filepath> <savepath> from the \'Parse\''
+    '\n\t\tsubmenu to save a .log file created by elka. Use ./ to specify'
+    '\n\t\tcurrent directory.'
+    '\n\tBehavior:'
+    '\n\t\tSave a log file to be parsed now or later. If no savepath is'
+    '\n\t\tspecified, the default save directory is ./Logging/PrevLogs and the'
+    '\n\t\tdefault save file is logtype-timestamp.log.'
+
+    '\nparse'
+    '\n\tUsage:'
+    '\n\t\tEnter <parse> <logtype> <filepath> from the \'Parse\' submenu to'
+    '\n\t\tparse a log file into the usable data sets.'
+    '\n\tBehavior:'
+    '\n\t\tParse a recently or previously made log file into the usable data'
+    '\n\t\tsets. Logtypes may be: in/out/ack. After successful parsing, the'
+    '\n\t\toutline of the parsed data sets are displayed in the console.'
+    '\n\t\tOperations and plotting can then be performed with these data sets.'
+
+    '\nexport'
+    '\n\tUsage:'
+    '\n\t\tEnter <export> <arr_type> <arr_num> <filename> to export a data set'
+    '\n\t\tin csv format.'
+    '\n\tBehavior:'
+    '\n\t\tExport a usable data set in csv format.'
+    '\n\t\tarr_type may be in/out/ack. arr_num indexes from 0.'
     )
 
   lp = LogParser()
@@ -258,16 +286,6 @@ def parse_logs():
           print 'Output data: {}'.format([i for i in range(len(outd))])
           print 'Ack data: {}'.format([i for i in range(len(ackd))])
         elif cmd[0] == 'plot':
-          '''
-          Specify lntyp0,lnsty0,...,pltsty up to four lntyp,lnsty tuples.
-          Line styles can also be specified with keyword arguments.
-          Use the following format:
-          in thrust1 'rs-', out thrust2 '>c'; color=green, linestyle = '-' 
-          Next, specify figure data if desired using keywords.
-          No commas allowed.
-          Use the following format:
-          title = Dropped packets, xlabel = time (s) 
-          '''
           if not data_available: raise InvalidCommand('No data available.')
           pcmd = raw_input('<Specify up to four lines and style\n<')
           fcmd = raw_input('<If desired: specify title, xlabel, ylabel, '
@@ -278,20 +296,11 @@ def parse_logs():
           ''' Return to main menu '''
           sp = True
         elif cmd[0] == 'save':
-          '''
-          Save log file in specified or default location.
-          Default location is ./Logging/PrevLogs
-          '''
           if len(cmd) > 2:
             lp.save_file(cmd[1], cmd[2])
           else:
             lp.save_file(cmd[1], None)
         elif cmd[0] == 'parse' and len(cmd) == 3:
-          '''
-          Parse specified log file.
-          Must specify input, output, or ack as log type.
-          Must then specify path to log.
-          '''
           # parse logs
           if cmd[1] == 'in':
             ind.append(lp.parse_in(cmd[2]))
@@ -306,17 +315,6 @@ def parse_logs():
             raise InvalidCommand('Could not parse {}'.format(cmd))
           data_available = True
         elif cmd[0] == 'export':
-          '''
-          Export entire log file in csv format.
-          Specify: export <arr_type> <arr_num> <filename>
-          '''
-          '''
-          arr,header,delimiter = retrieve_arr(cmd[1],int(cmd[2]))))
-          print arr
-          print type(arr)
-          lp.export_arr(filename=cmd[3],arr=arr,
-                  header=header,delimiter=delimiter)
-          '''
           lp.export_arr(filename=cmd[3],
                   **dict(zip(['arr','header','delimiter'],
                   retrieve_arr(cmd[1],int(cmd[2])))))
