@@ -12,7 +12,7 @@ Content:
 Usage:
 - Follow http://wiki.bitcraze.se/projects:crazyradio:index for information about
   how to use Elkaradio nrfProg and usb_tools
-- Run pip install -r requirements.txt to install dependencies
+- Run pip install--no-index --find-links=./wheels/<sys_type> -r requirements.txt to install dependencies
 - To use radio_link app:
     Navigate to radio_link folder using 'cd radio_link'
     run app using 'python ./'
