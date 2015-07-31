@@ -1,11 +1,5 @@
-2015-07-29 13:16:10,175 - main - DEBUG - 
+2015-07-31 09:53:07,012 - main - DEBUG - 
 Log files cleared
-2015-07-29 13:16:21,376 - main - DEBUG - None
+2015-07-31 09:53:21,759 - main - DEBUG - None
 
-2015-07-29 13:16:21,377 - main - DEBUG - [<_MainThread(MainThread, started 140249160841024)>]
-2015-07-29 13:16:22,413 - main - DEBUG - None
-
-2015-07-29 13:16:22,413 - main - DEBUG - [<_MainThread(MainThread, started 140249160841024)>]
-2015-07-29 13:16:26,829 - main - DEBUG - None
-
-2015-07-29 13:16:26,829 - main - DEBUG - [<_MainThread(MainThread, started 140249160841024)>]
+2015-07-31 09:53:21,759 - main - DEBUG - [<_MainThread(MainThread, started 2252)>]

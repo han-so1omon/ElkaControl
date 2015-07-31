@@ -21,7 +21,7 @@ setup(name='ElkaControl',
       ],
       packages=find_packages(), 
       #TODO override this with wheeled archives
-      #pip wheel --w wheels/sys_wheel_dir -r requirements.txt
+      #pip wheel -w wheels/sys_wheel_dir -r requirements.txt
       #pip install --no-index --find-links=./wheels -r requirements.txt
       install_requires=['pyusb',
           'pygame',
