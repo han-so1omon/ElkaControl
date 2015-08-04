@@ -1,5 +1,77 @@
-2015-07-31 09:53:07,012 - main - DEBUG - 
+2015-08-03 13:23:57,605 - main - DEBUG - 
 Log files cleared
-2015-07-31 09:53:21,759 - main - DEBUG - None
+2015-08-03 13:24:01,178 - main - DEBUG - Running Elka Control
+2015-08-03 13:24:01,406 - main.joy_read - DEBUG - 
+Joystick: Generic X-Box pad
+2015-08-03 13:24:01,407 - main.joy_read - DEBUG - 
+Joystick thread running
+2015-08-03 13:25:11,284 - main.elkaThread - DEBUG - 
+Thread-1 stopped
+2015-08-03 13:25:11,284 - main.elkaThread - DEBUG - 
+Thread-2 stopped
+2015-08-03 13:25:11,287 - main.elkaradioTRX - ERROR - [Errno 19] No such device (it may have been disconnected)
+Traceback (most recent call last):
+  File "./Elkaradio/elkaradioTRX.py", line 239, in send
+    ackIn = self.dev.read(0x81, 64, 100)
+  File "/usr/local/lib/python2.7/dist-packages/usb/core.py", line 918, in read
+    self.__get_timeout(timeout))
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 777, in bulk_read
+    timeout)
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 880, in __read
+    _check(retval)
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 560, in _check
+    raise USBError(_str_error[ret], ret, _libusb_errno[ret])
+USBError: [Errno 19] No such device (it may have been disconnected)
+2015-08-03 13:25:11,287 - main - ERROR - 
+Traceback (most recent call last):
+  File "/home/eric/Projects/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 395, in main
+    run_elka_control()
+  File "/home/eric/Projects/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 152, in run_elka_control
+    run_elka()
+  File "./ETP/elkaThread.py", line 147, in run_elka
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 147, in <lambda>
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 126, in chk_thread
+    t.join(1)
+  File "/usr/lib/python2.7/threading.py", line 960, in join
+    self.__block.wait(delay)
+  File "/usr/lib/python2.7/threading.py", line 358, in wait
+    _sleep(delay)
+KeyboardInterrupt
+2015-08-03 13:25:11,291 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Projects/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 395, in main
+    run_elka_control()
+  File "/home/eric/Projects/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 152, in run_elka_control
+    run_elka()
+  File "./ETP/elkaThread.py", line 147, in run_elka
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 147, in <lambda>
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 126, in chk_thread
+    t.join(1)
+  File "/usr/lib/python2.7/threading.py", line 960, in join
+    self.__block.wait(delay)
+  File "/usr/lib/python2.7/threading.py", line 358, in wait
+    _sleep(delay)
+KeyboardInterrupt
 
-2015-07-31 09:53:21,759 - main - DEBUG - [<_MainThread(MainThread, started 2252)>]
+2015-08-03 13:25:11,291 - main - DEBUG - [<_MainThread(MainThread, started 139840189564736)>]
+2015-08-03 13:25:14,795 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Projects/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 395, in main
+    run_elka_control()
+  File "/home/eric/Projects/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 152, in run_elka_control
+    run_elka()
+  File "./ETP/elkaThread.py", line 147, in run_elka
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 147, in <lambda>
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 126, in chk_thread
+    t.join(1)
+  File "/usr/lib/python2.7/threading.py", line 960, in join
+    self.__block.wait(delay)
+  File "/usr/lib/python2.7/threading.py", line 358, in wait
+    _sleep(delay)
+KeyboardInterrupt
+
+2015-08-03 13:25:14,795 - main - DEBUG - [<_MainThread(MainThread, started 139840189564736)>]

@@ -51,8 +51,9 @@ def split_bytes(vals):
 class Headers(object):
   def __init__(self):
     self.debug = [chr(0),chr(255),chr(255)]
-    self.gains = [chr(5),chr(255),chr(255)]
-    self.pilot_inputs = [chr(4),chr(255),chr(255)]
+    self.gains = [chr(1),chr(255),chr(255)]
+    self.sensitivity = [chr(2),chr(255),chr(255)]
+    self.trim = [chr(4),chr(255),chr(255)]
 
 ############## driver thread class #################
 """ New way to run the receiver thread """
@@ -66,12 +67,12 @@ class DriverThread(ExThread):
 
   def run_w_exc(self):
     #FIXME temp
-    kppitch = 1
-    kdpitch = 1
-    kproll = 1
-    kdroll = 1
-    kpyaw = 1
-    kdyaw = 1
+    kppitch = 10
+    kdpitch = 200
+    kproll = 10
+    kdroll = 200
+    kpyaw = 200
+    kdyaw = 0
 
     pitch_gains = split_bytes(kppitch) +\
                   split_bytes(kdpitch)
@@ -85,6 +86,7 @@ class DriverThread(ExThread):
     payload = map(chr,payload)
     payload = self.header.gains + payload
     # Format payload as string to comply with pyusb standards
+    payload.insert(0,chr(len(payload)))
     payload = ''.join(payload)
     
     ackIn = None
@@ -95,7 +97,7 @@ class DriverThread(ExThread):
     log_acks.info('{}'.format(ackIn))
 
     # New header for control inputs
-    header = self.header.pilot_inputs
+    header = self.header.trim
 
     while not self.sp:
       ackIn = None
@@ -104,6 +106,7 @@ class DriverThread(ExThread):
       raw = self.in_queue.pop()
       
       payload = header + map(chr,flatten(map(split_bytes, convert_raw(raw))))
+      payload.insert(0,chr(len(payload)))
       payload = ''.join(payload)
 
       #''' New way to send and receive packets '''
