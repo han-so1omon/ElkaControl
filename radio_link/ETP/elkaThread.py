@@ -1,3 +1,13 @@
+"""
+Author: Eric Solomon
+Project: Elkaradio Control 
+Lab: Alfred Gessow Rotorcraft Center
+Package: ETP
+Module: elkaThread.py
+
+Contains methods for converting joystick inputs and running elka.
+"""
+
 import sys, os, Queue, threading, logging, traceback
 sys.path.append(os.getcwd()) 
 
@@ -15,14 +25,15 @@ log_acks = logging.getLogger('acks')
 ################################################################################
 
 ############### utility functions ###############
+#FIXME tune this
 def convert_raw(raw):
   out = []
   to_datum = 1
   trans = 1000
   for i in range(len(raw)):
-    if i == 0: # transform to [1000 2000]
-      out.append(int((1.5 + raw[i]) * 1000))
-    else: # transform to [-1000 1000]
+    if i == 0: # transform thrust to [1000 2000]
+      out.append(int((3 + raw[i]) * 500))
+    else: # transform roll,pitch,yaw to [-1000 1000]
       out.append(int(raw[i]*1000))
   split_bytes(out)
   return out
@@ -49,37 +60,34 @@ def split_bytes(vals):
 
 ############## gains enum class ###################
 class Headers(object):
-  def __init__(self):
+ def __init__(self):
     self.debug = [chr(0),chr(255),chr(255)]
-    self.gains = [chr(1),chr(255),chr(255)]
-    self.sensitivity = [chr(2),chr(255),chr(255)]
+    self.gains = [chr(5),chr(255),chr(255)]
+    self.sensitivity = [chr(6),chr(255),chr(255)]
     self.trim = [chr(4),chr(255),chr(255)]
 
 ############## driver thread class #################
 """ New way to run the receiver thread """
 class DriverThread(ExThread):
-  def __init__(self, eradio, inQueue=None):
+  def __init__(self,eradio,init_gains=[10,0,200,10,0,200,200],
+      in_queue_arg=deque(maxlen=50)):
     ExThread.__init__(self)
     self.eradio = eradio
     self.sp = False
-    self.in_queue = inQueue
+    self.in_queue = in_queue_arg
     self.header = Headers()
+    # gains format: kppitch, kipitch, kdpitch, kproll, kiroll, kdroll, kpyaw
+    self.gains = init_gains
+    logger.debug('gains: {}'.format(init_gains))
 
   def run_w_exc(self):
-    #FIXME temp
-    kppitch = 10
-    kdpitch = 200
-    kproll = 10
-    kdroll = 200
-    kpyaw = 200
-    kdyaw = 0
-
-    pitch_gains = split_bytes(kppitch) +\
-                  split_bytes(kdpitch)
-    roll_gains = split_bytes(kproll) +\
-                 split_bytes(kdroll)
-    yaw_gains = split_bytes(kpyaw) +\
-                split_bytes(kdyaw)
+    pitch_gains = split_bytes(self.gains[0]) +\
+                  split_bytes(self.gains[1]) +\
+                  split_bytes(self.gains[2])
+    roll_gains = split_bytes(self.gains[3]) +\
+                 split_bytes(self.gains[4]) +\
+                 split_bytes(self.gains[5])
+    yaw_gains = split_bytes(self.gains[6])
 
     # Initial packet with gains
     payload = pitch_gains + roll_gains + yaw_gains
@@ -120,7 +128,8 @@ class DriverThread(ExThread):
     self.sp = True
 
 ################## main run function ########################
-def run_elka():
+# specify default gains
+def run_elka(init_gains):
   def chk_thread(t):
     if t.isAlive():
       t.join(1)
@@ -137,7 +146,10 @@ def run_elka():
   joy = JoyThread(in_queue)
   joy.start()
   threads.append(joy)
-  t = DriverThread(eradio,in_queue)
+  if init_gains:
+    t = DriverThread(eradio,init_gains=init_gains,in_queue_arg=in_queue)
+  else:
+    t = DriverThread(eradio,in_queue_arg=in_queue)
   t.start()
   threads.append(t)
 

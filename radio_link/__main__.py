@@ -2,7 +2,7 @@
 Author: Eric Solomon
 Project: Elkaradio Control 
 Lab: Alfred Gessow Rotorcraft Center
-Package: ElkaControl 
+Package: radio_link 
 Module: __main__.py
 
 Contains main function for Elka Control
@@ -20,7 +20,6 @@ from Elkaradio.elkaradioTRX import Elkaradio
 from Elkaradio.elkaradioTRX import _find_devices 
 from Utils.exceptions import *
 from Logging.logParser import LogParser
-from Logging.dataPlotter import DataPlotter
 from ETP.elkaThread import run_elka
 
 ########################### Set up loggers ##############################
@@ -49,6 +48,8 @@ logger.debug('\nLog files cleared')
 ind = []
 outd = []
 ackd = []
+gaind = []
+dropd = []
 data_available = False # true after parse call
 
 ######################### Define helper functions ##############################
@@ -57,7 +58,7 @@ r = re.compile(r'(\S+)')
 # use re.findall for these
 #sty = re.compile(r'(\S+)\s*=\s*(\S+)')
 sty = re.compile(r'(\S+)\s*=\s*([^,]+\s*)+')
-data_arrs = re.compile(r'\s*(\w+)\s+(\w+)\s+(\d+)\s+\'(\S+)\',?')
+data_arrs = re.compile(r'\s*(\w+)\s+(\d+)\s+(\d+)\s+\'(\S+)\',?')
 
 def parse_raw_cmd(r_cmd):
   global r
@@ -74,46 +75,24 @@ def parse_plot(fcmd,cmd,ind,outd,ackd):
 
   def parse_arrs(acmd,ind,outd,ackd):
     matches = data_arrs.findall(acmd)
-    arr_idx = dict(zip([
-        ('in','thrust'),('in','roll'),('in','pitch'),('in','yaw'),
-        ('out','thrust'),('out','roll'),('out','pitch'),('out','yaw'),
-        ('ack','gyro1'),('ack','gyro2'),('ack','gyro3'),('ack','gyro4'),
-        ('ack','gyro5'),('ack','gyro6'),('ack','euler1'),('ack','euler2'),
-        ('ack','euler3'),('ack','euler4'),('ack','commanded1'),
-        ('ack','commanded2'),('ack','commanded3'),('ack','commanded4'),
-        ('ack','commanded5'),('ack','commanded6'),('ack','commanded7'),
-        ('ack','commanded8'),('ack','commanded9'),('ack','commanded10'),
-        ('ack','commanded11'),('ack','commanded12'),('ack','commanded13'),
-        ('ack','commanded14'),('ack','commanded15'),('ack','commanded16'),
-        ('ack','dropped')
-        ],[
-        ('raw',0,1),('raw',0,2),('raw',0,3),('raw',0,4),('trans',0,1),
-        ('trans',0,2),('trans',0,3),('trans',0,4),('gyro',0,1),
-        ('gyro',0,2),('gyro',0,3),('gyro',0,4),('gyro',0,5),('gyro',0,6),
-        ('euler',0,1),('euler',0,2),('euler',0,3),('euler',0,4),
-        ('commanded',0,1),('commanded',0,2),('commanded',0,3),
-        ('commanded',0,4),('commanded',0,5),('commanded',0,6),
-        ('commanded',0,7),('commanded',0,8),('commanded',0,9),
-        ('commanded',0,10),('commanded',0,11),('commanded',0,12),
-        ('commanded',0,13),('commanded',0,14),('commanded',0,15),
-        ('commanded',0,16),('none',0,1)
-        ]))
     arrs = []
     if matches:
       for m in matches:
         # append x, then y, then style
-        idx = arr_idx[m[0:2]]
         if m[0] == 'in':
-          arrs.append(ind[int(m[2])][idx[0]][:,idx[1]])
-          arrs.append(ind[int(m[2])][idx[0]][:,idx[2]])
+          arrs.append(ind[int(m[2])][:,0])
+          arrs.append(ind[int(m[2])][:,int(m[1])])
         elif m[0] == 'out':
-          arrs.append(outd[int(m[2])][idx[0]][:,idx[1]])
-          arrs.append(outd[int(m[2])][idx[0]][:,idx[2]])
+          arrs.append(outd[int(m[2])][:,0])
+          arrs.append(outd[int(m[2])][:,int(m[1])])
         elif m[0] == 'ack':
-          arrs.append(ackd[int(m[2])][idx[0]][:,idx[1]])
-          arrs.append(ackd[int(m[2])][idx[0]][:,idx[2]])
+          arrs.append(ackd[int(m[2])][:,0])
+          arrs.append(ackd[int(m[2])][:,int(m[1])])
+        elif m[0] == 'dropped':
+          arrs.append(dropd[int(m[2])][:,0])
+          arrs.append(dropd[int(m[2])][:,int(m[1])])
         else:
-          raise InvalidCommand('Plot must be of type in, out, or ack')
+          raise InvalidCommand('Plot must be of type in, out, ack, or dropped')
         arrs.append(m[3]) # append line style
     else: raise InvalidCommand('Incorrect plot lines specified. '
             'Must specify between one and four valid lines.')
@@ -123,33 +102,30 @@ def parse_plot(fcmd,cmd,ind,outd,ackd):
 
 def retrieve_arr(arr_typ,arr_num):
   ret_arr_idx = dict(zip([
-    'in','out','gyro','euler','commanded','dropped'
+    'in','out','gain','ack','dropped',
     ],[
-    (ind,'raw','t=time;th=thrust;r=roll;p=pitch;y=yaw\n'
+    (ind,'t=time;th=thrust;r=roll;p=pitch;y=yaw\n'
          't1,th1,r1,p1,y1'),
-    (outd,'trans','t=time;th=thrust;r=roll;p=pitch;y=yaw\n'
+    (outd,'t=time;th=thrust;r=roll;p=pitch;y=yaw\n'
          't1,th1,r1,p1,y1'),
-    (ackd,'gyro','t=time;g=gyro\nt1,g1,g2,g3,g4,g5,g6'),
-    (ackd,'euler','t=time;e=euler\nt1,e1,e2,e3,e4'),
-    (ackd,'commanded','t=time;c=commanded\nt1,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10'
-        'c11,c12,c13,c14,c15,c16'),
-    (ackd,'none','t=time;d=dropped\nt1,d1')
+    (gaind,'t=time;kpp=Kp_pitch;kip=Ki_pitch;kdp=Kd_pitch;\n'
+      'kpr=Kp_roll;kir=Ki_roll;kdr=Kd_roll;kpy=Kp_yaw;\n'
+      'kpp,kip,kdp,kpr,kir,kdr,kpy')
+    (ackd,'t=time;g=gyro;a=accel;e=euler;c=commanded\n'
+    't1,g1,g2,g3,a1,a2,a3,e1,e2,c1,c2,c3,c4,c5'),
+    (dropd,'none','t=time;d=dropped\nt1,d1')
     ]))
   arr_idx = ret_arr_idx[arr_typ]
   return arr_idx[0][arr_num][arr_idx[1]],arr_idx[2],','
 
 """ Run elka control """
-def run_elka_control(rx=None):
+# gains given in form kpp,kdp,kpr,kdr,kpy,kdy
+def run_elka_control(rx=None,init_gains=None):
   global logger, log_inputs, log_outputs, log_acks
   if rx:
     setup_radios(rx)
   logger.debug('Running Elka Control')
-  ''' Headers... necessary?
-  log_inputs.info('inputs: [3][4]')
-  log_outputs.info('outputs: [][]')
-  log_acks.info('acks: [][]')
-  '''
-  run_elka()
+  run_elka(init_gains=init_gains)
 
 def setup_radios(rx=[]):
   global logger
@@ -164,7 +140,7 @@ def setup_radios(rx=[]):
                  .format(i))
 
 def parse_logs():
-  global ind,outd,ackd,data_available
+  global ind,outd,gaind,ackd,data_available
   # Display displays set names, export sends to spreadsheet,
   # Plot plots with x,y,z as axes values
   # Return returns to Main
@@ -196,18 +172,22 @@ def parse_logs():
     '\n\t\tdata sets.'
     '\n\tBehavior:'
     '\n\t\tDisplays data sets that were parsed during the current session.'
-    '\n\t\tData sets are persistent across menu changes. There are three types'
-    '\n\t\tof data sets: in, out, and ack.'
+    '\n\t\tData sets are persistent across menu changes. There are five types'
+    '\n\t\tof data sets: in, out, gain, ack, and dropped.'
     '\n\t\tin data is the raw data sent by the controller to the internal'
     '\n\t\tmodel. It contains the raw versions of thrust, roll,'
     '\n\t\tpitch, and yaw.'
     '\n\t\tout data is the transformed data that is to be sent to the'
     '\n\t\treceive node. It contains the transformed versions of thrust,'
     '\n\t\troll, pitch, and yaw.'
+    '\n\t\tgain data is the numerical gain sent to the mcu. It contains'
+    '\n\t\tkppitch, kipitch, kdpitch, kproll, kiroll, kdroll, and kpyaw.'
     '\n\t\tack data is the specified return packet data from the receive'
-    '\n\t\tnode. When operating with an elka vehicle, this packet contains'
-    '\n\t\t6 bytes gyro data, 4 bytes euler angles, and 16 bytes commanded'
-    '\n\t\tdata.'
+    '\n\t\tnode. When operating with an elka vehicle, this data set contains'
+    '\n\t\t13 16-bit variables of usable data.'
+    '\n\t\tdropped data is the data packets that could not be sent to the'
+    '\n\t\treceiving elka. It contains a timestamp and the number of dropped'
+    '\n\t\tpackets so at that point in transmission.'
 
     '\nplot'
     '\n\tUsage:'
@@ -215,16 +195,17 @@ def parse_logs():
     '\n\t\tprompt. In the first prompt, enter up to four valid lines to plot.'
     '\n\t\tIn the second prompt, specify plot details.'
     '\n\tBehavior:'
-    '\n\t\tSpecify up to four linetype,linestyle tuples. The following'
-    '\n\t\tlinetypes are available:'
-    '\n\t\tin thrust/roll/pitch/yaw'
-    '\n\t\tout thrust/roll/pitch/yaw'
-    '\n\t\tack gyro[1-16]/euler[1-4]/commanded[1-16]/dropped'
+    '\n\t\tSpecify up to four linetype,linestyle tuples. Linetypes must be'
+    '\n\t\t<array type> <variable number> <array number>'
+    '\n\t\tThe following linetypes are available:'
+    '\n\t\tin [1-4]'
+    '\n\t\tout [1-4]'
+    '\n\t\tack [1-13]'
     '\n\t\tLinestyles can also be specified with keyword arguments separated'
     '\n\t\tby commas.'
     '\n\t\tlinestyles and keyword arguments can be found at'
     '\n\t\thttp://matplotlib.org/1.3.1/api/axes_api.html#matplotlib.axes.Axes.plot'
-    '\n\t\te.g. ack gyro1 0 \'rs-\', in thrust 0 \'g--\';linewidth=1.0'
+    '\n\t\te.g. ack 1 0 \'rs-\', in 3 1 \'g--\';linewidth=1.0'
     '\n\t\tThen, specify plot details. The following details are available:'
     '\n\t\ttitle, xlabel, ylabel, text, axes, and grid.'
 
@@ -254,11 +235,10 @@ def parse_logs():
     '\n\t\tin csv format.'
     '\n\tBehavior:'
     '\n\t\tExport a usable data set in csv format.'
-    '\n\t\tarr_type may be in/out/ack. arr_num indexes from 0.'
+    '\n\t\tarr_type may be in/out/gain/ack/dropped. arr_num indexes from 0.'
     )
 
   lp = LogParser()
-  dp = DataPlotter()
 
   sp = False
 
@@ -284,6 +264,7 @@ def parse_logs():
           ''' Display usable data sets '''
           print 'Input data: {}'.format([i for i in range(len(ind))])
           print 'Output data: {}'.format([i for i in range(len(outd))])
+          print 'Gains data: {}'.format([i for i in range(len(gaind))])
           print 'Ack data: {}'.format([i for i in range(len(ackd))])
         elif cmd[0] == 'plot':
           if not data_available: raise InvalidCommand('No data available.')
@@ -306,11 +287,17 @@ def parse_logs():
             ind.append(lp.parse_in(cmd[2]))
             print 'Parsed in data: {}'.format(ind[-1])
           elif cmd[1] == 'out':
-            outd.append(lp.parse_out(cmd[2]))
-            print 'Parsed out data: {}'.format(outd[-1])
+            o,g = lp.parse_out(cmd[2])
+            outd.append(o)
+            gaind.append(g)
+            print 'Parsed out data.\nouts: {0}\ngains:{1}'.format(
+                    outd[-1],gaind[-1])
           elif cmd[1] == 'ack':
-            ackd.append(lp.parse_ack(cmd[2]))
-            print 'Parsed ack data: {}'.format(ackd[-1])
+            a,d = lp.parse_ack(cmd[2])
+            ackd.append(a)
+            dropd.append(d)
+            print 'Parsed ack data.\nacks: {0}\ndrops:{1}'.format(
+                    ackd[-1],dropd[-1])
           else:
             raise InvalidCommand('Could not parse {}'.format(cmd))
           data_available = True
@@ -355,11 +342,15 @@ def main():
     '\n\nrun elka'
     '\n\tUsage:'
     '\n\t\tEnter <run elka> from the \'Main\' menu to run elka with a vehicle.'
+    '\n\t\tA following prompt will allow you to enter custom gains. Leave this'
+    '\n\t\tblank to stick with the default gains.'
     '\n\t\tTo stop running elka, press CTRL-C.'
     '\n\tBehavior:'
     '\n\t\tRuns elka as the basestation for a vehicle. Requires that the'
     '\n\t\tvehicle and the base station transceivers are both set to the same'
     '\n\t\tfrequency and the vehicle is set in receive mode.'
+    '\n\t\tGains specified in the format: kppitch kdpitch kproll kdroll kpyaw'
+    '\n\t\tkdyaw. Default gains are [10 200 10 200 200 0].'
 
     '\n\nrun radios'
     '\n\tUsage:'
@@ -392,7 +383,9 @@ def main():
       elif cmd[0] == 'help':
         print help_options
       elif cmd[0] == 'run' and cmd[1] == 'elka':
-        run_elka_control()
+        gains = map(int,parse_raw_cmd(raw_input(
+          'Enter gains:\n< ')))
+        run_elka_control(init_gains=gains)
       elif cmd[0] == 'run' and cmd[1] == 'radios':
         # mainly for debugging
         i = 0

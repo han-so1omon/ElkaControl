@@ -22,7 +22,7 @@ from ETP.dataPacket import DataPacket
 from ETP.elkaDriver import ElkaDriver
 from Inputs.joystickCtrl import JoystickCtrl
 
-############################### Set up logger ##################################
+############################### Set up loggers ##################################
 # clear previous contents of logging files
 open('./../Logging/testCtrl.log', 'w').close()
 open('./../Logging/inputs.log', 'w').close()
