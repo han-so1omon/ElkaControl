@@ -114,6 +114,7 @@ def parse_plot(fcmd,cmd,ind,outd,ackd):
   return parse_style(fcmd), parse_arrs(cmd,ind,outd,ackd), parse_style(cmd)
 
 def retrieve_arr(arr_typ,arr_num):
+  global ind, outd, gaind, ackd, dropd
   ret_arr_idx = dict(zip([
     'in','out','gain','ack','dropped',
     ],[
@@ -123,13 +124,13 @@ def retrieve_arr(arr_typ,arr_num):
          't1,th1,r1,p1,y1'),
     (gaind,'t=time;kpp=Kp_pitch;kip=Ki_pitch;kdp=Kd_pitch;\n'
       'kpr=Kp_roll;kir=Ki_roll;kdr=Kd_roll;kpy=Kp_yaw;\n'
-      'kpp,kip,kdp,kpr,kir,kdr,kpy')
+      'kpp,kip,kdp,kpr,kir,kdr,kpy'),
     (ackd,'t=time;g=gyro;a=accel;e=euler;c=commanded\n'
     't1,g1,g2,g3,a1,a2,a3,e1,e2,c1,c2,c3,c4,c5'),
-    (dropd,'none','t=time;d=dropped\nt1,d1')
+    (dropd,'t=time;d=dropped\nt1,d1')
     ]))
   arr_idx = ret_arr_idx[arr_typ]
-  return arr_idx[0][arr_num][arr_idx[1]],arr_idx[2],','
+  return arr_idx[0][arr_num],arr_idx[1],','
 
 """ Run elka control """
 # gains given in form kpp,kdp,kpr,kdr,kpy,kdy
@@ -225,7 +226,7 @@ def parse_logs():
 
     '\nsave'
     '\n\tUsage:'
-    '\n\t\tEnter <save> <logtype> <filepath> <savepath> from the \'Parse\''
+    '\n\t\tEnter <save> <filepath> <savepath> from the \'Parse\''
     '\n\t\tsubmenu to save a .log file created by elka. Use ./ to specify'
     '\n\t\tcurrent directory.'
     '\n\tBehavior:'

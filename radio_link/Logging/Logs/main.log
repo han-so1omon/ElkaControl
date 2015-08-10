@@ -1,37 +1,10 @@
-2015-08-10 11:57:05,849 - main - DEBUG - 
+2015-08-10 12:54:20,457 - main - DEBUG - 
 Log files cleared
-2015-08-10 11:57:21,362 - main - ERROR - Incorrect plot lines specified. Must specify between one and four valid lines.
-Traceback (most recent call last):
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 290, in parse_logs
-    parse_plot(fcmd,pcmd,ind,outd,ackd))))
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 115, in parse_plot
-    return parse_style(fcmd), parse_arrs(cmd,ind,outd,ackd), parse_style(cmd)
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 111, in parse_arrs
-    else: raise InvalidCommand('Incorrect plot lines specified. '
-InvalidCommand: Incorrect plot lines specified. Must specify between one and four valid lines.
-2015-08-10 11:59:17,177 - main - ERROR - Incorrect plot lines specified. Must specify between one and four valid lines.
-Traceback (most recent call last):
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 290, in parse_logs
-    elif cmd[0] == 'return' and len(cmd) == 1:
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 115, in parse_plot
-    
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 111, in parse_arrs
-    'Must specify between one and four valid lines.')
-InvalidCommand: Incorrect plot lines specified. Must specify between one and four valid lines.
-2015-08-10 12:00:27,495 - main - ERROR - index 14 is out of bounds for axis 1 with size 14
-Traceback (most recent call last):
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 290, in parse_logs
-    elif cmd[0] == 'return' and len(cmd) == 1:
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 115, in parse_plot
-    
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 104, in parse_arrs
-    elif m[0] == 'dropped':
-IndexError: index 14 is out of bounds for axis 1 with size 14
-2015-08-10 12:01:07,792 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 418, in main
-    else:
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 277, in parse_logs
-    elif cmd[0] == 'display' and len(cmd) == 1:
+2015-08-10 12:55:02,289 - main - DEBUG - Traceback (most recent call last):
+  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 418, in main
+    parse_logs()
+  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 277, in parse_logs
+    sys.exit(0)
 SystemExit: 0
 
-2015-08-10 12:01:07,793 - main - DEBUG - [<_MainThread(MainThread, started 140438733027136)>]
+2015-08-10 12:55:02,289 - main - DEBUG - [<_MainThread(MainThread, started 3952)>]
