@@ -41,6 +41,7 @@ class JoyThread(ExThread):
     ExThread.__init__(self)
     self.in_queue = in_queue
     self.sp = False
+    pygame.quit()
     pygame.init()
     if (pygame.joystick.get_count() != 0):
       self.j = pygame.joystick.Joystick(0)

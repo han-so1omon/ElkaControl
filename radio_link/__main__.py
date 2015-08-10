@@ -23,23 +23,36 @@ from Logging.logParser import LogParser
 from ETP.elkaThread import run_elka
 
 ########################### Set up loggers ##############################
-""" Log headers are <name>: tuple1[<tuple1 elements>] tuple2[<tuple2 elements>]... """
-
 #Establish loggers as module level globals
 logger = None
 log_inputs = None
 log_outputs = None
 log_acks = None
 
-open('./Logging/Logs/main.log', 'w').close()
-open('./Logging/Logs/inputs.log', 'w').close()
-open('./Logging/Logs/outputs.log', 'w').close()
-logging.config.fileConfig('./Logging/Logs/logging.conf', disable_existing_loggers=False)
-logger = logging.getLogger('main')
-log_inputs = logging.getLogger('inputs')
-log_outputs = logging.getLogger('outputs')
-log_acks = logging.getLogger('acks')
+# call each time before logging to a file
+def clear_logs(k):
+  global logger, log_inputs, log_outputs, log_acks
+  logging.config.fileConfig('./Logging/Logs/logging.conf', disable_existing_loggers=False)
+  if 'm' in k:
+    #open('./Logging/Logs/main.log', 'w').close()
+    open('./Logging/Logs/main.log', 'r+').truncate()
+    logger = logging.getLogger('main')
+  if 'i' in k:
+    #open('./Logging/Logs/inputs.log', 'w').close()
+    open('./Logging/Logs/inputs.log', 'r+').truncate()
+    log_inputs = logging.getLogger('inputs')
+  if 'o' in k:
+    #open('./Logging/Logs/outputs.log', 'w').close()
+    open('./Logging/Logs/outputs.log', 'r+').truncate()
+    log_outputs = logging.getLogger('outputs')
+  if 'a' in k:
+    open('./Logging/Logs/acks.log', 'r+').truncate()
+    log_acks = logging.getLogger('acks')
+
+clear_logs('mioa')
 logger.debug('\nLog files cleared')
+
+#TODO headers
 #log_inputs.info('raw_in[4]')
 #log_outputs.info('controls[8]/gains[8]') # also contains gains
 #log_acks.info('gyro[6] euler[4] commanded[16]')
@@ -146,10 +159,11 @@ def parse_logs():
   # Return returns to Main
   p_options = ('\nHelp <help>'
                '\nDisplay available data sets <display>'
-              '\nSave data file <save <./path/to/file.bar>>'
+              '\nSave data file <save> <./path/to/file.bar>'
               '\nExport data to formatted file <export>'
               '\nPlot data <plot>'
-              '\nParse log file <parse <logtype <./path/to/x.log>>>'
+              '\nParse log file <parse> <logtype> <./path/to/x.log>'
+              '\nExport log file in csv format <export> <logtype> <lognum>'
               '\nReturn to main menu <return>'
               '\nExit program <exit>')
   help_options = (
@@ -242,8 +256,6 @@ def parse_logs():
 
   sp = False
 
-  # FIXME make sure that threading is not broken because while loop is now
-  # outside of try clause
   while not sp:
     try:
         # prompt next step
@@ -253,7 +265,9 @@ def parse_logs():
         r_cmd = raw_input('<')
         cmd = parse_raw_cmd(r_cmd)
 
-        if cmd[0] == 'help':
+        if not cmd:
+          continue
+        elif cmd[0] == 'help':
           ''' Display options '''
           print help_options
         elif cmd[0] == 'exit':
@@ -383,11 +397,13 @@ def main():
       elif cmd[0] == 'help':
         print help_options
       elif cmd[0] == 'run' and cmd[1] == 'elka':
+        clear_logs('ioa')
         gains = map(int,parse_raw_cmd(raw_input(
           'Enter gains:\n< ')))
         run_elka_control(init_gains=gains)
       elif cmd[0] == 'run' and cmd[1] == 'radios':
         # mainly for debugging
+        clear_logs('ioa')
         i = 0
         erads = []
         rx = [] # array of receive nodes
