@@ -5,7 +5,9 @@ Lab: Alfred Gessow Rotorcraft Center
 Package: Logging
 Module: logParser.py 
 
-Parses inputs, outputs, and acks logs into usable data sets
+Parses input, output, and ack logs into usable data sets.
+Saves temp log files.
+Exports data sets to csv format.
 """
 
 import sys, os, re, shutil, datetime, time, numpy as np,\
@@ -20,12 +22,14 @@ def combine_arr_bytes(a):
 ########## Parser Class ##########
 class LogParser(object):
     def __init__(self):
-        # store in, out, gains, acks, and dropped data parsed from logs
-        self.inp = None
-        self.out = None
-        self.gains = None
-        self.acks = None
-        self.drops = None
+        # Store in, out, gains, acks, and dropped data parsed from logs.
+        # Initialize empty so that return from parsing will allow for empty check on
+        # np array.
+        self.ins = np.array([])
+        self.outs = np.array([])
+        self.gains = np.array([])
+        self.acks = np.array([])
+        self.drops = np.array([])
         self.rfile = re.compile(r'(?<=[/|\\])([\w|\d|\-|\_]+).([\w|\d]+)\Z')
         plt.ion()
         self.fig_num = 1
@@ -76,10 +80,12 @@ class LogParser(object):
 
       shutil.copy2(fstr, m_out)
 
-    """ Parse inputs log. Store time and raw data as tuples
-        in self.inp dict. """
-    def parse_in(self, ipf='./Logging/Logs/inputs.log'):
+    """ Parse input log. Store time and raw data as tuples
+        in self.ins dict. """
+    def parse_in(self, ipf='./Logging/Logs/input.log'):
       first = True
+      epoch = None
+      self.ins = np.array([])
       r = re.compile(
             r'(\d+):(\d+):(\d+)\.(\d+),\[((-?\d+\.\d+(e-?\d+)?,?\s?){4})\]')
       with open(ipf, 'r') as inf:
@@ -88,22 +94,29 @@ class LogParser(object):
           m = r.match(l)
           if not m:
             raise IOError('unexpected line read in {}'.format(inf))
-          t = int(m.group(1))*3600 + int(m.group(2))*60 \
-                + int(m.group(3)) + int(m.group(4))*.001
-          raw = np.float32([t] + map(float,m.group(5).split(', ')))
           if first:
+            epoch = int(m.group(1))*3600 + int(m.group(2))*60 \
+                + int(m.group(3)) + int(m.group(4))*.001
+            t = int(m.group(1))*3600 + int(m.group(2))*60 \
+                + int(m.group(3)) + int(m.group(4))*.001 - epoch
+            raw = np.float32([t] + map(float,m.group(5).split(', ')))                
             # change this if float32 is too small
-            self.inp = np.float32(raw)
+            self.ins = np.float32(raw)
             first = False
           else:
-            self.inp = np.vstack((self.inp, raw))
-      return self.inp
+            t = int(m.group(1))*3600 + int(m.group(2))*60 \
+                + int(m.group(3)) + int(m.group(4))*.001 - epoch
+            raw = np.float32([t] + map(float,m.group(5).split(', ')))                
+            self.ins = np.vstack((self.ins, raw))
+      return self.ins
 
-    """ Parse outputs log. Store time and transformed data as tuples
-        in self.out dict. """
-    def parse_out(self, otf ='./Logging/Logs/outputs.log'):
+    """ Parse output log. Store time and transformed data as tuples
+        in self.outs dict. """
+    def parse_out(self, otf ='./Logging/Logs/output.log'):
       # 0 for all arrays, 1 for gains, 2 for p_in, -1 for none
-      firstG = True; firstP = True
+      firstLine = True; firstG = True; firstP = True
+      epoch = None
+      self.outs = np.array([]) ; self.gains = np.array([])
       rp = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),\[(((\d+),?\s?){12})\]')
       rg = re.compile(r'(\d+):(\d+):(\d+)\.(\d+),\[(((\d+),?\s?){18})\]')
       with open(otf, 'r') as outf:
@@ -111,21 +124,29 @@ class LogParser(object):
           m = None
           m = rp.match(l)
           if m:
-            t = int(m.group(1))*3600 + int(m.group(2))*60 \
+            if firstLine:
+              firstLine = False
+              epoch = int(m.group(1))*3600 + int(m.group(2))*60 \
                     + int(m.group(3)) + int(m.group(4))*.001
+            t = int(m.group(1))*3600 + int(m.group(2))*60 \
+                    + int(m.group(3)) + int(m.group(4))*.001 - epoch
             out = np.float32([t]+combine_arr_bytes(
               map(int,m.group(5).split(',')))[4:])
             if firstP:
-              self.out = np.float32(out)
+              self.outs = np.float32(out)
               firstP = False
             else:
-                self.out = np.vstack((self.out,out))
+                self.outs = np.vstack((self.outs,out))
           else:
             m = rg.match(l)
             if not m:
               raise IOError('unexpected line read in {}'.format(outf))
+            if firstLine:
+              firstLine = False
+              epoch = int(m.group(1))*3600 + int(m.group(2))*60 \
+                    + int(m.group(3)) + int(m.group(4))*.001              
             t = int(m.group(1))*3600 + int(m.group(2))*60 \
-                    + int(m.group(3)) + int(m.group(4))*.001
+                    + int(m.group(3)) + int(m.group(4))*.001 - epoch
             out = np.float32([t]+combine_arr_bytes(
               map(int,m.group(5).split(','))[4:]))
             if firstG:
@@ -133,13 +154,14 @@ class LogParser(object):
               firstG = False
             else:
               self.gains = np.vstack((self.gains,out))
-      return self.out, self.gains
+      return self.outs, self.gains
 
-    """ Parse acks log. Store gyro, euler angles, and commands  as tuples
+    """ Parse ack log. Store gyro, euler angles, and commands  as tuples
         in self.acks dict. """
-    def parse_ack(self, acf ='./Logging/Logs/acks.log'):
-        firstV = True; firstI = True
-
+    def parse_ack(self, acf ='./Logging/Logs/ack.log'):
+        firstLine = True; firstV = True; firstI = True
+        epoch = None
+        self.acks = np.array([]) ; self.drops = np.array([])
         # capture valid ack from ELKA
         r = re.compile(
           r'(\d+):(\d+):(\d+)\.(\d+),array\(\'B\',\s\[((\d+,?\s?){27})\]\)')
@@ -158,21 +180,29 @@ class LogParser(object):
               if not m:
                 raise IOError('unexpected line read in {}'.format(ackf))
               if firstI:
+                if firstLine:
+                  firstLine = False
+                  epoch = int(m.group(1))*3600 + int(m.group(2))*60 \
+                        + int(m.group(3)) + int(m.group(4))*.001              
                 self.drops = np.hstack((
                     [int(m.group(1))*3600 + int(m.group(2))*60 +
-                    int(m.group(3)) + int(m.group(4))*.001],
+                    int(m.group(3)) + int(m.group(4))*.001 - epoch],
                     [drop_ctr]))
                 drop_ctr += 1
                 firstI = False
               else:
                 self.drops = np.vstack((self.drops,
                     np.hstack(([int(m.group(1))*3600 + int(m.group(2))*60
-                    + int(m.group(3)) + int(m.group(4))*.001],
+                    + int(m.group(3)) + int(m.group(4))*.001 - epoch],
                     [drop_ctr]))))
                 drop_ctr += 1
             else:
+              if firstLine:
+                firstLine = False
+                epoch = int(m.group(1))*3600 + int(m.group(2))*60 \
+                      + int(m.group(3)) + int(m.group(4))*.001
               t = int(m.group(1))*3600 + int(m.group(2))*60 \
-                    + int(m.group(3)) + int(m.group(4))*.001
+                    + int(m.group(3)) + int(m.group(4))*.001 - epoch
               rec = combine_arr_bytes(map(int,m.group(5).split(','))[1:])
               if firstV:
                 self.acks = np.hstack(([t],rec))

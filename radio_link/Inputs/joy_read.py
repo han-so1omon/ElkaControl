@@ -7,7 +7,7 @@ from Utils.exThread import ExThread
 
 ############################## Set up loggers ##################################
 logger = logging.getLogger('main.joy_read')
-log_inputs = logging.getLogger('inputs')
+log_inputs = logging.getLogger('input')
 ################################################################################
 
 ########## Axes() class #########
@@ -24,7 +24,8 @@ class Axes(object):
         # For current implementation, only use the following:
         # LeftHL - yaw, LeftVU - pitch, RightHL - roll, RightVU - thrust
         if joystick_name == 'Generic X-Box pad' or\
-           joystick_name == 'Controller (Gamepad F310)':
+           joystick_name == 'Controller (Gamepad F310)' or\
+					 joystick_name == 'Gamepad F310 (Controller)':
             self.LeftHL = 0
             self.LeftVU = 1
             self.RightHL = 3

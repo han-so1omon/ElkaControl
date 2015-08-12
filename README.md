@@ -12,9 +12,15 @@ Usage:
 - Follow http://wiki.bitcraze.se/projects:crazyradio:index for information about
   how to use Elkaradio nrfProg and usb_tools
 - Install python 2.7.10 from https://www.python.org/downloads/
-  - If on Windows, make sure to add python to PATH during install
-  - If on Windows, download Microsoft Visual C++ Compiler for Python 2.7 from
-     https://www.microsoft.com/en-us/download/details.aspx?id=44266
+  - If on Windows,
+		- Make sure to add python to PATH during install
+		- Download and install Microsoft Visual C++ Compiler for Python 2.7 from
+				https://www.microsoft.com/en-us/download/details.aspx?id=44266
+		- Download and install libusb-win32-bin-1.2.6.0 from
+				http://sourceforge.net/projects/libusb-win32/files/
+		- Download and install Zadig USB driver installer from
+				http://zadig.akeo.ie/
+				- Plug in Elkaradio device, find Crazyradio device on Zadig, and install libusb-win32 driver
 - Run pip install--no-index --find-links=./wheels/<sys_type> -r requirements.txt to install dependencies
 - To use radio_link app:
     Navigate to radio_link folder using 'cd radio_link'

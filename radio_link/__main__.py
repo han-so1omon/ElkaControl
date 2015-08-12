@@ -16,6 +16,7 @@ from IPython import embed # debugging
 #add logging module to path
 sys.path.append(os.path.join(os.getcwd(), 'Logging/Logs'))
 
+from os.path import isfile
 from Elkaradio.elkaradioTRX import Elkaradio
 from Elkaradio.elkaradioTRX import _find_devices 
 from Utils.exceptions import *
@@ -33,29 +34,25 @@ log_acks = None
 def clear_logs(k):
   global logger, log_inputs, log_outputs, log_acks
   logging.config.fileConfig('./Logging/Logs/logging.conf', disable_existing_loggers=False)
-  if 'm' in k:
-    #open('./Logging/Logs/main.log', 'w').close()
+  if 'm' in k and isfile('./Logging/Logs/main.log'):
     open('./Logging/Logs/main.log', 'r+').truncate()
     logger = logging.getLogger('main')
-  if 'i' in k:
+  if 'i' in k and isfile('./Logging/Logs/input.log'):
     #open('./Logging/Logs/inputs.log', 'w').close()
-    open('./Logging/Logs/inputs.log', 'r+').truncate()
-    log_inputs = logging.getLogger('inputs')
-  if 'o' in k:
+    open('./Logging/Logs/input.log', 'r+').truncate()
+    log_inputs = logging.getLogger('input')
+  if 'o' in k and isfile('./Logging/Logs/output.log'):
     #open('./Logging/Logs/outputs.log', 'w').close()
-    open('./Logging/Logs/outputs.log', 'r+').truncate()
-    log_outputs = logging.getLogger('outputs')
-  if 'a' in k:
-    open('./Logging/Logs/acks.log', 'r+').truncate()
-    log_acks = logging.getLogger('acks')
+    open('./Logging/Logs/output.log', 'r+').truncate()
+    log_outputs = logging.getLogger('output')
+  if 'a' in k and isfile('./Logging/Logs/ack.log'):
+    open('./Logging/Logs/ack.log', 'r+').truncate()
+    log_acks = logging.getLogger('ack')
 
 clear_logs('mioa')
 logger.debug('\nLog files cleared')
 
 #TODO headers
-#log_inputs.info('raw_in[4]')
-#log_outputs.info('controls[8]/gains[8]') # also contains gains
-#log_acks.info('gyro[6] euler[4] commanded[16]')
 
 ### set up parsed data arrays
 ind = []
@@ -70,53 +67,54 @@ data_available = False # true after parse call
 r = re.compile(r'(\S+)')
 # use re.findall for these
 #sty = re.compile(r'(\S+)\s*=\s*(\S+)')
-sty = re.compile(r'(\S+)\s*=\s*([^,]+\s*)+')
-data_arrs = re.compile(r'\s*(\w+)\s+(\d+)\s+(\d+)\s+\'(\S+)\',?')
+re_sty = re.compile(r'(\S+)\s*=\s*([^,]+\s*)+')
+re_data_arrs = re.compile(r'\s*(\w+)\s+(\d+)\s+(\d+)\s+\'(\S+)\',?')
 
 def parse_raw_cmd(r_cmd):
   global r
   return r.findall(r_cmd)
 
-def parse_plot(fcmd,cmd,ind,outd,ackd):
-  global sty, data_arrs
+def parse_plot(fcmd,cmd):
+  global re_sty, re_data_arrs, ind, outd, ackd
   arrs = None; style = None
     
   def parse_style(scmd):
-    matches = sty.findall(scmd)
+    matches = re_sty.findall(scmd)
     if matches:
       return dict([(m[0],m[1].strip(',')) for m in matches])
 
-  def parse_arrs(acmd,ind,outd,ackd):
-    matches = data_arrs.findall(acmd)
+  def parse_arrs(acmd):
+    matches = re_data_arrs.findall(acmd)
     arrs = []
     if matches:
       for m in matches:
+        k = int(m[2])
         # append x, then y, then style
-        if m[0] == 'in':
-          arrs.append(ind[int(m[2])][:,0])
-          arrs.append(ind[int(m[2])][:,int(m[1])])
-        elif m[0] == 'out':
-          arrs.append(outd[int(m[2])][:,0])
-          arrs.append(outd[int(m[2])][:,int(m[1])])
-        elif m[0] == 'ack':
-          arrs.append(ackd[int(m[2])][:,0])
-          arrs.append(ackd[int(m[2])][:,int(m[1])])
-        elif m[0] == 'dropped':
-          arrs.append(dropd[int(m[2])][:,0])
-          arrs.append(dropd[int(m[2])][:,int(m[1])])
+        if m[0] == 'in' and ind[k].any():
+          arrs.append(ind[k][:,0])
+          arrs.append(ind[k][:,int(m[1])])
+        elif m[0] == 'out' and outd[k].any():
+          arrs.append(outd[k][:,0])
+          arrs.append(outd[k][:,int(m[1])])
+        elif m[0] == 'ack' and ackd[k].any():
+          arrs.append(ackd[k][:,0])
+          arrs.append(ackd[k][:,int(m[1])])
+        elif m[0] == 'drop' and dropd[k].any(): # FIXME IndexError: too many indices for array
+          arrs.append(dropd[k][:,0])
+          arrs.append(dropd[k][:,int(m[1])])
         else:
-          raise InvalidCommand('Plot must be of type in, out, ack, or dropped')
+          raise InvalidCommand('Plot must contain data and be of type in, out, ack, or dropped')
         arrs.append(m[3]) # append line style
     else: raise InvalidCommand('Incorrect plot lines specified. '
             'Must specify between one and four valid lines.')
     return arrs
   
-  return parse_style(fcmd), parse_arrs(cmd,ind,outd,ackd), parse_style(cmd)
+  return parse_style(fcmd), parse_arrs(cmd), parse_style(cmd)
 
 def retrieve_arr(arr_typ,arr_num):
   global ind, outd, gaind, ackd, dropd
   ret_arr_idx = dict(zip([
-    'in','out','gain','ack','dropped',
+    'in','out','gain','ack','drop',
     ],[
     (ind,'t=time;th=thrust;r=roll;p=pitch;y=yaw\n'
          't1,th1,r1,p1,y1'),
@@ -127,7 +125,7 @@ def retrieve_arr(arr_typ,arr_num):
       'kpp,kip,kdp,kpr,kir,kdr,kpy'),
     (ackd,'t=time;g=gyro;a=accel;e=euler;c=commanded\n'
     't1,g1,g2,g3,a1,a2,a3,e1,e2,c1,c2,c3,c4,c5'),
-    (dropd,'t=time;d=dropped\nt1,d1')
+    (dropd,'t=time;d=drop\nt1,d1')
     ]))
   arr_idx = ret_arr_idx[arr_typ]
   return arr_idx[0][arr_num],arr_idx[1],','
@@ -164,7 +162,7 @@ def parse_logs():
               '\nExport data to formatted file <export>'
               '\nPlot data <plot>'
               '\nParse log file <parse> <logtype> <./path/to/x.log>'
-              '\nExport log file in csv format <export> <logtype> <lognum>'
+              '\nExport log file in csv format <export> <logtype> <lognum> <savefile.csv>'
               '\nReturn to main menu <return>'
               '\nExit program <exit>')
   help_options = (
@@ -243,14 +241,16 @@ def parse_logs():
     '\n\t\tsets. Logtypes may be: in/out/ack. After successful parsing, the'
     '\n\t\toutline of the parsed data sets are displayed in the console.'
     '\n\t\tOperations and plotting can then be performed with these data sets.'
+    '\n\t\tEmpty data sets, such as empty ack sets, are stored to maintain'
+    '\n\t\tparallelism among.'
 
     '\nexport'
     '\n\tUsage:'
-    '\n\t\tEnter <export> <arr_type> <arr_num> <filename> to export a data set'
+    '\n\t\tEnter <export> <arr_type> <arr_num> <savefile> to export a data set'
     '\n\t\tin csv format.'
     '\n\tBehavior:'
     '\n\t\tExport a usable data set in csv format.'
-    '\n\t\tarr_type may be in/out/gain/ack/dropped. arr_num indexes from 0.'
+    '\n\t\tarr_type may be in/out/gain/ack/drop. arr_num indexes from 0.'
     )
 
   lp = LogParser()
@@ -279,15 +279,16 @@ def parse_logs():
           ''' Display usable data sets '''
           print 'Input data: {}'.format([i for i in range(len(ind))])
           print 'Output data: {}'.format([i for i in range(len(outd))])
-          print 'Gains data: {}'.format([i for i in range(len(gaind))])
+          print 'Gain data: {}'.format([i for i in range(len(gaind))])
           print 'Ack data: {}'.format([i for i in range(len(ackd))])
+          print 'Drop data: {}'.format([i for i in range(len(dropd))])
         elif cmd[0] == 'plot':
           if not data_available: raise InvalidCommand('No data available.')
           pcmd = raw_input('<Specify up to four lines and style\n<')
           fcmd = raw_input('<If desired: specify title, xlabel, ylabel, '
             'text, axes, and grid.\n<')
           lp.plot_data(**dict(zip(['fdata','arrs','style'],
-              parse_plot(fcmd,pcmd,ind,outd,ackd))))
+              parse_plot(fcmd,pcmd))))
         elif cmd[0] == 'return' and len(cmd) == 1:
           ''' Return to main menu '''
           sp = True
@@ -299,7 +300,8 @@ def parse_logs():
         elif cmd[0] == 'parse' and len(cmd) == 3:
           # parse logs
           if cmd[1] == 'in':
-            ind.append(lp.parse_in(cmd[2]))
+            i = lp.parse_in(cmd[2])
+            if i.any(): ind.append(i)
             print 'Parsed in data: {}'.format(ind[-1])
           elif cmd[1] == 'out':
             o,g = lp.parse_out(cmd[2])

@@ -19,9 +19,9 @@ from Utils.exThread import ExThread
 
 ############################## Set up loggers ##################################
 logger = logging.getLogger('main.elkaThread')
-log_inputs = logging.getLogger('inputs')
-log_outputs = logging.getLogger('outputs')
-log_acks = logging.getLogger('acks')
+log_inputs = logging.getLogger('input')
+log_outputs = logging.getLogger('output')
+log_acks = logging.getLogger('ack')
 ################################################################################
 
 ############### utility functions ###############
