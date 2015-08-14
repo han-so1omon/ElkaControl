@@ -15,9 +15,20 @@ import sys, os, re, shutil, datetime, time, numpy as np,\
 sys.path.append(os.getcwd()) 
 
 # combines adjacent array bytes in arrays
-def combine_arr_bytes(a):
+def combine_arr_bytes(a,two_comp='no'):
   sz = len(a)/2
-  return [((a[2*i]<<8)+a[2*i+1]) for i in range(sz)]
+  if two_comp=='yes':
+    # add thrust element to list
+    print "A:{}".format(a)
+    l = [(a[0]<<8) + a[1]]
+    for i in range(1,sz):
+      c = (a[2*i]<<8) + (a[2*i+1])
+      if a[2*i] > 127: 
+        c -= 2**16
+      l.append(c)
+    return l
+  else:
+    return [((a[2*i]<<8)+a[2*i+1]) for i in range(sz)]
 
 ########## Parser Class ##########
 class LogParser(object):
@@ -51,7 +62,7 @@ class LogParser(object):
         #matches filename.extension
         m_in = self.rfile.findall(fstr) 
 
-      #FIXME clean this up
+      #TODO clean this up
       if (not nm) and m_in:
         d = datetime.datetime.fromtimestamp(time.time())
         m_out = '{0}-{1}-{2}-{3}_{4}_{5}_{6}.{7}'.format(
@@ -131,7 +142,9 @@ class LogParser(object):
             t = int(m.group(1))*3600 + int(m.group(2))*60 \
                     + int(m.group(3)) + int(m.group(4))*.001 - epoch
             out = np.float32([t]+combine_arr_bytes(
-              map(int,m.group(5).split(',')))[4:])
+              map(int,m.group(5).split(','))[4:]))
+            print combine_arr_bytes(
+                map(int,m.group(5).split(','))[4:],two_comp='yes')
             if firstP:
               self.outs = np.float32(out)
               firstP = False
@@ -203,7 +216,8 @@ class LogParser(object):
                       + int(m.group(3)) + int(m.group(4))*.001
               t = int(m.group(1))*3600 + int(m.group(2))*60 \
                     + int(m.group(3)) + int(m.group(4))*.001 - epoch
-              rec = combine_arr_bytes(map(int,m.group(5).split(','))[1:])
+              rec = combine_arr_bytes(map(int,m.group(5).split(','))[1:],
+                      two_comp='yes')
               if firstV:
                 self.acks = np.hstack(([t],rec))
                 firstV = False

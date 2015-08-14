@@ -25,17 +25,17 @@ log_acks = logging.getLogger('ack')
 ################################################################################
 
 ############### utility functions ###############
-#FIXME tune this
+#FIXME outputting between 0 and 65535
 def convert_raw(raw):
   out = []
   to_datum = 1
   trans = 1000
   for i in range(len(raw)):
     if i == 0: # transform thrust to [1000 2000]
-      out.append(int((3 + raw[i]) * 500))
+      out.append(int((3 + raw[i])*500))
     else: # transform roll,pitch,yaw to [-1000 1000]
       out.append(int(raw[i]*1000))
-  split_bytes(out)
+  out = split_bytes(out)
   return out
 
 def flatten(l):
@@ -50,9 +50,7 @@ def flatten(l):
 def split_bytes(vals):
   l = []
   if isinstance(vals, list):
-    for v in vals:
-      l.append((v>>8)&0xff)
-      l.append(v&0xff)
+    l.extend(flatten(map(split_bytes,vals)))
   else:
     l.append((vals>>8)&0xff)
     l.append(vals&0xff)
@@ -113,7 +111,7 @@ class DriverThread(ExThread):
       # get raw data from controller
       raw = self.in_queue.pop()
       
-      payload = header + map(chr,flatten(map(split_bytes, convert_raw(raw))))
+      payload = header + map(chr,flatten(convert_raw(raw)))
       payload.insert(0,chr(len(payload)))
       payload = ''.join(payload)
 

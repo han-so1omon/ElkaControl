@@ -103,7 +103,7 @@ def parse_plot(fcmd,cmd):
           arrs.append(dropd[k][:,0])
           arrs.append(dropd[k][:,int(m[1])])
         else:
-          raise InvalidCommand('Plot must contain data and be of type in, out, ack, or dropped')
+          raise InvalidCommand('Plot array must contain data and be of type in, out, ack, or dropped')
         arrs.append(m[3]) # append line style
     else: raise InvalidCommand('Incorrect plot lines specified. '
             'Must specify between one and four valid lines.')
@@ -166,43 +166,43 @@ def parse_logs():
               '\nReturn to main menu <return>'
               '\nExit program <exit>')
   help_options = (
-    '\nexit'
+    '\n\nexit'
     '\n\tUsage:'
     '\n\t\tEnter <exit> from a particular submenu to exit the program.'
     '\n\tBehavior:'
     '\n\t\tExits program with system call. Leaves any active data unsaved.'
 
-    '\nhelp'
+    '\n\nhelp'
     '\n\tUsage:'
     '\n\t\tEnter <help> from a particular submenu to display help menu.'
     '\n\tBehavior:'
     '\n\t\tDisplays help menu. Help menu contains usage information and'
     '\n\t\texpected behavior for each command.'
 
-    '\ndisplay'
+    '\n\ndisplay'
     '\n\tUsage:'
     '\n\t\tEnter <display> from the \'Parse\' submenu to display the usable'
     '\n\t\tdata sets.'
     '\n\tBehavior:'
     '\n\t\tDisplays data sets that were parsed during the current session.'
     '\n\t\tData sets are persistent across menu changes. There are five types'
-    '\n\t\tof data sets: in, out, gain, ack, and dropped.'
+    '\n\t\tof data sets: in, out, gain, ack, and drop.'
     '\n\t\tin data is the raw data sent by the controller to the internal'
     '\n\t\tmodel. It contains the raw versions of thrust, roll,'
     '\n\t\tpitch, and yaw.'
     '\n\t\tout data is the transformed data that is to be sent to the'
     '\n\t\treceive node. It contains the transformed versions of thrust,'
     '\n\t\troll, pitch, and yaw.'
-    '\n\t\tgain data is the numerical gain sent to the mcu. It contains'
+    '\n\t\tgain data is the numerical gain set sent to the mcu. It contains'
     '\n\t\tkppitch, kipitch, kdpitch, kproll, kiroll, kdroll, and kpyaw.'
     '\n\t\tack data is the specified return packet data from the receive'
     '\n\t\tnode. When operating with an elka vehicle, this data set contains'
     '\n\t\t13 16-bit variables of usable data.'
-    '\n\t\tdropped data is the data packets that could not be sent to the'
+    '\n\t\tdrop data is the data packets that could not be sent to the'
     '\n\t\treceiving elka. It contains a timestamp and the number of dropped'
-    '\n\t\tpackets so at that point in transmission.'
+    '\n\t\tpackets at that point in transmission.'
 
-    '\nplot'
+    '\n\nplot'
     '\n\tUsage:'
     '\n\t\tEnter <plot> from the \'Parse\' submenu to enter a two-part plot'
     '\n\t\tprompt. In the first prompt, enter up to four valid lines to plot.'
@@ -214,15 +214,24 @@ def parse_logs():
     '\n\t\tin [1-4]'
     '\n\t\tout [1-4]'
     '\n\t\tack [1-13]'
+    '\n\t\tdrop [1]'
+    '\n\t\tNote: variable 0 is time, and this can be plotted vs time as well.'
     '\n\t\tLinestyles can also be specified with keyword arguments separated'
     '\n\t\tby commas.'
     '\n\t\tlinestyles and keyword arguments can be found at'
     '\n\t\thttp://matplotlib.org/1.3.1/api/axes_api.html#matplotlib.axes.Axes.plot'
-    '\n\t\te.g. ack 1 0 \'rs-\', in 3 1 \'g--\';linewidth=1.0'
+    '\n\t\te.g. to plot the first variable of the first ack set and the third'
+    '\n\t\t variable of the second in set, enter:'
+    '\n\t\tack 1 0 \'rs-\', in 3 1 \'g--\';linewidth=1.0'
     '\n\t\tThen, specify plot details. The following details are available:'
-    '\n\t\ttitle, xlabel, ylabel, text, axes, and grid.'
+    '\n\t\ttitle, xlabel, ylabel, text, axis, and grid.'
+    '\n\t\ttitle, xlabel, ylabel, and text may be strings.'
+    '\n\t\taxis may be on, off, equal, scaled, tight, image, auto, or normal.'
+    '\n\t\tgrid may be on or off.'
+    '\n\t\te.g. to title a plot \'accel\' with x axis label \'t[s]\', enter:'
+    '\n\t\ttitle=accel, xlabel = t[s]'
 
-    '\nsave'
+    '\n\nsave'
     '\n\tUsage:'
     '\n\t\tEnter <save> <filepath> <savepath> from the \'Parse\''
     '\n\t\tsubmenu to save a .log file created by elka. Use ./ to specify'
@@ -232,19 +241,19 @@ def parse_logs():
     '\n\t\tspecified, the default save directory is ./Logging/PrevLogs and the'
     '\n\t\tdefault save file is logtype-timestamp.log.'
 
-    '\nparse'
+    '\n\nparse'
     '\n\tUsage:'
     '\n\t\tEnter <parse> <logtype> <filepath> from the \'Parse\' submenu to'
     '\n\t\tparse a log file into the usable data sets.'
     '\n\tBehavior:'
     '\n\t\tParse a recently or previously made log file into the usable data'
     '\n\t\tsets. Logtypes may be: in/out/ack. After successful parsing, the'
-    '\n\t\toutline of the parsed data sets are displayed in the console.'
+    '\n\t\toutline of the parsed data sets is displayed in the console.'
     '\n\t\tOperations and plotting can then be performed with these data sets.'
     '\n\t\tEmpty data sets, such as empty ack sets, are stored to maintain'
     '\n\t\tparallelism among.'
 
-    '\nexport'
+    '\n\nexport'
     '\n\tUsage:'
     '\n\t\tEnter <export> <arr_type> <arr_num> <savefile> to export a data set'
     '\n\t\tin csv format.'
@@ -286,7 +295,7 @@ def parse_logs():
           if not data_available: raise InvalidCommand('No data available.')
           pcmd = raw_input('<Specify up to four lines and style\n<')
           fcmd = raw_input('<If desired: specify title, xlabel, ylabel, '
-            'text, axes, and grid.\n<')
+            'text, axis, and grid.\n<')
           lp.plot_data(**dict(zip(['fdata','arrs','style'],
               parse_plot(fcmd,pcmd))))
         elif cmd[0] == 'return' and len(cmd) == 1:
@@ -349,7 +358,7 @@ def main():
     '\n\tBehavior:'
     '\n\t\tExits program with system call. Leaves any active data unsaved.'
 
-    '\nhelp'
+    '\n\nhelp'
     '\n\tUsage:'
     '\n\t\tEnter <help> from a particular submenu to display help menu.'
     '\n\tBehavior:'

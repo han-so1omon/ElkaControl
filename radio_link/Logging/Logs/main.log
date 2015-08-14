@@ -1,173 +1,35 @@
-2015-08-12 12:55:14,773 - main - DEBUG - 
+2015-08-14 13:22:55,232 - main - DEBUG - 
 Log files cleared
-2015-08-12 12:55:16,923 - main - DEBUG - Running Elka Control
-2015-08-12 12:55:17,187 - main.joy_read - DEBUG - 
-Joystick: Gamepad F310 (Controller)
-2015-08-12 12:55:17,187 - main.joy_read - DEBUG - 
-Joystick thread running
-2015-08-12 12:55:17,190 - main.elkaThread - DEBUG - gains: [10, 0, 200, 10, 0, 200, 200]
-2015-08-12 12:55:17,635 - main.elkaThread - DEBUG - 
-Thread-1 stopped
-2015-08-12 12:55:17,635 - main.elkaThread - DEBUG - 
-Thread-2 stopped
-2015-08-12 12:55:17,635 - main - ERROR - 
+2015-08-14 13:23:08,086 - main - ERROR - [Errno 2] No such file or directory: './Logging/Logs/tout.log'
 Traceback (most recent call last):
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 410, in main
-    run_elka_control(init_gains=gains)
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 144, in run_elka_control
-    run_elka(init_gains=init_gains)
-  File "./ETP\elkaThread.py", line 159, in run_elka
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 159, in <lambda>
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 135, in chk_thread
-    t.join(1)
-  File "C:\Python27\lib\threading.py", line 960, in join
-    self.__block.wait(delay)
-  File "C:\Python27\lib\threading.py", line 359, in wait
-    _sleep(delay)
-KeyboardInterrupt
-2015-08-12 12:55:17,638 - main - DEBUG - Traceback (most recent call last):
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 410, in main
-    run_elka_control(init_gains=gains)
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 144, in run_elka_control
-    run_elka(init_gains=init_gains)
-  File "./ETP\elkaThread.py", line 159, in run_elka
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 159, in <lambda>
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 135, in chk_thread
-    t.join(1)
-  File "C:\Python27\lib\threading.py", line 960, in join
-    self.__block.wait(delay)
-  File "C:\Python27\lib\threading.py", line 359, in wait
-    _sleep(delay)
-KeyboardInterrupt
-
-2015-08-12 12:55:17,638 - main - DEBUG - [<DriverThread(Thread-2, started 8020)>, <_MainThread(MainThread, started 7300)>]
-2015-08-12 12:55:29,255 - main - DEBUG - Running Elka Control
-2015-08-12 12:55:29,792 - main.joy_read - DEBUG - 
-Joystick: Gamepad F310 (Controller)
-2015-08-12 12:55:29,792 - main.joy_read - DEBUG - 
-Joystick thread running
-2015-08-12 12:55:29,793 - main.elkaThread - DEBUG - gains: [10, 0, 200, 10, 0, 200, 200]
-2015-08-12 12:55:31,585 - main.elkaThread - DEBUG - 
-Thread-3 stopped
-2015-08-12 12:55:31,585 - main.elkaThread - DEBUG - 
-Thread-4 stopped
-2015-08-12 12:55:31,585 - main - ERROR - 
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 316, in parse_logs
+    o,g = lp.parse_out(cmd[2])
+  File "./Logging/logParser.py", line 133, in parse_out
+    with open(otf, 'r') as outf:
+IOError: [Errno 2] No such file or directory: './Logging/Logs/tout.log'
+2015-08-14 13:23:49,492 - main - ERROR - Incorrect plot lines specified. Must specify between one and four valid lines.
 Traceback (most recent call last):
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 410, in main
-    run_elka_control(init_gains=gains)
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 144, in run_elka_control
-    run_elka(init_gains=init_gains)
-  File "./ETP\elkaThread.py", line 159, in run_elka
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 159, in <lambda>
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 135, in chk_thread
-    t.join(1)
-  File "C:\Python27\lib\threading.py", line 960, in join
-    self.__block.wait(delay)
-  File "C:\Python27\lib\threading.py", line 359, in wait
-    _sleep(delay)
-KeyboardInterrupt
-2015-08-12 12:55:31,588 - main - DEBUG - Traceback (most recent call last):
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 410, in main
-    run_elka_control(init_gains=gains)
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 144, in run_elka_control
-    run_elka(init_gains=init_gains)
-  File "./ETP\elkaThread.py", line 159, in run_elka
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 159, in <lambda>
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 135, in chk_thread
-    t.join(1)
-  File "C:\Python27\lib\threading.py", line 960, in join
-    self.__block.wait(delay)
-  File "C:\Python27\lib\threading.py", line 359, in wait
-    _sleep(delay)
-KeyboardInterrupt
-
-2015-08-12 12:55:31,588 - main - DEBUG - [<_MainThread(MainThread, started 7300)>]
-2015-08-12 12:58:54,727 - main - ERROR - too many indices for array
-Traceback (most recent call last):
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 295, in parse_logs
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 300, in parse_logs
     parse_plot(fcmd,pcmd))))
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 116, in parse_plot
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 112, in parse_plot
     return parse_style(fcmd), parse_arrs(cmd), parse_style(cmd)
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 107, in parse_arrs
-    arrs.append(dropd[k][:,0])
-IndexError: too many indices for array
-2015-08-12 12:59:30,716 - main - DEBUG - Traceback (most recent call last):
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 410, in main
-    run_elka_control(init_gains=gains)
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 144, in run_elka_control
-    run_elka(init_gains=init_gains)
-  File "./ETP\elkaThread.py", line 159, in run_elka
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 159, in <lambda>
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 135, in chk_thread
-    t.join(1)
-  File "C:\Python27\lib\threading.py", line 960, in join
-    self.__block.wait(delay)
-  File "C:\Python27\lib\threading.py", line 359, in wait
-    _sleep(delay)
-KeyboardInterrupt
-
-2015-08-12 12:59:30,716 - main - DEBUG - [<_MainThread(MainThread, started 7300)>]
-2015-08-12 12:59:38,276 - main - DEBUG - Running Elka Control
-2015-08-12 12:59:38,779 - main.joy_read - DEBUG - 
-Joystick: Gamepad F310 (Controller)
-2015-08-12 12:59:38,780 - main.joy_read - DEBUG - 
-Joystick thread running
-2015-08-12 12:59:38,780 - main.elkaThread - DEBUG - gains: [10, 0, 200, 10, 0, 200, 200]
-2015-08-12 12:59:40,036 - main.elkaThread - DEBUG - 
-Thread-5 stopped
-2015-08-12 12:59:40,039 - main.elkaThread - DEBUG - 
-Thread-6 stopped
-2015-08-12 12:59:40,045 - main - ERROR - 
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 108, in parse_arrs
+    else: raise InvalidCommand('Incorrect plot lines specified. '
+InvalidCommand: Incorrect plot lines specified. Must specify between one and four valid lines.
+2015-08-14 13:25:12,458 - main - ERROR - index 5 is out of bounds for axis 1 with size 5
 Traceback (most recent call last):
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 410, in main
-    run_elka_control(init_gains=gains)
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 144, in run_elka_control
-    run_elka(init_gains=init_gains)
-  File "./ETP\elkaThread.py", line 159, in run_elka
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 159, in <lambda>
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 135, in chk_thread
-    t.join(1)
-  File "C:\Python27\lib\threading.py", line 960, in join
-    self.__block.wait(delay)
-  File "C:\Python27\lib\threading.py", line 359, in wait
-    _sleep(delay)
-KeyboardInterrupt
-2015-08-12 12:59:40,051 - main - DEBUG - Traceback (most recent call last):
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 410, in main
-    run_elka_control(init_gains=gains)
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 144, in run_elka_control
-    run_elka(init_gains=init_gains)
-  File "./ETP\elkaThread.py", line 159, in run_elka
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 159, in <lambda>
-    map(lambda t: chk_thread(t), threads)
-  File "./ETP\elkaThread.py", line 135, in chk_thread
-    t.join(1)
-  File "C:\Python27\lib\threading.py", line 960, in join
-    self.__block.wait(delay)
-  File "C:\Python27\lib\threading.py", line 359, in wait
-    _sleep(delay)
-KeyboardInterrupt
-
-2015-08-12 12:59:40,051 - main - DEBUG - [<_MainThread(MainThread, started 7300)>]
-2015-08-12 13:01:21,865 - main - ERROR - too many indices for array
-Traceback (most recent call last):
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 295, in parse_logs
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 300, in parse_logs
     parse_plot(fcmd,pcmd))))
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 116, in parse_plot
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 112, in parse_plot
     return parse_style(fcmd), parse_arrs(cmd), parse_style(cmd)
-  File "C:\Users\RC_highbay\Documents\ElkaControl\radio_link\__main__.py", line 107, in parse_arrs
-    arrs.append(dropd[k][:,0])
-IndexError: too many indices for array
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 98, in parse_arrs
+    arrs.append(outd[k][:,int(m[1])])
+IndexError: index 5 is out of bounds for axis 1 with size 5
+2015-08-14 13:25:14,207 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 429, in main
+    parse_logs()
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 286, in parse_logs
+    sys.exit(0)
+SystemExit: 0
+
+2015-08-14 13:25:14,207 - main - DEBUG - [<_MainThread(MainThread, started 139811856865088)>]
