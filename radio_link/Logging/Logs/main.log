@@ -1,35 +1,65 @@
-2015-08-14 13:22:55,232 - main - DEBUG - 
+2015-08-21 12:53:00,400 - main - DEBUG - 
 Log files cleared
-2015-08-14 13:23:08,086 - main - ERROR - [Errno 2] No such file or directory: './Logging/Logs/tout.log'
+2015-08-21 12:53:05,454 - main - DEBUG - Running Elka Control
+2015-08-21 12:53:05,694 - main.joy_read - DEBUG - 
+Joystick: Generic X-Box pad
+2015-08-21 12:53:05,695 - main.joy_read - DEBUG - 
+Joystick thread running
+2015-08-21 12:53:05,696 - main.elkaThread - DEBUG - gains: [1, 0, 200, 10, 0, 200, 200]
+2015-08-21 12:53:08,396 - main.elkaThread - DEBUG - 
+Thread-1 stopped
+2015-08-21 12:53:08,397 - main.elkaThread - DEBUG - 
+Thread-2 stopped
+2015-08-21 12:53:08,398 - main - ERROR - 
 Traceback (most recent call last):
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 316, in parse_logs
-    o,g = lp.parse_out(cmd[2])
-  File "./Logging/logParser.py", line 133, in parse_out
-    with open(otf, 'r') as outf:
-IOError: [Errno 2] No such file or directory: './Logging/Logs/tout.log'
-2015-08-14 13:23:49,492 - main - ERROR - Incorrect plot lines specified. Must specify between one and four valid lines.
-Traceback (most recent call last):
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 300, in parse_logs
-    parse_plot(fcmd,pcmd))))
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 112, in parse_plot
-    return parse_style(fcmd), parse_arrs(cmd), parse_style(cmd)
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 108, in parse_arrs
-    else: raise InvalidCommand('Incorrect plot lines specified. '
-InvalidCommand: Incorrect plot lines specified. Must specify between one and four valid lines.
-2015-08-14 13:25:12,458 - main - ERROR - index 5 is out of bounds for axis 1 with size 5
-Traceback (most recent call last):
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 300, in parse_logs
-    parse_plot(fcmd,pcmd))))
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 112, in parse_plot
-    return parse_style(fcmd), parse_arrs(cmd), parse_style(cmd)
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 98, in parse_arrs
-    arrs.append(outd[k][:,int(m[1])])
-IndexError: index 5 is out of bounds for axis 1 with size 5
-2015-08-14 13:25:14,207 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 429, in main
-    parse_logs()
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 286, in parse_logs
-    sys.exit(0)
-SystemExit: 0
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 415, in main
+    run_elka_control(init_gains=gains)
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 140, in run_elka_control
+    run_elka(init_gains=init_gains)
+  File "././ETP/elkaThread.py", line 160, in run_elka
+    map(lambda t: chk_thread(t), threads)
+  File "././ETP/elkaThread.py", line 160, in <lambda>
+    map(lambda t: chk_thread(t), threads)
+  File "././ETP/elkaThread.py", line 136, in chk_thread
+    t.join(1)
+  File "/usr/lib/python2.7/threading.py", line 960, in join
+    self.__block.wait(delay)
+  File "/usr/lib/python2.7/threading.py", line 358, in wait
+    _sleep(delay)
+KeyboardInterrupt
+2015-08-21 12:53:08,399 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 415, in main
+    run_elka_control(init_gains=gains)
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 140, in run_elka_control
+    run_elka(init_gains=init_gains)
+  File "././ETP/elkaThread.py", line 160, in run_elka
+    map(lambda t: chk_thread(t), threads)
+  File "././ETP/elkaThread.py", line 160, in <lambda>
+    map(lambda t: chk_thread(t), threads)
+  File "././ETP/elkaThread.py", line 136, in chk_thread
+    t.join(1)
+  File "/usr/lib/python2.7/threading.py", line 960, in join
+    self.__block.wait(delay)
+  File "/usr/lib/python2.7/threading.py", line 358, in wait
+    _sleep(delay)
+KeyboardInterrupt
 
-2015-08-14 13:25:14,207 - main - DEBUG - [<_MainThread(MainThread, started 139811856865088)>]
+2015-08-21 12:53:08,399 - main - DEBUG - [<_MainThread(MainThread, started 140102727935808)>]
+2015-08-21 12:53:10,534 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 415, in main
+    run_elka_control(init_gains=gains)
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 140, in run_elka_control
+    run_elka(init_gains=init_gains)
+  File "././ETP/elkaThread.py", line 160, in run_elka
+    map(lambda t: chk_thread(t), threads)
+  File "././ETP/elkaThread.py", line 160, in <lambda>
+    map(lambda t: chk_thread(t), threads)
+  File "././ETP/elkaThread.py", line 136, in chk_thread
+    t.join(1)
+  File "/usr/lib/python2.7/threading.py", line 960, in join
+    self.__block.wait(delay)
+  File "/usr/lib/python2.7/threading.py", line 358, in wait
+    _sleep(delay)
+KeyboardInterrupt
+
+2015-08-21 12:53:10,534 - main - DEBUG - [<_MainThread(MainThread, started 140102727935808)>]

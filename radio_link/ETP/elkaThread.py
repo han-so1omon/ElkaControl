@@ -75,6 +75,7 @@ class DriverThread(ExThread):
     self.in_queue = in_queue_arg
     self.header = Headers()
     # gains format: kppitch, kipitch, kdpitch, kproll, kiroll, kdroll, kpyaw
+    self.default_gains = [10,0,200,10,0,200,200]
     self.gains = init_gains
     logger.debug('gains: {}'.format(init_gains))
 

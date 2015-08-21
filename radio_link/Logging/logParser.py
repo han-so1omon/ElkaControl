@@ -19,7 +19,6 @@ def combine_arr_bytes(a,two_comp='no'):
   sz = len(a)/2
   if two_comp=='yes':
     # add thrust element to list
-    print "A:{}".format(a)
     l = [(a[0]<<8) + a[1]]
     for i in range(1,sz):
       c = (a[2*i]<<8) + (a[2*i+1])
