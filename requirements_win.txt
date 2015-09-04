@@ -4,4 +4,4 @@ numpy>=1.8.2
 numpydoc>=0.5
 ipython>=3.2.1
 pyusb>=1.0.0b2
-#pygame>=1.9.1 # in timeout for being a jerk, use pip install or otherwise
+pygame # make sure to install from local wheel
