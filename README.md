@@ -21,6 +21,9 @@ Usage:
 		- Download and install Zadig USB driver installer from
 				http://zadig.akeo.ie/
 				- Plug in Elkaradio device, find Crazyradio device on Zadig, and install libusb-win32 driver
+- From the python interpreter, check if you are running a 32 bit or 64 bit Python interpreter
+>>> import platform
+>>> platform.architecture()
 - Run
 	pip install --no-index --find-links=./wheels/[sys_type] -r requirements[sys_type].txt to install dependencies
 - To use radio_link app:
