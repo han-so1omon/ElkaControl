@@ -5,12 +5,13 @@ See http://wiki.bitcraze.se/projects:crazyradio:index for more information about
 Content:
 Firmware: The Elkaradio firmware source code
 nrfProg: SPI programmer that uses jtagkey USB adapter
-usb_tools: Python scripts to reset and bootload elkaradio from command line
+usb_tools: Python scripts to reset and bootload Elkaradio from command line
 radio_link: Python app to run ElkaControl and manage Elkaradio
 
 Usage:
 - Follow http://wiki.bitcraze.se/projects:crazyradio:index for information about
   how to use Elkaradio nrfProg and usb_tools
+
 - Install python 2.7.10 from https://www.python.org/downloads/
   - If on Windows,
 		- Make sure to add python to PATH during install
@@ -21,12 +22,24 @@ Usage:
 		- Download and install Zadig USB driver installer from
 				http://zadig.akeo.ie/
 				- Plug in Elkaradio device, find Crazyradio device on Zadig, and install libusb-win32 driver
+
 - From the python interpreter, check if you are running a 32 bit or 64 bit Python interpreter
 
 >>> import platform
 >>> platform.architecture()
+
 - Run
 	pip install --no-index --find-links=./wheels/[sys_type] -r requirements[sys_type].txt to install dependencies
+
+- If you are having trouble with dependencies try running
+    pip install [package]
+  and making sure that the version is at least that specified in the
+  requirements.txt file
+
+- Dependency installations may require administrative/superuser privileges
+
+- Certain dependencies are available throught the apt- utility on Ubuntu
+
 - To use radio_link app:
     Navigate to radio_link folder using 'cd radio_link'
     run app using 'python ./'

@@ -45,6 +45,7 @@ class JoyThread(ExThread):
     pygame.quit()
     pygame.init()
     if (pygame.joystick.get_count() != 0):
+
       self.j = pygame.joystick.Joystick(0)
       self.j.init()
       self.ctrlr_name = self.j.get_name()
@@ -53,12 +54,12 @@ class JoyThread(ExThread):
       #self.axes = [None] * self.numaxes
       self.raw = [None] * 4
       logger.debug('\nJoystick: {0}'.format(self.ctrlr_name))
-    else:
+    else
       raise JoystickNotFound()
 
   # sift through pygame events and get axes to send as determined by
   # axes_enum
-  def get(self):
+  def get_js(self):
     for event in pygame.event.get():
       if event.type == pygame.QUIT: # If user clicked close
         self.sp = True
@@ -69,12 +70,18 @@ class JoyThread(ExThread):
     self.raw[3] = self.j.get_axis(self.axes_enum.LeftHL)
     self.in_queue.append(self.raw)
 
+
   def run_w_exc(self):
     logger.debug('\nJoystick thread running')
     raw = [None] * 4
-    while not self.sp:
-      self.get()
-      log_inputs.info('{}'.format(self.raw))
+    if self.ctrl_mode == JSCTRL:
+      while not self.sp:
+        self.get_js()
+        log_inputs.info('{}'.format(self.raw))
+    else:
+      while not self.sp:
+        self.get_kb()
+        log_inputs.info('{}'.format(self.raw))
 
   def stop(self):
     self.sp = True
