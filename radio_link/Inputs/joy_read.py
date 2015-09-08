@@ -54,7 +54,7 @@ class JoyThread(ExThread):
       #self.axes = [None] * self.numaxes
       self.raw = [None] * 4
       logger.debug('\nJoystick: {0}'.format(self.ctrlr_name))
-    else
+    else:
       raise JoystickNotFound()
 
   # sift through pygame events and get axes to send as determined by

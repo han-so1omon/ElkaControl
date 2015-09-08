@@ -1,65 +1,131 @@
-2015-08-21 12:53:00,400 - main - DEBUG - 
+2015-09-08 17:01:38,887 - main - DEBUG - 
 Log files cleared
-2015-08-21 12:53:05,454 - main - DEBUG - Running Elka Control
-2015-08-21 12:53:05,694 - main.joy_read - DEBUG - 
-Joystick: Generic X-Box pad
-2015-08-21 12:53:05,695 - main.joy_read - DEBUG - 
-Joystick thread running
-2015-08-21 12:53:05,696 - main.elkaThread - DEBUG - gains: [1, 0, 200, 10, 0, 200, 200]
-2015-08-21 12:53:08,396 - main.elkaThread - DEBUG - 
+2015-09-08 17:01:42,684 - main - DEBUG - Running Elka Control
+2015-09-08 17:01:42,904 - main.elkaThread - DEBUG - 
+Starting in Keyboard Control Mode
+2015-09-08 17:01:45,166 - main.elkaThread - DEBUG - gains: [10, 0, 200, 10, 0, 200, 200]
+2015-09-08 17:01:45,269 - main.elkaradioTRX - ERROR - [Errno 110] Operation timed out
+Traceback (most recent call last):
+  File "./Elkaradio/elkaradioTRX.py", line 239, in send
+    ackIn = self.dev.read(0x81, 64, 100)
+  File "/usr/local/lib/python2.7/dist-packages/usb/core.py", line 918, in read
+    self.__get_timeout(timeout))
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 769, in bulk_read
+    timeout)
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 872, in __read
+    _check(retval)
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 552, in _check
+    raise USBError(_strerror(ret), ret, _libusb_errno[ret])
+USBError: [Errno 110] Operation timed out
+2015-09-08 17:01:50,586 - main.elkaThread - DEBUG - 
 Thread-1 stopped
-2015-08-21 12:53:08,397 - main.elkaThread - DEBUG - 
-Thread-2 stopped
-2015-08-21 12:53:08,398 - main - ERROR - 
+2015-09-08 17:01:50,587 - main.elkaradioTRX - ERROR - [Errno 19] No such device (it may have been disconnected)
+Traceback (most recent call last):
+  File "./Elkaradio/elkaradioTRX.py", line 239, in send
+    ackIn = self.dev.read(0x81, 64, 100)
+  File "/usr/local/lib/python2.7/dist-packages/usb/core.py", line 918, in read
+    self.__get_timeout(timeout))
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 769, in bulk_read
+    timeout)
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 872, in __read
+    _check(retval)
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 552, in _check
+    raise USBError(_strerror(ret), ret, _libusb_errno[ret])
+USBError: [Errno 19] No such device (it may have been disconnected)
+2015-09-08 17:01:50,587 - main - ERROR - 
 Traceback (most recent call last):
   File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 415, in main
     run_elka_control(init_gains=gains)
   File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 140, in run_elka_control
     run_elka(init_gains=init_gains)
-  File "././ETP/elkaThread.py", line 160, in run_elka
+  File "./ETP/elkaThread.py", line 255, in run_elka
     map(lambda t: chk_thread(t), threads)
-  File "././ETP/elkaThread.py", line 160, in <lambda>
+  File "./ETP/elkaThread.py", line 255, in <lambda>
     map(lambda t: chk_thread(t), threads)
-  File "././ETP/elkaThread.py", line 136, in chk_thread
+  File "./ETP/elkaThread.py", line 200, in chk_thread
     t.join(1)
   File "/usr/lib/python2.7/threading.py", line 960, in join
     self.__block.wait(delay)
-  File "/usr/lib/python2.7/threading.py", line 358, in wait
+  File "/usr/lib/python2.7/threading.py", line 359, in wait
     _sleep(delay)
 KeyboardInterrupt
-2015-08-21 12:53:08,399 - main - DEBUG - Traceback (most recent call last):
+2015-09-08 17:01:50,590 - main - DEBUG - Traceback (most recent call last):
   File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 415, in main
     run_elka_control(init_gains=gains)
   File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 140, in run_elka_control
     run_elka(init_gains=init_gains)
-  File "././ETP/elkaThread.py", line 160, in run_elka
+  File "./ETP/elkaThread.py", line 255, in run_elka
     map(lambda t: chk_thread(t), threads)
-  File "././ETP/elkaThread.py", line 160, in <lambda>
+  File "./ETP/elkaThread.py", line 255, in <lambda>
     map(lambda t: chk_thread(t), threads)
-  File "././ETP/elkaThread.py", line 136, in chk_thread
+  File "./ETP/elkaThread.py", line 200, in chk_thread
     t.join(1)
   File "/usr/lib/python2.7/threading.py", line 960, in join
     self.__block.wait(delay)
-  File "/usr/lib/python2.7/threading.py", line 358, in wait
+  File "/usr/lib/python2.7/threading.py", line 359, in wait
     _sleep(delay)
 KeyboardInterrupt
 
-2015-08-21 12:53:08,399 - main - DEBUG - [<_MainThread(MainThread, started 140102727935808)>]
-2015-08-21 12:53:10,534 - main - DEBUG - Traceback (most recent call last):
+2015-09-08 17:01:50,590 - main - DEBUG - [<_MainThread(MainThread, started 139830098192192)>]
+2015-09-08 17:02:05,661 - main - DEBUG - Running Elka Control
+2015-09-08 17:02:05,668 - main.elkaThread - DEBUG - 
+Starting in Keyboard Control Mode
+2015-09-08 17:02:07,844 - main.elkaThread - DEBUG - gains: [10, 0, 200, 10, 0, 200, 200]
+2015-09-08 17:02:13,065 - main.elkaThread - DEBUG - 
+Thread-2 stopped
+2015-09-08 17:02:13,066 - main.elkaradioTRX - ERROR - [Errno 19] No such device (it may have been disconnected)
+Traceback (most recent call last):
+  File "./Elkaradio/elkaradioTRX.py", line 239, in send
+    ackIn = self.dev.read(0x81, 64, 100)
+  File "/usr/local/lib/python2.7/dist-packages/usb/core.py", line 918, in read
+    self.__get_timeout(timeout))
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 769, in bulk_read
+    timeout)
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 872, in __read
+    _check(retval)
+  File "/usr/local/lib/python2.7/dist-packages/usb/backend/libusb1.py", line 552, in _check
+    raise USBError(_strerror(ret), ret, _libusb_errno[ret])
+USBError: [Errno 19] No such device (it may have been disconnected)
+2015-09-08 17:02:13,067 - main - ERROR - 
+Traceback (most recent call last):
   File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 415, in main
     run_elka_control(init_gains=gains)
   File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 140, in run_elka_control
     run_elka(init_gains=init_gains)
-  File "././ETP/elkaThread.py", line 160, in run_elka
+  File "./ETP/elkaThread.py", line 255, in run_elka
     map(lambda t: chk_thread(t), threads)
-  File "././ETP/elkaThread.py", line 160, in <lambda>
+  File "./ETP/elkaThread.py", line 255, in <lambda>
     map(lambda t: chk_thread(t), threads)
-  File "././ETP/elkaThread.py", line 136, in chk_thread
+  File "./ETP/elkaThread.py", line 200, in chk_thread
     t.join(1)
   File "/usr/lib/python2.7/threading.py", line 960, in join
     self.__block.wait(delay)
-  File "/usr/lib/python2.7/threading.py", line 358, in wait
+  File "/usr/lib/python2.7/threading.py", line 359, in wait
+    _sleep(delay)
+KeyboardInterrupt
+2015-09-08 17:02:13,068 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 415, in main
+    run_elka_control(init_gains=gains)
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 140, in run_elka_control
+    run_elka(init_gains=init_gains)
+  File "./ETP/elkaThread.py", line 255, in run_elka
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 255, in <lambda>
+    map(lambda t: chk_thread(t), threads)
+  File "./ETP/elkaThread.py", line 200, in chk_thread
+    t.join(1)
+  File "/usr/lib/python2.7/threading.py", line 960, in join
+    self.__block.wait(delay)
+  File "/usr/lib/python2.7/threading.py", line 359, in wait
     _sleep(delay)
 KeyboardInterrupt
 
-2015-08-21 12:53:10,534 - main - DEBUG - [<_MainThread(MainThread, started 140102727935808)>]
+2015-09-08 17:02:13,069 - main - DEBUG - [<_MainThread(MainThread, started 139830098192192)>]
+2015-09-08 17:06:08,817 - main - DEBUG - Traceback (most recent call last):
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 429, in main
+    parse_logs()
+  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 286, in parse_logs
+    sys.exit(0)
+SystemExit: 0
+
+2015-09-08 17:06:08,818 - main - DEBUG - [<_MainThread(MainThread, started 139830098192192)>]

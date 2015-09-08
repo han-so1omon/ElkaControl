@@ -15,6 +15,7 @@ import sys, os, re, shutil, datetime, time, numpy as np,\
 sys.path.append(os.getcwd()) 
 
 # combines adjacent array bytes in arrays
+# set two_comp to 'yes' if values may be negative
 def combine_arr_bytes(a,two_comp='no'):
   sz = len(a)/2
   if two_comp=='yes':
@@ -142,8 +143,6 @@ class LogParser(object):
                     + int(m.group(3)) + int(m.group(4))*.001 - epoch
             out = np.float32([t]+combine_arr_bytes(
               map(int,m.group(5).split(','))[4:]))
-            print combine_arr_bytes(
-                map(int,m.group(5).split(','))[4:],two_comp='yes')
             if firstP:
               self.outs = np.float32(out)
               firstP = False

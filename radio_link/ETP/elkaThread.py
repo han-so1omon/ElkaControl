@@ -68,7 +68,7 @@ class Headers(object):
 ############## driver thread class #################
 """ Run the receiver thread """
 JSCTRL = 0
-KBCTRl = 1
+KBCTRL = 1
 
 class DriverThreadKeyboard(ExThread):
   def __init__(self,eradio,kb_in=[0,0,0,0],init_gains=[10,0,200,10,0,200,200]):
@@ -81,6 +81,8 @@ class DriverThreadKeyboard(ExThread):
     self.default_gains = [10,0,200,10,0,200,200]
     self.gains = init_gains
     logger.debug('gains: {}'.format(init_gains))
+
+    self.null_payload = [0,0,0,0,0,0,0,0]
 
   def run_w_exc(self):
     pitch_gains = split_bytes(self.gains[0]) +\
@@ -113,7 +115,7 @@ class DriverThreadKeyboard(ExThread):
       ackIn = None
 
       # get raw data from controller
-      payload = header + map(chr,flatten(self.kb_in))
+      payload = header + map(chr,flatten(map(split_bytes,self.kb_in)))
       payload.insert(0,chr(len(payload)))
       payload = ''.join(payload)
 
@@ -140,6 +142,8 @@ class DriverThreadJoystick(ExThread):
     self.default_gains = [10,0,200,10,0,200,200]
     self.gains = init_gains
     logger.debug('gains: {}'.format(init_gains))
+
+    self.null_payload = [0,0,0,0,0,0,0,0]
 
   def run_w_exc(self):
     pitch_gains = split_bytes(self.gains[0]) +\
@@ -201,34 +205,45 @@ def run_elka(init_gains):
 
   eradio = Elkaradio()
 
-  #limit queue size to prevent command buffer from forming
+  threads = []
+  # start pygame and check if controller is present
   init()
   if get_count() > 0:
-    self.ctrl_mode = JSCTRL
+    ctrl_mode = JSCTRL
     print 'Starting in Joystick Control Mode'
     logger.debug('\nStarting in Joystick Control Mode')
-
+    #limit queue size to prevent command buffer from forming
     in_queue = deque(maxlen=50)
-    threads = []
     joy = JoyThread(in_queue)
     joy.start()
     threads.append(joy)
   else:
-    self.ctrl_mode = KBCTRL
+    ctrl_mode = KBCTRL
     print 'Starting in Keyboard Control Mode'
     logger.debug('\nStarting in Keyboard Control Mode')
-    kb_in = map(int,raw_input('Enter default values for thrust [0,2000],'
+    try:
+      kb_in = map(int,raw_input('Enter default values for thrust [0,2000],'
             'roll [-1000,1000], pitch [-1000, 1000], yaw [-1000,'
             '1000]\n').split(','))
-
-  if init_gains && self.ctrl_mode == JSCTRL:
+      if len(kb_in) != 4 or \
+      not (0<= kb_in[0] <= 2000) or \
+      not (-1000<= kb_in[1] <=1000) or \
+      not (-1000<= kb_in[2] <=1000) or \
+      not (-1000<= kb_in[3] <=1000):
+        raise InvalidCommand('Commands must be length 4'
+          'and within provided ranges')
+    except ValueError:
+      raise InvalidCommand('Commands must be length 4'
+        'and within provided ranges')
+    
+  if init_gains and ctrl_mode == JSCTRL:
     t = DriverThreadJoystick(eradio,init_gains=init_gains,
         in_queue_arg=in_queue)
-  elif init_gains && self.ctrl_mode == KBCTRL:
+  elif init_gains and ctrl_mode == KBCTRL:
     t = DriverThreadKeyboard(eradio,init_gains=init_gains,kb_in=kb_in)
-  elif self.ctrl_mode = JSCTRL:
+  elif ctrl_mode == JSCTRL:
     t = DriverThreadJoystick(eradio,in_queue_arg=in_queue)
-  elif self.ctrl_mode = KBCTRL:
+  elif ctrl_mode == KBCTRL:
     t = DriverThreadKeyboard(eradio,kb_in=kb_in) 
 
   t.start()
