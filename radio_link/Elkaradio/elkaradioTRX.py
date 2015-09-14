@@ -64,12 +64,13 @@ def _find_serial_port():
     eradio_port = None
 
     if platform.system() == 'Linux':
-        if not os.path.exists('/etc/udev/rules.d/99-crazyradio.rules'):
-            with open('/tmp/99-crazyradio.rules', 'w+') as outf:
+        if not os.path.exists('/etc/udev/rules.d/73-eradio.rules'):
+            print 'Enter root password to create usb SYMLINK for eradio.'
+            with open('/tmp/73-eradio.rules', 'w+') as outf:
                 outf.write('SUBSYSTEM=="usb", ATTRS{idVendor}=="1915",\
                         ATTRS{idProduct}=="7777", MODE="0664",\
                         GROUP="plugdev", SYMLINK+="elkaradio"')
-            os.system('sudo mv /tmp/99-crazyradio.rules /etc/udev/rules.d')
+            os.system('sudo mv /tmp/73-eradio.rules /etc/udev/rules.d')
             #FIXME change once GUI implemented
             # os.system('gksu mv /tmp/99-crazyradio.rules /etc/udev/rules.d')
         eradio_port = '/dev/elkaradio'
@@ -209,20 +210,6 @@ class Elkaradio(object):
         return result
 
     ### Data transfers ###
-    # Working, but soon to be deprecated.
-    def send_packet(self, data_out):
-      """ Send a packet and receive the ack from the radio dongle
-          The ack contains information about the packet transmition
-          and a data payload if the ack packet contained any """
-
-      ackIn = None
-      self.dev.write(1, data_out, 100)
-      try:
-        ackIn = self.dev.read(0x81, 26, 100)
-      except usb.USBError as e:
-        logger.exception(e)
-      return ackIn
-
     """ Send a packet and receive the ack from the radio dongle.
         The ack contains information about the packet transmition
         and a data payload if the ack packet contained any.
@@ -232,14 +219,18 @@ class Elkaradio(object):
 
         Returns 27 bytes read from USB device."""
     def send(self, data_out):
-
-        ackIn = None
-        self.dev.write(1, data_out, 10)
-        try:
-          ackIn = self.dev.read(0x81, 64, 100)
-        except usb.USBError as e:
-          logger.exception(e)
-        return ackIn
+      ackIn = None
+      self.dev.write(1, data_out, 10)
+      try:
+        ackIn = self.dev.read(0x81, 64, 100)
+      #FIXME suppress output of this error when USB is operating normally
+      #seems like a bug
+      except usb.USBError as e:
+        print 'May have lost Elkaradio. If continuing '\
+            'transmission, assure that red LED on Elkaradio is on or '\
+            'flashing'
+        logger.debug(e)
+      return ackIn
 
     #Private utility functions
     def _send_vendor_setup(self, request, value, index, data):

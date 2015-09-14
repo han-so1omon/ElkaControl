@@ -25,7 +25,8 @@ class Axes(object):
         # LeftHL - yaw, LeftVU - pitch, RightHL - roll, RightVU - thrust
         if joystick_name == 'Generic X-Box pad' or\
            joystick_name == 'Controller (Gamepad F310)' or\
-					 joystick_name == 'Gamepad F310 (Controller)':
+  	   joystick_name == 'Gamepad F310 (Controller)' or\
+           joystick_name == 'Logitech Gamepad F310':
             self.LeftHL = 0
             self.LeftVU = 1
             self.RightHL = 3
@@ -35,6 +36,8 @@ class Axes(object):
             self.LeftVU = 1
             self.RightHL = 2
             self.RightVU = 3
+        else:
+          raise JoystickNotFound('Invalid joystick plugged in')
 
 ########### JoyThread class #############
 class JoyThread(ExThread):
@@ -45,13 +48,11 @@ class JoyThread(ExThread):
     pygame.quit()
     pygame.init()
     if (pygame.joystick.get_count() != 0):
-
       self.j = pygame.joystick.Joystick(0)
       self.j.init()
       self.ctrlr_name = self.j.get_name()
       self.axes_enum = Axes(self.ctrlr_name) 
       self.numaxes = self.j.get_numaxes()
-      #self.axes = [None] * self.numaxes
       self.raw = [None] * 4
       logger.debug('\nJoystick: {0}'.format(self.ctrlr_name))
     else:
@@ -70,19 +71,13 @@ class JoyThread(ExThread):
     self.raw[3] = self.j.get_axis(self.axes_enum.LeftHL)
     self.in_queue.append(self.raw)
 
-
   def run_w_exc(self):
     logger.debug('\nJoystick thread running')
-    raw = [None] * 4
-    if self.ctrl_mode == JSCTRL:
-      while not self.sp:
-        self.get_js()
-        log_inputs.info('{}'.format(self.raw))
-    else:
-      while not self.sp:
-        self.get_kb()
-        log_inputs.info('{}'.format(self.raw))
+    while not self.sp:
+      self.get_js()
+      log_inputs.info('{}'.format(self.raw))
 
   def stop(self):
+    pygame.quit()
     self.sp = True
 

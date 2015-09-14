@@ -37,22 +37,21 @@ def clear_logs(k):
   if 'm' in k and isfile('./Logging/Logs/main.log'):
     open('./Logging/Logs/main.log', 'r+').truncate()
     logger = logging.getLogger('main')
+    logger.debug('\nMain log cleared')
   if 'i' in k and isfile('./Logging/Logs/input.log'):
-    #open('./Logging/Logs/inputs.log', 'w').close()
     open('./Logging/Logs/input.log', 'r+').truncate()
     log_inputs = logging.getLogger('input')
+    logger.debug('\nInput log cleared')
   if 'o' in k and isfile('./Logging/Logs/output.log'):
-    #open('./Logging/Logs/outputs.log', 'w').close()
     open('./Logging/Logs/output.log', 'r+').truncate()
     log_outputs = logging.getLogger('output')
+    logger.debug('\nOutput log cleared')
   if 'a' in k and isfile('./Logging/Logs/ack.log'):
     open('./Logging/Logs/ack.log', 'r+').truncate()
     log_acks = logging.getLogger('ack')
+    logger.debug('\nAck log cleared')
 
 clear_logs('mioa')
-logger.debug('\nLog files cleared')
-
-#TODO headers
 
 ### set up parsed data arrays
 ind = []
@@ -66,50 +65,64 @@ data_available = False # true after parse call
 # Global regexps for slight time efficiency
 r = re.compile(r'(\S+)')
 # use re.findall for these
-#sty = re.compile(r'(\S+)\s*=\s*(\S+)')
-re_sty = re.compile(r'(\S+)\s*=\s*([^,]+\s*)+')
-re_data_arrs = re.compile(r'\s*(\w+)\s+(\d+)\s+(\d+)\s+\'(\S+)\',?')
+re_fsty = re.compile(r'(\S+)\s*=\s*([^,]+\s*)+')
+re_ssty = re.compile(r'(\s*(\w+)\s*=\s*([^,;]+)\s*,?;?)')
+re_data_arrs = re.compile(
+  r'\s*(\w+)\s+(\d+)\s+(\d+)\s*\'?([\-a-z]+)?\'?,?')
 
 def parse_raw_cmd(r_cmd):
   global r
   return r.findall(r_cmd)
 
-def parse_plot(fcmd,cmd):
-  global re_sty, re_data_arrs, ind, outd, ackd
+def parse_plot(pcmd,scmd,fcmd):
+  global re_fsty, re_ssty, re_data_arrs, ind, outd, ackd
   arrs = None; style = None
     
-  def parse_style(scmd):
-    matches = re_sty.findall(scmd)
+  def parse_fstyle(fcmd):
+    matches = re_fsty.findall(fcmd)
     if matches:
       return dict([(m[0],m[1].strip(',')) for m in matches])
+  
+  def parse_sstyle(scmd):
+    matches = re_ssty.findall(scmd)
+    style_arr = []
+    try:
+      i = 0
+      d = dict()
+      for m in matches:
+        d[m[1]] = m[2]
+        if ';' in m[0] or m==matches[-1]:
+          style_arr.append(d)
+          d = dict()
+          i += 1
+    except TypeError:
+      pass
+    return style_arr
+        
 
   def parse_arrs(acmd):
     matches = re_data_arrs.findall(acmd)
-    arrs = []
+    arrs = [] # 2d list of objects [x,y,sty]
     if matches:
       for m in matches:
         k = int(m[2])
         # append x, then y, then style
         if m[0] == 'in' and ind[k].any():
-          arrs.append(ind[k][:,0])
-          arrs.append(ind[k][:,int(m[1])])
+          arrs.append([ind[k][:,0],ind[k][:,int(m[1])],m[3]])
         elif m[0] == 'out' and outd[k].any():
-          arrs.append(outd[k][:,0])
-          arrs.append(outd[k][:,int(m[1])])
+          arrs.append([outd[k][:,0],outd[k][:,int(m[1])],m[3]])
         elif m[0] == 'ack' and ackd[k].any():
-          arrs.append(ackd[k][:,0])
-          arrs.append(ackd[k][:,int(m[1])])
+          arrs.append([ackd[k][:,0],ackd[k][:,int(m[1])],m[3]])
         elif m[0] == 'drop' and dropd[k].any(): # FIXME IndexError: too many indices for array
-          arrs.append(dropd[k][:,0])
-          arrs.append(dropd[k][:,int(m[1])])
+          arrs.append([dropd[k][:,0],dropd[k][:,int(m[1])],m[3]])
         else:
-          raise InvalidCommand('Plot array must contain data and be of type in, out, ack, or dropped')
-        arrs.append(m[3]) # append line style
+          raise InvalidCommand('Plot array must contain data and be of '
+          'type in, out, ack, or dropped')
     else: raise InvalidCommand('Incorrect plot lines specified. '
             'Must specify between one and four valid lines.')
     return arrs
   
-  return parse_style(fcmd), parse_arrs(cmd), parse_style(cmd)
+  return parse_arrs(pcmd), parse_sstyle(scmd), parse_fstyle(fcmd)
 
 def retrieve_arr(arr_typ,arr_num):
   global ind, outd, gaind, ackd, dropd
@@ -204,11 +217,17 @@ def parse_logs():
 
     '\n\nplot'
     '\n\tUsage:'
-    '\n\t\tEnter <plot> from the \'Parse\' submenu to enter a two-part plot'
+    '\n\t\tEnter <plot> from the \'Parse\' submenu to enter a three-part plot'
     '\n\t\tprompt. In the first prompt, enter up to four valid lines to plot.'
-    '\n\t\tIn the second prompt, specify plot details.'
+    '\n\t\tIn the second prompt, specify line styles. The most important'
+    '\n\t\tline style to denote is label, as this will allow you to'
+    '\n\t\tassociate a line with a name.'
+    '\n\t\tLine styles can also be specified with keyword arguments separated'
+    '\n\t\tby commas. Line styles and keyword arguments can be found at'
+    '\n\t\thttp://matplotlib.org/1.3.1/api/axes_api.html#matplotlib.axes.Axes.plot'
+    '\n\t\tIn the third prompt, specify lines to plot.'
     '\n\tBehavior:'
-    '\n\t\tSpecify up to four linetype,linestyle tuples. Linetypes must be'
+    '\n\t\tSpecify up to four linetypes. Linetypes must be'
     '\n\t\t<array type> <variable number> <array number>'
     '\n\t\tThe following linetypes are available:'
     '\n\t\tin [1-4]'
@@ -216,13 +235,13 @@ def parse_logs():
     '\n\t\tack [1-13]'
     '\n\t\tdrop [1]'
     '\n\t\tNote: variable 0 is time, and this can be plotted vs time as well.'
-    '\n\t\tLinestyles can also be specified with keyword arguments separated'
-    '\n\t\tby commas.'
-    '\n\t\tlinestyles and keyword arguments can be found at'
-    '\n\t\thttp://matplotlib.org/1.3.1/api/axes_api.html#matplotlib.axes.Axes.plot'
     '\n\t\te.g. to plot the first variable of the first ack set and the third'
     '\n\t\t variable of the second in set, enter:'
-    '\n\t\tack 1 0 \'rs-\', in 3 1 \'g--\';linewidth=1.0'
+    '\n\t\tack 1 0 \'rs-\', in 3 1 \'g--\''
+    '\n\t\tNext, specify line styles, such as label and markersize.'
+    '\n\t\te.g. to add a label and a markersize to line 1 and a label to line'
+    '\n\t\t2, enter:'
+    '\n\t\tlabel = line 1, markersize = 15; label = line 2'
     '\n\t\tThen, specify plot details. The following details are available:'
     '\n\t\ttitle, xlabel, ylabel, text, axis, and grid.'
     '\n\t\ttitle, xlabel, ylabel, and text may be strings.'
@@ -293,11 +312,13 @@ def parse_logs():
           print 'Drop data: {}'.format([i for i in range(len(dropd))])
         elif cmd[0] == 'plot':
           if not data_available: raise InvalidCommand('No data available.')
-          pcmd = raw_input('<Specify up to four lines and style\n<')
-          fcmd = raw_input('<If desired: specify title, xlabel, ylabel, '
-            'text, axis, and grid.\n<')
-          lp.plot_data(**dict(zip(['fdata','arrs','style'],
-              parse_plot(fcmd,pcmd))))
+          pcmd = raw_input('<Specify up to four lines\n<')
+          scmd = raw_input('<Specify line styles separating styles for'
+          'each style by a comma and each line by a semi-colon\n<')
+          fcmd = raw_input('<If desired: specify plot title, xlabel, '
+            'ylabel, text, axis, and grid.\n<')
+          lp.plot_data(**dict(zip(['arrs','styles','fdata'],
+              parse_plot(pcmd,scmd,fcmd))))
         elif cmd[0] == 'return' and len(cmd) == 1:
           ''' Return to main menu '''
           sp = True
@@ -410,8 +431,15 @@ def main():
         print help_options
       elif cmd[0] == 'run' and cmd[1] == 'elka':
         clear_logs('ioa')
-        gains = map(int,parse_raw_cmd(raw_input(
-          'Enter gains:\n< ')))
+        # Iinitialize gains to none in case none provided.
+        # If none provided in prompt, they are filled in by driver thread.
+        gains = None
+        try:
+          gains = map(int,raw_input(
+            'Enter gains separated by commas:\n< ').split(','))
+        # handle cases where user does not enter any gain values
+        except ValueError:
+          pass
         run_elka_control(init_gains=gains)
       elif cmd[0] == 'run' and cmd[1] == 'radios':
         # mainly for debugging

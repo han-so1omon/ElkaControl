@@ -29,6 +29,7 @@ setup(name='ElkaControl',
           'pyusb',
           'matplotlib',
           'numpy',
-          'numpydoc'
+          'numpydoc',
+          'ipython'
       ],
       )

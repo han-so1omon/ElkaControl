@@ -26,7 +26,6 @@ log_acks = logging.getLogger('ack')
 ################################################################################
 
 ############### utility functions ###############
-#FIXME outputting between 0 and 65535
 def convert_raw(raw):
   out = []
   to_datum = 1
@@ -72,6 +71,9 @@ KBCTRL = 1
 
 class DriverThreadKeyboard(ExThread):
   def __init__(self,eradio,kb_in=[0,0,0,0],init_gains=[10,0,200,10,0,200,200]):
+    print 'Starting in Keyboard Control Mode'
+    logger.debug('\nStarting in Keyboard Control Mode')
+
     ExThread.__init__(self)
     self.eradio = eradio
     self.sp = False
@@ -79,12 +81,25 @@ class DriverThreadKeyboard(ExThread):
     self.kb_in=kb_in
     # gains format: kppitch, kipitch, kdpitch, kproll, kiroll, kdroll, kpyaw
     self.default_gains = [10,0,200,10,0,200,200]
-    self.gains = init_gains
-    logger.debug('gains: {}'.format(init_gains))
+    self.gains = init_gains + self.default_gains[
+                    len(init_gains):len(self.default_gains)]
+    logger.debug('\ngains: {}'.format(self.gains))
 
     self.null_payload = [0,0,0,0,0,0,0,0]
 
   def run_w_exc(self):
+    # send null payload to start transmission
+    header = self.header.trim
+    payload = header + map(chr,self.null_payload)
+    payload.insert(0,chr(len(payload)))
+    payload = ''.join(payload)
+    ackIn = self.eradio.send(payload)
+    # convert payload back to readable format
+    payload = map(ord,list(payload))
+    log_outputs.info('{}'.format(payload))
+    log_acks.info('{}'.format(ackIn))
+    logger.debug('\nSending null payload and starting transmission.')
+
     pitch_gains = split_bytes(self.gains[0]) +\
                   split_bytes(self.gains[1]) +\
                   split_bytes(self.gains[2])
@@ -104,6 +119,7 @@ class DriverThreadKeyboard(ExThread):
     ackIn = None
     ackIn = self.eradio.send(payload)
 
+    # convert payload back to readable format
     payload = map(ord,list(payload))
     log_outputs.info('{}'.format(payload))
     log_acks.info('{}'.format(ackIn))
@@ -119,7 +135,6 @@ class DriverThreadKeyboard(ExThread):
       payload.insert(0,chr(len(payload)))
       payload = ''.join(payload)
 
-      #''' New way to send and receive packets '''
       ackIn = self.eradio.send(payload)
       # convert payload back to readable format
       payload = map(ord,list(payload))
@@ -127,11 +142,26 @@ class DriverThreadKeyboard(ExThread):
       log_acks.info('{}'.format(ackIn))
           
   def stop(self):
+    # send null payload to stop motors
     self.sp = True
+
+    header = self.header.trim
+    payload = header + map(chr,self.null_payload)
+    payload.insert(0,chr(len(payload)))
+    payload = ''.join(payload)
+    ackIn = self.eradio.send(payload)
+
+    # convert payload back to readable format
+    payload = map(ord,list(payload))
+    log_outputs.info('{}'.format(payload))
+    log_acks.info('{}'.format(ackIn))
+    logger.debug('\nSending null payload and stopping transmission.')
 
 class DriverThreadJoystick(ExThread):
   def __init__(self,eradio,init_gains=[10,0,200,10,0,200,200],
       in_queue_arg=deque(maxlen=50)):
+    print 'Starting in Joystick Control Mode'
+    logger.debug('\nStarting in Joystick Control Mode')
 
     ExThread.__init__(self)
     self.eradio = eradio
@@ -140,12 +170,25 @@ class DriverThreadJoystick(ExThread):
     self.header = Headers()
     # gains format: kppitch, kipitch, kdpitch, kproll, kiroll, kdroll, kpyaw
     self.default_gains = [10,0,200,10,0,200,200]
-    self.gains = init_gains
-    logger.debug('gains: {}'.format(init_gains))
+    self.gains = init_gains + self.default_gains[
+                    len(init_gains):len(self.default_gains)]
+    logger.debug('\ngains: {}'.format(self.gains))
 
     self.null_payload = [0,0,0,0,0,0,0,0]
 
   def run_w_exc(self):
+    # send null payload to start transmission
+    header = self.header.trim
+    payload = header + map(chr,self.null_payload)
+    payload.insert(0,chr(len(payload)))
+    payload = ''.join(payload)
+    ackIn = self.eradio.send(payload)
+    # convert payload back to readable format
+    payload = map(ord,list(payload))
+    log_outputs.info('{}'.format(payload))
+    log_acks.info('{}'.format(ackIn))
+    logger.debug('\nSending null payload and starting transmission.')
+
     pitch_gains = split_bytes(self.gains[0]) +\
                   split_bytes(self.gains[1]) +\
                   split_bytes(self.gains[2])
@@ -190,7 +233,20 @@ class DriverThreadJoystick(ExThread):
       log_acks.info('{}'.format(ackIn))
           
   def stop(self):
+    # send null payload to stop motors
     self.sp = True
+
+    header = self.header.trim
+    payload = header + map(chr,self.null_payload)
+    payload.insert(0,chr(len(payload)))
+    payload = ''.join(payload)
+    ackIn = self.eradio.send(payload)
+
+    # convert payload back to readable format
+    payload = map(ord,list(payload))
+    log_outputs.info('{}'.format(payload))
+    log_acks.info('{}'.format(ackIn))
+    logger.debug('\nSending null payload and stopping transmission.')
 
 ################## main run function ########################
 # specify default gains
@@ -209,43 +265,41 @@ def run_elka(init_gains):
   # start pygame and check if controller is present
   init()
   if get_count() > 0:
+    quit() # quit pygame
     ctrl_mode = JSCTRL
-    print 'Starting in Joystick Control Mode'
-    logger.debug('\nStarting in Joystick Control Mode')
     #limit queue size to prevent command buffer from forming
     in_queue = deque(maxlen=50)
     joy = JoyThread(in_queue)
     joy.start()
     threads.append(joy)
   else:
+    quit() # quit pygame
     ctrl_mode = KBCTRL
-    print 'Starting in Keyboard Control Mode'
-    logger.debug('\nStarting in Keyboard Control Mode')
     try:
       kb_in = map(int,raw_input('Enter default values for thrust [0,2000],'
             'roll [-1000,1000], pitch [-1000, 1000], yaw [-1000,'
-            '1000]\n').split(','))
+            '1000] seperated by commas\n').split(','))
       if len(kb_in) != 4 or \
       not (0<= kb_in[0] <= 2000) or \
       not (-1000<= kb_in[1] <=1000) or \
       not (-1000<= kb_in[2] <=1000) or \
       not (-1000<= kb_in[3] <=1000):
-        raise InvalidCommand('Commands must be length 4'
+        raise InvalidCommand('Commands must be length 4 '
           'and within provided ranges')
     except ValueError:
-      raise InvalidCommand('Commands must be length 4'
+      raise InvalidCommand('Commands must be length 4 '
         'and within provided ranges')
-    
+
   if init_gains and ctrl_mode == JSCTRL:
     t = DriverThreadJoystick(eradio,init_gains=init_gains,
         in_queue_arg=in_queue)
-  elif init_gains and ctrl_mode == KBCTRL:
-    t = DriverThreadKeyboard(eradio,init_gains=init_gains,kb_in=kb_in)
   elif ctrl_mode == JSCTRL:
     t = DriverThreadJoystick(eradio,in_queue_arg=in_queue)
+  elif init_gains and ctrl_mode == KBCTRL:
+    t = DriverThreadKeyboard(eradio,init_gains=init_gains,kb_in=kb_in)
   elif ctrl_mode == KBCTRL:
     t = DriverThreadKeyboard(eradio,kb_in=kb_in) 
-
+  
   t.start()
   threads.append(t)
 
@@ -256,6 +310,7 @@ def run_elka(init_gains):
   except:
     map(lambda t: stop_thread(t), threads)
     usb.util.dispose_resources(eradio.dev)
+    logger.debug('\neradio recycled')
     raise
 
 if __name__ == '__main__':

@@ -12,23 +12,27 @@ Exports data sets to csv format.
 
 import sys, os, re, shutil, datetime, time, numpy as np,\
     matplotlib.pyplot as plt
+
+from matplotlib.legend_handler import HandlerLine2D
+from itertools import chain
 sys.path.append(os.getcwd()) 
 
 # combines adjacent array bytes in arrays
 # set two_comp to 'yes' if values may be negative
-def combine_arr_bytes(a,two_comp='no'):
+def combine_arr_bytes(a,two_comp=None):
   sz = len(a)/2
-  if two_comp=='yes':
-    # add thrust element to list
-    l = [(a[0]<<8) + a[1]]
-    for i in range(1,sz):
+  if not two_comp: two_comp = [False]*sz
+  l = []
+  for i in range(sz):
+    if two_comp[i]:
       c = (a[2*i]<<8) + (a[2*i+1])
       if a[2*i] > 127: 
         c -= 2**16
       l.append(c)
-    return l
-  else:
-    return [((a[2*i]<<8)+a[2*i+1]) for i in range(sz)]
+    else:
+      l.append((a[2*i]<<8)+a[2*i+1])
+  
+  return l
 
 ########## Parser Class ##########
 class LogParser(object):
@@ -142,7 +146,8 @@ class LogParser(object):
             t = int(m.group(1))*3600 + int(m.group(2))*60 \
                     + int(m.group(3)) + int(m.group(4))*.001 - epoch
             out = np.float32([t]+combine_arr_bytes(
-              map(int,m.group(5).split(','))[4:]))
+                    map(int,m.group(5).split(','))[4:],
+                    two_comp=[False,True,True,True]))
             if firstP:
               self.outs = np.float32(out)
               firstP = False
@@ -214,8 +219,8 @@ class LogParser(object):
                       + int(m.group(3)) + int(m.group(4))*.001
               t = int(m.group(1))*3600 + int(m.group(2))*60 \
                     + int(m.group(3)) + int(m.group(4))*.001 - epoch
-              rec = combine_arr_bytes(map(int,m.group(5).split(','))[1:],
-                      two_comp='yes')
+              raw = map(int,m.group(5).split(','))[1:]
+              rec = combine_arr_bytes(raw, two_comp=[True]*(len(raw)/2))
               if firstV:
                 self.acks = np.hstack(([t],rec))
                 firstV = False
@@ -232,17 +237,37 @@ class LogParser(object):
     
     Returns matplotlib.pyplot figure
     """
-    def plot_data(self,fdata,arrs,style):
+    def plot_data(self,arrs,styles,fdata):
       f = plt.figure(num=self.fig_num)
       self.fig_num += 1
       ax = plt.subplot(111)
+      # Specify global qualities of plot
       if fdata:
         for d in fdata.keys():
           self.pdets[d](fdata[d])
-      if style:
-        plt.plot(*arrs,**style)
-      else:
-        plt.plot(*arrs)
+      # Specify qualities of individual plots
+      lines = []
+      labels = []
+      for i in range(len(arrs)):
+        lines.append(plt.plot(*arrs[i],**styles[i]))
+        # collect line labels
+        if 'label' in styles[i]:
+          labels.append(styles[i]['label'])
+        else:
+          labels.append('Line {}'.format(i))
+        # convert number arguments into numbers 
+          for k in styles[i].keys():
+            try:
+              styles[i][k] = int(styles[i][k])
+            except ValueError:
+              pass
+      handlers = []
+      for i in range(len(lines)):
+        handlers.append(HandlerLine2D()) 
+      # reduce handlers list of lists and add to legend handler map
+      plt.legend(handler_map=dict(zip(
+          [val for sublist in lines for val in sublist],
+          handlers)))
       plt.show()
       return f
 

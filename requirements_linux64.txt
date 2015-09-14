@@ -2,7 +2,7 @@ ipython>=3.2.1
 matplotlib>=1.4.3a
 numpy>=1.8.2a
 numpydoc>=0.5a
-pygame # installing from remote wheel
+pygame # make sure to install from local wheel
 pyserial>=2.6a
 pyusb>=1.0.0a
 

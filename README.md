@@ -19,13 +19,13 @@ Usage:
           https://www.microsoft.com/en-us/download/details.aspx?id=44266
 
 - Set up Elkaradio USB
-  - If on Windows,
+  - If on Windows:
     - Download and install libusb-win32-bin-1.2.6.0 from
         http://sourceforge.net/projects/libusb-win32/files/
     - Download and install Zadig USB driver installer from
         http://zadig.akeo.ie/
     - Plug in Elkaradio device, find Crazyradio device on Zadig, and install libusb-win32 driver
-  - If on Linux,
+  - If on Linux:
     - Add yourself as the owner of the ElkaControl directory
         chmod 4755 /path/to/ElkaControl
         chown -R yourusername /path/to/ElkaControl
@@ -56,7 +56,11 @@ Usage:
 
 - Certain dependencies are available throught the apt- utility on Ubuntu
 
+
 - To use radio_link app:
-  - Navigate to radio_link folder from home folder using 
-    'cd /path/to/ElkaControl/radio_link'
-  - Run app using 'python ./'
+  - If on Windows:
+    - Edit your Environment Variables to add ElkaControl/run/win to you PATH
+  - If on Linux:
+    - Edit your .profile to add ElkaControl/run/linux to you PATH
+  - Run elkaControl from a terminal or Powershell
+  - Help for a submenu can be found by entering 'help'
