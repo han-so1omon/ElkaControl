@@ -1,16 +1,46 @@
-2015-09-18 14:01:07,383 - main - DEBUG - 
+2015-09-18 15:03:46,970 - main - DEBUG - 
 Main log cleared
-2015-09-18 14:01:07,383 - main - DEBUG - 
+2015-09-18 15:03:46,970 - main - DEBUG - 
 Input log cleared
-2015-09-18 14:01:07,383 - main - DEBUG - 
+2015-09-18 15:03:46,970 - main - DEBUG - 
 Output log cleared
-2015-09-18 14:01:07,383 - main - DEBUG - 
+2015-09-18 15:03:46,970 - main - DEBUG - 
 Ack log cleared
-2015-09-18 14:02:16,389 - main - DEBUG - Traceback (most recent call last):
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 457, in main
-    parse_logs()
-  File "/home/eric/Documents/ElkaControlProject/ElkaControl/radio_link/__main__.py", line 305, in parse_logs
-    sys.exit(0)
-SystemExit: 0
+2015-09-18 15:03:48,282 - main - DEBUG - None
 
-2015-09-18 14:02:16,390 - main - DEBUG - [<_MainThread(MainThread, started 139736886744896)>]
+2015-09-18 15:03:48,282 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
+2015-09-18 15:03:48,734 - main - DEBUG - None
+
+2015-09-18 15:03:48,734 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
+2015-09-18 15:03:49,158 - main - DEBUG - None
+
+2015-09-18 15:03:49,158 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
+2015-09-18 15:04:00,519 - main - DEBUG - None
+
+2015-09-18 15:04:00,519 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
+2015-09-18 15:04:00,691 - main - DEBUG - None
+
+2015-09-18 15:04:00,691 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
+2015-09-18 15:04:00,910 - main - DEBUG - None
+
+2015-09-18 15:04:00,910 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
+2015-09-18 15:04:01,473 - main - DEBUG - None
+
+2015-09-18 15:04:01,473 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
+2015-09-18 15:04:02,239 - main - ERROR - Invalid command for menu Main.
+Traceback (most recent call last):
+  File "C:\Users\Eric\Documents\ElkaControl\radio_link\__main__.py", line 461, in main
+    raise InvalidCommand('Invalid command for menu Main.')
+InvalidCommand: Invalid command for menu Main.
+2015-09-18 15:04:02,239 - main - DEBUG - Traceback (most recent call last):
+  File "C:\Users\Eric\Documents\ElkaControl\radio_link\__main__.py", line 461, in main
+    raise InvalidCommand('Invalid command for menu Main.')
+InvalidCommand: Invalid command for menu Main.
+
+2015-09-18 15:04:02,239 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
+2015-09-18 15:04:04,585 - main - DEBUG - Traceback (most recent call last):
+  File "C:\Users\Eric\Documents\ElkaControl\radio_link\__main__.py", line 461, in main
+    raise InvalidCommand('Invalid command for menu Main.')
+InvalidCommand: Invalid command for menu Main.
+
+2015-09-18 15:04:04,585 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]

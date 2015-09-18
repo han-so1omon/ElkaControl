@@ -425,7 +425,9 @@ def main():
       cmd = parse_raw_cmd(r_cmd)
 
       """ main option tree """
-      if cmd[0] == 'exit':
+      if not cmd:
+        continue
+      elif cmd[0] == 'exit':
         sp = True
       elif cmd[0] == 'help':
         print help_options
