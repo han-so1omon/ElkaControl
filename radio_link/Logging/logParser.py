@@ -238,6 +238,7 @@ class LogParser(object):
     Returns matplotlib.pyplot figure
     """
     def plot_data(self,arrs,styles,fdata):
+      # fill styles if empty
       f = plt.figure(num=self.fig_num)
       self.fig_num += 1
       ax = plt.subplot(111)
@@ -249,18 +250,21 @@ class LogParser(object):
       lines = []
       labels = []
       for i in range(len(arrs)):
+        if styles and len(styles)>i and 'label' not in styles[i]:
+          styles[i]['label'] = 'Line {}'.format(i)
+        elif not len(styles)>i:
+          styles.append({'label': 'Line {}'.format(i)})
+
         lines.append(plt.plot(*arrs[i],**styles[i]))
         # collect line labels
-        if 'label' in styles[i]:
-          labels.append(styles[i]['label'])
-        else:
-          labels.append('Line {}'.format(i))
-        # convert number arguments into numbers 
+                # convert number arguments into numbers 
+        '''
           for k in styles[i].keys():
             try:
               styles[i][k] = int(styles[i][k])
             except ValueError:
               pass
+        '''
       handlers = []
       for i in range(len(lines)):
         handlers.append(HandlerLine2D()) 

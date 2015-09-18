@@ -313,9 +313,9 @@ def parse_logs():
         elif cmd[0] == 'plot':
           if not data_available: raise InvalidCommand('No data available.')
           pcmd = raw_input('<Specify up to four lines\n<')
-          scmd = raw_input('<Specify line styles separating styles for'
-          'each style by a comma and each line by a semi-colon\n<')
-          fcmd = raw_input('<If desired: specify plot title, xlabel, '
+          scmd = raw_input('<Specify line styles separating each style '
+          'attribute by a comma and each line by a semi-colon\n<')
+          fcmd = raw_input('<Specify plot title, xlabel, '
             'ylabel, text, axis, and grid.\n<')
           lp.plot_data(**dict(zip(['arrs','styles','fdata'],
               parse_plot(pcmd,scmd,fcmd))))
