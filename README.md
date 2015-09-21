@@ -42,6 +42,7 @@ Usage:
 - From the python interpreter, check if you are running a 32 bit or 64 bit Python interpreter
 
 >>> import platform
+
 >>> platform.architecture()
 
 - Run

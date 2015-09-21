@@ -1,46 +1,32 @@
-2015-09-18 15:03:46,970 - main - DEBUG - 
+2015-09-18 15:10:13,889 - main - DEBUG - 
 Main log cleared
-2015-09-18 15:03:46,970 - main - DEBUG - 
+2015-09-18 15:10:13,889 - main - DEBUG - 
 Input log cleared
-2015-09-18 15:03:46,970 - main - DEBUG - 
+2015-09-18 15:10:13,890 - main - DEBUG - 
 Output log cleared
-2015-09-18 15:03:46,970 - main - DEBUG - 
+2015-09-18 15:10:13,890 - main - DEBUG - 
 Ack log cleared
-2015-09-18 15:03:48,282 - main - DEBUG - None
+2015-09-18 15:10:24,801 - main - DEBUG - None
 
-2015-09-18 15:03:48,282 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
-2015-09-18 15:03:48,734 - main - DEBUG - None
+2015-09-18 15:10:24,801 - main - DEBUG - [<_MainThread(MainThread, started 140140248659776)>]
+2015-09-18 15:10:25,139 - main - DEBUG - None
 
-2015-09-18 15:03:48,734 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
-2015-09-18 15:03:49,158 - main - DEBUG - None
+2015-09-18 15:10:25,139 - main - DEBUG - [<_MainThread(MainThread, started 140140248659776)>]
+2015-09-18 15:10:25,626 - main - DEBUG - None
 
-2015-09-18 15:03:49,158 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
-2015-09-18 15:04:00,519 - main - DEBUG - None
+2015-09-18 15:10:25,626 - main - DEBUG - [<_MainThread(MainThread, started 140140248659776)>]
+2015-09-18 15:10:25,775 - main - DEBUG - None
 
-2015-09-18 15:04:00,519 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
-2015-09-18 15:04:00,691 - main - DEBUG - None
+2015-09-18 15:10:25,776 - main - DEBUG - [<_MainThread(MainThread, started 140140248659776)>]
+2015-09-18 15:10:26,412 - main - DEBUG - None
 
-2015-09-18 15:04:00,691 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
-2015-09-18 15:04:00,910 - main - DEBUG - None
+2015-09-18 15:10:26,412 - main - DEBUG - [<_MainThread(MainThread, started 140140248659776)>]
+2015-09-18 15:10:26,561 - main - DEBUG - None
 
-2015-09-18 15:04:00,910 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
-2015-09-18 15:04:01,473 - main - DEBUG - None
+2015-09-18 15:10:26,561 - main - DEBUG - [<_MainThread(MainThread, started 140140248659776)>]
+2015-09-18 15:10:26,690 - main - DEBUG - None
 
-2015-09-18 15:04:01,473 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
-2015-09-18 15:04:02,239 - main - ERROR - Invalid command for menu Main.
-Traceback (most recent call last):
-  File "C:\Users\Eric\Documents\ElkaControl\radio_link\__main__.py", line 461, in main
-    raise InvalidCommand('Invalid command for menu Main.')
-InvalidCommand: Invalid command for menu Main.
-2015-09-18 15:04:02,239 - main - DEBUG - Traceback (most recent call last):
-  File "C:\Users\Eric\Documents\ElkaControl\radio_link\__main__.py", line 461, in main
-    raise InvalidCommand('Invalid command for menu Main.')
-InvalidCommand: Invalid command for menu Main.
+2015-09-18 15:10:26,691 - main - DEBUG - [<_MainThread(MainThread, started 140140248659776)>]
+2015-09-18 15:10:28,222 - main - DEBUG - None
 
-2015-09-18 15:04:02,239 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
-2015-09-18 15:04:04,585 - main - DEBUG - Traceback (most recent call last):
-  File "C:\Users\Eric\Documents\ElkaControl\radio_link\__main__.py", line 461, in main
-    raise InvalidCommand('Invalid command for menu Main.')
-InvalidCommand: Invalid command for menu Main.
-
-2015-09-18 15:04:04,585 - main - DEBUG - [<_MainThread(MainThread, started 7136)>]
+2015-09-18 15:10:28,222 - main - DEBUG - [<_MainThread(MainThread, started 140140248659776)>]
