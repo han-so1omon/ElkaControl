@@ -13,10 +13,15 @@ sys.path.append(os.getcwd())
 
 from pygame.joystick import init, get_count, quit
 from collections import deque
+from importlib import import_module
+# Import project modules/classes global vars
+from elka_modules import *
+
+# Import project modules/classes
 from Elkaradio.elkaradioTRX import *
-from Inputs.joy_read import JoyThread 
 from Utils.exceptions import *
-from Utils.exThread import ExThread
+JoyThread=import_from_project(dINPUTS,mJOYREAD,'JoyThread')
+ExThread=import_from_project(dUTILS,mEXTHREAD,'ExThread')
 
 ############################## Set up loggers ##################################
 logger = logging.getLogger('main.elkaThread')

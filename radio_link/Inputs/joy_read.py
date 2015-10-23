@@ -1,9 +1,13 @@
 import sys, os, pygame, threading, Queue, logging
 sys.path.append(os.getcwd()) 
-
 from collections import deque
+
+# Import project modules/classes global vars
+from elka_modules import *
+
+# Import project modules/classes
 from Utils.exceptions import *
-from Utils.exThread import ExThread
+ExThread=import_from_project(dUTILS,mEXTHREAD,'ExThread')
 
 ############################## Set up loggers ##################################
 logger = logging.getLogger('main.joy_read')

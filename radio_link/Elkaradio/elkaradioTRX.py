@@ -13,8 +13,15 @@ import os, sys, usb, usb.core, usb.util, logging, platform, platform,\
        serial.tools.list_ports, time, string
 
 from IPython import embed
-
 sys.path.append(os.getcwd())
+
+# Import project modules/classes global vars
+from elka_modules import *
+
+from Utils.exceptions import ElkaradioNotFound
+# Import project modules/classes
+ElkaradioNotFound=import_from_project(dUTILS,mEXCEPTIONS,
+    'ElkaradioNotFound')
 
 ############################## Set up loggers ##################################
 logger = logging.getLogger('main.elkaradioTRX')
@@ -22,9 +29,6 @@ log_inputs = logging.getLogger('input')
 log_outputs = logging.getLogger('output')
 log_acks = logging.getLogger('ack')
 ################################################################################
-
-from Utils.exceptions import ElkaradioNotFound
-from ETP.dataPacket import DataPacket
 
 #USB parameters
 CRADIO_VID = 0x1915

@@ -12,17 +12,23 @@ import os, sys, traceback, logging, logging.config, logging.handlers,\
        threading, re, string
 
 from IPython import embed # debugging
-
-#add logging module to path
-sys.path.append(os.path.join(os.getcwd(), 'Logging/Logs'))
-
+from importlib import import_module
 from os.path import isfile
-from Elkaradio.elkaradioTRX import Elkaradio
-from Elkaradio.elkaradioTRX import _find_devices 
-from Utils.exceptions import *
-from Logging.logParser import LogParser
-from ETP.elkaThread import run_elka
 
+# Add parent directory (to access global module directories)
+# and logging directory (stores current logs) to PYTHONPATH
+sys.path.append(os.path.join(os.getcwd(), '../'))
+sys.path.append(os.path.join(os.getcwd(), 'Logging/Logs'))
+# Import project modules/classes global vars
+from elka_modules import *
+
+# Import project modules/classes
+from Utils.exceptions import *
+Elkaradio = import_from_project(dELKARADIO,mELKARADIOTRX,'Elkaradio')
+_find_devices=import_from_project(
+    dELKARADIO,mELKARADIOTRX,'_find_devices')
+LogParser = import_from_project(dLOGGING,mLOGPARSER,'LogParser')
+run_elka = import_from_project(dETP,mELKATHREAD,'run_elka')
 ########################### Set up loggers ##############################
 #Establish loggers as module level globals
 logger = None
@@ -144,7 +150,7 @@ def retrieve_arr(arr_typ,arr_num):
   return arr_idx[0][arr_num],arr_idx[1],','
 
 """ Run elka control """
-# gains given in form kpp,kdp,kpr,kdr,kpy,kdy
+# gains given in form kpp,kip,kdp,kpr,kir,kdr,kpy
 def run_elka_control(rx=None,init_gains=None):
   global logger, log_inputs, log_outputs, log_acks
   if rx:
