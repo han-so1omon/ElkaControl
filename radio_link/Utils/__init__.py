@@ -1,3 +1,3 @@
 """
-Utils for CrazyradioControl
+Utils for ElkaControl
 """

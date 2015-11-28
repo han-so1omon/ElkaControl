@@ -12,12 +12,10 @@ import os, sys, traceback, logging, logging.config, logging.handlers,\
        threading, re, string
 
 from IPython import embed # debugging
-from importlib import import_module
 from os.path import isfile
 
 # Add parent directory (to access global module directories)
 # and logging directory (stores current logs) to PYTHONPATH
-sys.path.append(os.path.join(os.getcwd(), '../'))
 sys.path.append(os.path.join(os.getcwd(), 'Logging/Logs'))
 # Import project modules/classes global vars
 from elka_modules import *
@@ -368,9 +366,10 @@ def parse_logs():
       logger.exception(e)
 ################################################################################
 
-################################ Main method ###################################
-def main():
+################################ Main console method ###################################
+def main_console():
   global logger
+
   sp = False
   base = None
   options = ('\nHelp <help>\n'
@@ -403,7 +402,7 @@ def main():
     '\n\t\tvehicle and the base station transceivers are both set to the same'
     '\n\t\tfrequency and the vehicle is set in receive mode.'
     '\n\t\tGains specified in the format: kppitch kdpitch kproll kdroll kpyaw'
-    '\n\t\tkdyaw. Default gains are [10 200 10 200 200 0].'
+    '\n\t\tkdyaw. Default gains are [10 0 200 10 0 200 200].'
 
     '\n\nrun radios'
     '\n\tUsage:'
@@ -465,7 +464,6 @@ def main():
         parse_logs()
       else:
         raise InvalidCommand('Invalid command for menu Main.')
-
     except JoystickNotFound as e:
       print "Joystick not found: ", e
       logger.exception(e)
@@ -491,6 +489,112 @@ def main():
       logger.debug(traceback.format_exc())
       # should only show main thread as alive
       logger.debug(threading.enumerate()) 
+################################################################################
+
+################u############### Main gui method ###################################
+from PyQt5.QtWidgets import QApplication,QDialog,QMainWindow,QDockWidget,\
+                            QMessageBox,QFileDialog
+#TODO change this to dynamic import
+from UI.elkamainwindow import Ui_ElkaMainWindow
+class MyApp(QMainWindow, Ui_ElkaMainWindow):
+  def __init__(self):
+    QMainWindow.__init__(self)
+    Ui_ElkaMainWindow.__init__(self)
+    self.setupUi(self)
+    self.connectUI()
+
+  def notify(self,obj,evt):
+      try:
+        return QApplication.notify(self,obj,evt)
+      except Exception:
+          print "Unexpected error."
+
+  def connectUI(self):
+    # Connect Command page elements
+    self.gains_kpp.setMaximum(1000)
+    self.gains_kpp.setValue(10)
+    self.gains_kip.setMaximum(1000)
+    self.gains_kip.setValue(0)
+    self.gains_kdp.setMaximum(1000)
+    self.gains_kdp.setValue(200)
+    self.gains_kpr.setMaximum(1000)
+    self.gains_kpr.setValue(10)
+    self.gains_kir.setMaximum(1000)
+    self.gains_kir.setValue(0)
+    self.gains_kdr.setMaximum(1000)
+    self.gains_kdr.setValue(200)
+    self.gains_kpy.setMaximum(1000)
+    self.gains_kpy.setValue(200)
+
+    # start elka button mechanics
+    self.start_elka_button.clicked.connect(self.wrap_run_ec)
+    # stop elka button mechanics
+    self.stop_elka_button.clicked.connect(self.wrap_stop_ec)
+    # properties button mechanics
+    self.properties_button.clicked.connect(self.wrap_disp_properties)
+    # parse log button mechanics
+    self.parse_log_button.clicked.connect(self.wrap_parse_log)
+    # save log button mechanics
+    self.save_log_button.clicked.connect(self.wrap_save_log)
+    # export data button mechanics
+    self.export_data_button.clicked.connect(self.wrap_export_data)
+    # plot data button mechanics
+    self.plot_data_button.clicked.connect(self.wrap_plot_data)
+
+    self.joystick_input_button.setChecked(False)
+    self.keyboard_input_button.setChecked(False)
+
+    lp = LogParser()
+
+    # Connect Plot page elements
+    # Connect Editor page elements
+    # Connect Menu elements
+
+  def wrap_run_ec(self):
+    # TODO load GUI widgets
+    clear_logs('ioa')
+    run_elka_control(
+        init_gains=[self.gains_kpp.value(),self.gains_kip.value(),
+                    self.gains_kdp.value(),self.gains_kpr.value(),
+                    self.gains_kir.value(),self.gains_kdr.value(),
+                    self.gains_kpy.value()])
+  
+  def wrap_stop_ec(self):
+    #TODO add stop signal
+    pass
+
+  #TODO connect to properties menu option. Add app properties
+  def wrap_disp_properties(self):
+    props_string='hello'
+    properties = QMessageBox.information(self,'Properties',props_string,
+                    QMessageBox.Yes,QMessageBox.Yes)
+
+  def wrap_parse_log(self):
+    file=QFileDialog.getOpenFileName(self,'Select Log File','.','(*.log)')
+    if file:
+      pass
+
+
+  def wrap_save_log(self):
+    pass
+
+  def wrap_export_data(self):
+    pass
+
+  def wrap_plot_data(self):
+    pass
+
+
+def main_gui():
+  global logger,ind,outd,gaind,ackd,data_available
+  app = QApplication(sys.argv)
+  window = MyApp()
+  window.show()
+  sys.exit(app.exec_())
+################################################################################
 
 if __name__ == '__main__':
-    main()
+  if sys.argv.__contains__('-c') or sys.argv.__contains__('--console'):
+    main_console()
+  else:
+    main_gui()

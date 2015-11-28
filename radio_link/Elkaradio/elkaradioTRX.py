@@ -3,7 +3,7 @@ Author: Eric Solomon
 Project: Elkaradio Control
 Lab: Alfred Gessow Rotorcraft Center
 Package: Elkaradio 
-Module: elkaDriver.py 
+Module: elkaradioTRX.py 
 
 Handles control transfers to USB radio dongle.
 Used mainly for setup and teardown.

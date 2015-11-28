@@ -13,7 +13,6 @@ sys.path.append(os.getcwd())
 
 from pygame.joystick import init, get_count, quit
 from collections import deque
-from importlib import import_module
 # Import project modules/classes global vars
 from elka_modules import *
 
