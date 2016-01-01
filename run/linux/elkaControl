@@ -1,4 +1,18 @@
 script=$(readlink -f "$0")
 scriptpath=$(dirname "$script")
 elkaControlDir=$scriptpath/../../radio_link
-(cd $elkaControlDir && exec rlwrap python ./)
+
+mode=
+one=one
+
+while [ "$1" != "" ]; do
+  case $1 in
+    -c | --console )
+    mode=$1
+    shift
+    ;;
+  esac
+  shift
+done
+
+(cd $elkaControlDir && exec rlwrap python ./ $mode)

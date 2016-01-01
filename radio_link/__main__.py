@@ -8,6 +8,8 @@ Module: __main__.py
 Contains main function for Elka Control
 """
 
+#FIXME reorganize user file storage
+
 import os, sys, traceback, logging, logging.config, logging.handlers,\
        threading, re, string
 
@@ -43,15 +45,15 @@ def clear_logs(k):
     logger = logging.getLogger('main')
     logger.debug('\nMain log cleared')
   if 'i' in k and isfile('./Logging/Logs/input.log'):
-    open('./Logging/Logs/input.log', 'r+').truncate()
+    open('./Logging/Logs/input.ilog', 'r+').truncate()
     log_inputs = logging.getLogger('input')
     logger.debug('\nInput log cleared')
   if 'o' in k and isfile('./Logging/Logs/output.log'):
-    open('./Logging/Logs/output.log', 'r+').truncate()
+    open('./Logging/Logs/output.olog', 'r+').truncate()
     log_outputs = logging.getLogger('output')
     logger.debug('\nOutput log cleared')
   if 'a' in k and isfile('./Logging/Logs/ack.log'):
-    open('./Logging/Logs/ack.log', 'r+').truncate()
+    open('./Logging/Logs/ack.alog', 'r+').truncate()
     log_acks = logging.getLogger('ack')
     logger.debug('\nAck log cleared')
 
@@ -63,6 +65,8 @@ outd = []
 ackd = []
 gaind = []
 dropd = []
+data_sets=[('inputs',ind),('outputs',outd),('acks',ackd),('gains',gaind),
+      ('drops',dropd)]
 data_available = False # true after parse call
 
 ######################### Define helper functions ##############################
@@ -73,6 +77,7 @@ re_fsty = re.compile(r'(\S+)\s*=\s*([^,]+\s*)+')
 re_ssty = re.compile(r'(\s*(\w+)\s*=\s*([^,;]+)\s*,?;?)')
 re_data_arrs = re.compile(
   r'\s*(\w+)\s+(\d+)\s+(\d+)\s*\'?([\-a-z]+)?\'?,?')
+re_log_suffix=re.compile(r'.(\.?.log)')
 
 def parse_raw_cmd(r_cmd):
   global r
@@ -438,7 +443,7 @@ def main_console():
         print help_options
       elif cmd[0] == 'run' and cmd[1] == 'elka':
         clear_logs('ioa')
-        # Iinitialize gains to none in case none provided.
+        # Initialize gains to none in case none provided.
         # If none provided in prompt, they are filled in by driver thread.
         gains = None
         try:
@@ -492,10 +497,14 @@ def main_console():
 ################################################################################
 
 ################u############### Main gui method ###################################
+from PyQt5 import QtCore
+from PyQt5.QtGui import QStandardItem,QStandardItemModel
 from PyQt5.QtWidgets import QApplication,QDialog,QMainWindow,QDockWidget,\
-                            QMessageBox,QFileDialog
+                            QMessageBox,QFileDialog,QAction,QMenu
 #TODO change this to dynamic import
 from UI.elkamainwindow import Ui_ElkaMainWindow
+
+_translate = QtCore.QCoreApplication.translate
 class MyApp(QMainWindow, Ui_ElkaMainWindow):
   def __init__(self):
     QMainWindow.__init__(self)
@@ -532,23 +541,73 @@ class MyApp(QMainWindow, Ui_ElkaMainWindow):
     self.stop_elka_button.clicked.connect(self.wrap_stop_ec)
     # properties button mechanics
     self.properties_button.clicked.connect(self.wrap_disp_properties)
-    # parse log button mechanics
+    self.joystick_input_button.setChecked(False)
+    self.keyboard_input_button.setChecked(False)
+
+    # Connect Plot page elements
+    self.lp = LogParser()
+
+    self.data_sets_tree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+    self.data_sets_tree.customContextMenuRequested.connect(self.open_tree_menu)
+    self.data_sets_tree_model=QStandardItemModel()
+    self.add_tree_items(self.data_sets_tree_model,data_sets)
+    self.data_sets_tree.setModel(self.data_sets_tree_model)
+    self.data_sets_tree_model.setHorizontalHeaderLabels(
+        [self.tr('Available Data Sets')])
+
+     # parse log button mechanics
     self.parse_log_button.clicked.connect(self.wrap_parse_log)
     # save log button mechanics
-    self.save_log_button.clicked.connect(self.wrap_save_log)
+    self.save_log_button.clicked.connect(self.wrap_save_log_as)
     # export data button mechanics
     self.export_data_button.clicked.connect(self.wrap_export_data)
     # plot data button mechanics
     self.plot_data_button.clicked.connect(self.wrap_plot_data)
 
-    self.joystick_input_button.setChecked(False)
-    self.keyboard_input_button.setChecked(False)
-
-    lp = LogParser()
-
-    # Connect Plot page elements
     # Connect Editor page elements
-    # Connect Menu elements
+    # Connect Actions
+    self.action_export_all_data = QAction(self)
+    self.action_export_all_data.setObjectName("action_export_all")
+    self.action_export_all_data.setText('Export All Sets')
+    self.action_plot_all_data = QAction(self)
+    self.action_plot_all_data.setObjectName("action_plot_all")
+    self.action_plot_all_data.setText('Plot All Sets')
+    self.action_export_data = QAction(self)
+    self.action_export_data.setObjectName("action_export")
+    self.action_export_data.setText('Export Set')
+    self.action_plot_data = QAction(self)
+    self.action_plot_data.setObjectName("action_plot")
+    self.action_plot_data.setText('Plot Set')
+
+  def add_tree_items(self,parent,elements):
+    for data,sets in elements:
+      model_sets=parent.findItems(data)
+      if model_sets:
+        item = model_sets[0]
+        if sets:
+          child=QStandardItem(str(item.rowCount()))
+          item.appendRow(child)
+      else:
+        item=QStandardItem(data)
+        parent.appendRow(item)
+  
+  def open_tree_menu(self,position):
+    indeces=self.data_sets_tree.selectedIndexes()
+    if len(indeces)>0:
+      lvl=0
+      idx=indeces[0]
+      while idx.parent().isValid():
+        idx=idx.parent()
+        lvl+=1
+    menu=QMenu()
+    if lvl==0:
+      menu.addAction(self.action_export_all_data)
+      menu.addAction(self.action_plot_all_data)
+    elif lvl==1:
+      menu.addAction(self.action_export_data)
+      menu.addAction(self.action_plot_data)
+
+    menu.exec_(self.data_sets_tree.viewport().mapToGlobal(position))
 
   def wrap_run_ec(self):
     # TODO load GUI widgets
@@ -570,20 +629,47 @@ class MyApp(QMainWindow, Ui_ElkaMainWindow):
                     QMessageBox.Yes,QMessageBox.Yes)
 
   def wrap_parse_log(self):
-    file=QFileDialog.getOpenFileName(self,'Select Log File','.','(*.log)')
-    if file:
-      pass
+    file=QFileDialog.getOpenFileName(self,'Select Log File','.',
+            'Data Logs (*.alog *.ilog *.olog)')
+    if len(file[0]):
+      if file[0].endswith('.ilog'):
+        i=self.lp.parse_in(file[0])
+        ind.append(i)
+      elif file[0].endswith('.olog'):
+        o,g = self.lp.parse_out(file[0])
+        outd.append(o)
+        gaind.append(g)
+      elif file[0].endswith('.alog'):
+        a,d=self.lp.parse_ack(file[0])
+        ackd.append(a)
+        dropd.append(d)
+      else: # Pressed cancel case
+        pass
+      
+      # Add new data sets to tree view
+      self.add_tree_items(self.data_sets_tree_model,data_sets)
 
-
-  def wrap_save_log(self):
-    pass
+  def wrap_save_log_as(self):
+    global re_log_suffix
+    to_save=QFileDialog.getOpenFileName(self,'Select Log File','.',
+            '(*.log *.alog *.ilog *.olog)')
+    if len(to_save[0]):
+      save_to = QFileDialog.getSaveFileName(self,'Select Save Location','.',
+            '*.log;;*.alog;;*.ilog;;*.olog')
+      print re_log_suffix.findall(save_to[1])
+      save_to=save_to[0]+re_log_suffix.findall(save_to[1])[0]
+      self.lp.save_file(to_save[0],save_to)
 
   def wrap_export_data(self):
-    pass
+    '''
+    lp.export_arr(filename=cmd[3],
+                  **dict(zip(['arr','header','delimiter'],
+                  retrieve_arr(cmd[1],int(cmd[2])))))
+    '\n\t\tEnter <export> <arr_type> <arr_num> <savefile> to export a data set'
+    '''
 
   def wrap_plot_data(self):
     pass
-
 
 def main_gui():
   global logger,ind,outd,gaind,ackd,data_available

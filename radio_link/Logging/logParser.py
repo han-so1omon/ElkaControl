@@ -95,9 +95,18 @@ class LogParser(object):
 
       shutil.copy2(fstr, m_out)
 
+    """ Determine log type and pass to appropriate parsing function. """
+    def parse_log(self,file):
+      if file.endswith('.ilog'):
+        return self.parse_in(file)
+      if file.endswith('.olog'):
+        return self.parse_out(file)
+      if file.endswith('.alog'):
+        return self.parse_ack(file)
+
     """ Parse input log. Store time and raw data as tuples
         in self.ins dict. """
-    def parse_in(self, ipf='./Logging/Logs/input.log'):
+    def parse_in(self, ipf='./Logging/Logs/input.ilog'):
       first = True
       epoch = None
       self.ins = np.array([])
@@ -127,7 +136,7 @@ class LogParser(object):
 
     """ Parse output log. Store time and transformed data as tuples
         in self.outs dict. """
-    def parse_out(self, otf ='./Logging/Logs/output.log'):
+    def parse_out(self, otf ='./Logging/Logs/output.olog'):
       # 0 for all arrays, 1 for gains, 2 for p_in, -1 for none
       firstLine = True; firstG = True; firstP = True
       epoch = None
@@ -174,7 +183,7 @@ class LogParser(object):
 
     """ Parse ack log. Store gyro, euler angles, and commands  as tuples
         in self.acks dict. """
-    def parse_ack(self, acf ='./Logging/Logs/ack.log'):
+    def parse_ack(self, acf ='./Logging/Logs/ack.alog'):
         firstLine = True; firstV = True; firstI = True
         epoch = None
         self.acks = np.array([]) ; self.drops = np.array([])
